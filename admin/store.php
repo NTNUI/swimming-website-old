@@ -106,9 +106,9 @@ if (isset($_POST["add"])) {
 		//Default image
 	}
 
-	// hva faen er dette for noe Olav? -Pavel
-	$api_id = substr(preg_replace("/[^a-zA-Z0-9]/", "", $name["no"]), 0, 16) . date("Y");
-	
+	// set a random hash to be id.
+	$api_id = substr(hash("md5", time()),0,20);
+
 	$conn = connect("web");
 	$sql = "INSERT INTO store_items (api_id, name, description, price, available_from, available_until, amount_available, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 	$query = $conn->prepare($sql);
