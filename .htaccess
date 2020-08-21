@@ -1,0 +1,25 @@
+Options -Indexes
+# To renable indexing for some folders, add a .htaccess with "Options +Indexes" in the dir
+
+RewriteEngine On
+
+
+# Force ssl
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Directories to allow from anywhere
+RewriteCond %{REQUEST_URI}% "/(img|filer|src|css|js)/" 
+RewriteRule (.*) $1 [L]
+
+#Languages
+RewriteRule ^(en)(?:/(.*)|)$ $2?lang=$1 [L,QSA]
+
+#Api directory
+RewriteRule ^api/?(.*)/?$ "index.php&side=api&action=$1" [L,QSA]
+
+#Admin directory
+RewriteRule ^admin/?(.*)/?$ "index.php&side=admin&action=$1" [L,QSA]
+
+#Finally let the request to an actual page
+RewriteRule ^(.*)/?$ index.php?side=$1 [QSA]

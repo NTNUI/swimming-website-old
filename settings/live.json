@@ -1,0 +1,39 @@
+{
+  "stripe": {
+    "API_key": "sk_live_r51zgekQ1xLUvPavrfCwCqRo",
+    "secret_key": "whsec_Xkpj5LTAjDtrW3kN5hcNX1412njJfoTr"
+  },
+  "captcha_key": "6LdrnW8UAAAAAIDoJVmceXJ_DxkmlqHMMwF3r4I1",
+  "emails": {
+    "leader": "svomming-leder@ntnui.no",
+    "developer": "svomming-teknisk@ntnui.no",
+    "analyst": "svomming-kasserer@ntnui.no",
+    "coach": "svomming-trener@ntnui.no",
+    "bot-general": "svomming-webbot@ntnui.no",
+    "bot-meet": "svomming-stevne@ntnui.no"
+  },
+  "SQL_server": {
+    "servername": "mysql.stud.ntnu.no",
+    "username": "svommer_web",
+    "password": "j2s20OSWCADYT9lw",
+    "databases": {
+      "member": "svommer_medlem",
+      "web": "svommer_web"
+    }
+  },
+  "hosting": {
+    "baseurl": "https://org.ntnu.no/svommer",
+    "debugging": false,
+    "errorReporting" :  0,
+    "servertype": "live",
+    "os": "linux"
+  },
+  "defaults": {
+    "language": "no",
+    "landing-page": "mainpage",
+    "licence_key": "NSFLicence2019"
+  },
+  "memberTable": "medlem_2020",
+  "live": null,
+  "captia_key": "6LdrnW8UAAAAAIDoJVmceXJ_DxkmlqHMMwF3r4I1"
+}

@@ -1,0 +1,1 @@
+Do not edit files inside this folder manually. Use the GUI in admin/translations
