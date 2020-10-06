@@ -16,6 +16,10 @@ while ($query->fetch()) {
 body {
 	cursor: url('img/icons/936_1368087457.png'), auto;
 }
+.box {
+	padding: 0;
+	width: 100%;
+}
 </style>
 <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <div class="box">
@@ -44,5 +48,5 @@ const layout = {
 	"title": "Friday beers per board member per time",
 }
 
-Plotly.newPlot("plot", plots, layout);
+Plotly.newPlot("plot", plots, layout, {responsive: true});
 </script>

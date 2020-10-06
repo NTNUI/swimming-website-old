@@ -1,4 +1,10 @@
 <?php use Michelf\Markdown; ?>
+<?php
+//include "test.php";
+//print (get_page_title());
+?>
+
+
 <head>
 	<meta property="og:title" content="NTNUI Svømming"/>
 	<meta name="description" content="NTNUI Svømming er en svømmeklubb for studenter ved universitetet NTNU i Trondheim."/>
@@ -59,6 +65,7 @@
 
 <div class="news-box">
 	<h1><?php print $t->get_translation("news");?></h1>
+	<h2>Keep up to date in our fb group: <a href="https://www.facebook.com/groups/2250060697">https://www.facebook.com/groups/2250060697</a></h2>
 	<br>
 
 	<?php

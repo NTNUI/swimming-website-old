@@ -39,7 +39,7 @@ case "set_visibility":
 		]);
 		return;
 	}
-	$visibility = $_REQUEST["visibility"];
+	$visibility = filter_var($_REQUEST["visibility"], FILTER_VALIDATE_BOOLEAN);
 	$store->set_visibility($item["id"], $visibility);
 	print json_encode([
 		"success" => true,

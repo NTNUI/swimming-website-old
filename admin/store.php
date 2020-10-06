@@ -127,12 +127,25 @@ if (isset($_POST["add"])) {
 
 // 			start, limit, api_id, raw_data, visiblity_check
 $items = $store->get_items(0, 100, "", false, false);
+$conn = connect("web");
+$sql = "SELECT id, name FROM store_groups";
+$query = $conn->prepare($sql);
+$query->execute();
+$query->bind_result($id, $name);
+$groups = []; 
+while ($query->fetch()) {
+	$groups[$id] = $name;
+}
+$query->close();
+$conn->close();
 ?>
 <style>
 .weak {
 	color: rgba(0, 0, 0, 0.4);
 }
 </style>
+<?php /*
+<div class="box">
 <table style="width: 100%;">
 	<tr>
 		<th>Tittel</th>
@@ -158,7 +171,109 @@ $items = $store->get_items(0, 100, "", false, false);
 		print "</td>";
 }?>
 </table>
+</div>
+ */?>
+<div class="box">
+Dobbeltrykk på en item for å se salg
+<div id="items"></div>
 
+</div>
+<link href="https://unpkg.com/tabulator-tables@4.5.3/dist/css/tabulator.min.css" rel="stylesheet">
+<script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.5.3/dist/js/tabulator.min.js"></script>
+<script type="text/javascript" src="https://momentjs.com/downloads/moment.min.js"></script>
+<script type="text/javascript">
+const store_data = <?php print json_encode($items) ?>;
+const groups = <?php print json_encode($groups) ?>;
+//Create Date Editor
+var dateEditor = function(cell, onRendered, success, cancel){
+    //cell - the cell component for the editable cell
+    //onRendered - function to call when the editor has been rendered
+    //success - function to call to pass the successfuly updated value to Tabulator
+    //cancel - function to call to abort the edit and return to a normal cell
+
+    //create and style input
+	//
+    const val = cell.getValue() * 1000 || new Date().getTime();
+    var cellValue = moment(val).format("YYYY-MM-DD H:mm:ss"),
+    input = document.createElement("input");
+
+    input.setAttribute("type", "datetime");
+
+    input.style.padding = "4px";
+    input.style.width = "100%";
+    input.style.boxSizing = "border-box";
+
+    input.value = cellValue;
+
+    onRendered(function(){
+        input.focus();
+        input.style.height = "100%";
+    });
+
+    function onChange(){
+        if(input.value != cellValue){
+	    if (input.value == "") success(false);
+            success(moment(input.value, "YYYY-MM-DD H:mm:ss").unix());
+        }else{
+            cancel();
+        }
+    }
+
+    //submit new value on blur or change
+    input.addEventListener("blur", onChange);
+
+    //submit new value on enter
+    input.addEventListener("keydown", function(e){
+        if(e.keyCode == 13){
+            onChange();
+        }
+
+        if(e.keyCode == 27){
+            cancel();
+        }
+    });
+
+    return input;
+};
+const table = new Tabulator("#items", {
+	layout: "fitDataStretch",
+	data: store_data,
+	groupBy: "group_id",
+	groupHeader: function(value, count, data, group) {
+		return groups[value] + "<span style='color:#d00; margin-left:10px;'>(" + count + ")</span>";
+	},
+	columns: [
+		{title: "Tittel", field: "name"},
+		{title: "Kjøpt", field: "amount_bought"},
+		{title: "Tilgjengelig", field: "amount_available"},
+		{title: "Pris", field: "price"},
+		{title: "Tilgjengelig FRA", field: "available_from", formatter: function(cell, formatterParams, onRendered) {
+			if (cell.getValue() === false) return "Tidenes morgen";
+			return new Date(cell.getValue() * 1000).toLocaleString();
+		}, editor: dateEditor},
+		{title: "Tilgjengelig TIL", field: "available_until", formatter: function(cell, formatterParams, onRendered) {
+			if (cell.getValue() === false) return "Verdens ende";
+			return new Date(cell.getValue() * 1000).toLocaleString();
+		}, editor: dateEditor},
+		{title: "Synlig", field: "visibility", editor:true, formatter: "tickCross", sorter: "boolean", cellEdited: function (cell) {
+			const data = cell.getData();
+			set_visibility(data.api_id, data.visibility);
+		},
+		}
+	],
+	rowFormatter:  function(row) {
+		const data = row.getData();
+		if (!data.visibility) {
+			row.getElement().style.backgroundColor = "#eee";
+			row.getElement().style.color = "#aaa";
+		} 
+	},
+	rowDblClick : function(e, row) {
+		const data = row.getData();
+		window.location.assign("<?php print $base_url ?>/admin/store?item_id=" + data.api_id);
+	}
+});
+</script>
 
 <div id="add_container">
 	<div class="green box">
@@ -174,6 +289,7 @@ $items = $store->get_items(0, 100, "", false, false);
 		
 	</div>
 
+<div class="box">
 	<form method="POST" enctype="multipart/form-data">
 		<label for="name_no">Tittel (Norsk):</label>
 		<input name="name_no" type="text" required/>
@@ -199,6 +315,7 @@ $items = $store->get_items(0, 100, "", false, false);
 		<input name="image" type="file" accept="image/*"/>
 		<button name="add" type="submit">Legg til</button>
 	</form>
+</div>
 </div>
 <script type="text/javascript">
 

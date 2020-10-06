@@ -156,6 +156,7 @@ This shit uses like 4GB of memory, put a link instead
 		access_link("autopay");
 		access_link("dugnad");
 		
+		access_link("alumni");
 		?>
 		<a href='<?php print $t->get_url("isMember") ?>'>Medlemsliste</a> (Det er denne Pirbadet skal ha)<br>
 	</div>

@@ -20,13 +20,13 @@ class StoreHelper {
 		if ($visibility_check) $visibility = "WHERE visible=TRUE";
 		
 		if ($id == "") {
-			$sql = "SELECT id, api_id, name, description, price, available_from, available_until, require_phone, visible, (SELECT COUNT(*) FROM store_orders WHERE store_orders.item_id = store_items.id AND (store_orders.order_status='FINALIZED' OR store_orders.order_status='DELIVERED')) AS amount, amount_available, image FROM store_items AS store_items $visibility ORDER BY visible DESC, id DESC LIMIT ? OFFSET ?"; 
+			$sql = "SELECT id, api_id, name, description, price, available_from, available_until, require_phone, visible, (SELECT COUNT(*) FROM store_orders WHERE store_orders.item_id = store_items.id AND (store_orders.order_status='FINALIZED' OR store_orders.order_status='DELIVERED')) AS amount, amount_available, image, group_id FROM store_items AS store_items $visibility ORDER BY visible DESC, id DESC LIMIT ? OFFSET ?"; 
 
 			$query = $mysqli->prepare($sql);
 			$query->bind_param("ii", $limit, $start);
 
 		} else {
-			$sql = "SELECT id, api_id, name, description, price, available_from, available_until, require_phone, visible, (SELECT COUNT(*) FROM store_orders WHERE store_orders.item_id = store_items.id AND (store_orders.order_status='FINALIZED' OR store_orders.order_status='DELIVERED')) AS amount, amount_available, image FROM store_items AS store_items WHERE api_id=? ORDER BY id DESC LIMIT ? OFFSET ?";
+			$sql = "SELECT id, api_id, name, description, price, available_from, available_until, require_phone, visible, (SELECT COUNT(*) FROM store_orders WHERE store_orders.item_id = store_items.id AND (store_orders.order_status='FINALIZED' OR store_orders.order_status='DELIVERED')) AS amount, amount_available, image, group_id FROM store_items AS store_items WHERE api_id=? ORDER BY id DESC LIMIT ? OFFSET ?";
 			$query = $mysqli->prepare($sql);
 			$query->bind_param("sii", $id, $limit, $start);
 		}
@@ -34,7 +34,7 @@ class StoreHelper {
 		if (!$query->execute()) return false;
 		
 		$result = array();
-		$query->bind_result($id, $api_id, $name, $description, $price, $available_from, $available_until, $require_phone, $visibility, $amount, $amount_available, $image);
+		$query->bind_result($id, $api_id, $name, $description, $price, $available_from, $available_until, $require_phone, $visibility, $amount, $amount_available, $image, $group_id);
 
 		while ($query->fetch()) {
 			if (!$rawData) {
@@ -61,7 +61,8 @@ class StoreHelper {
 				"amount_available" => $amount_available,
 				"amount_bought" => $amount,
 				"visibility" => $visibility,
-				"image" => $image);
+				"image" => $image,
+				"group_id" => $group_id);
 
 		}
 

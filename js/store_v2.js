@@ -103,7 +103,8 @@ function display_store(item) {
 	overlay.querySelector("#checkout_img").src = img;
 }
 
-function hide_store() {
+function hide_store(e) {
+	if (e) e.preventDefault();
 	document.querySelector("#checkout_overlay").style.display = "none";
 }
 

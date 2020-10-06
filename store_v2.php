@@ -54,7 +54,7 @@ if (isset($_REQUEST["error"])) { ?>
 					<div id="card-errors" role="alert"></div>
 				</div>
 				<button type="submit" style="float: left; width: 45%"><?php print $t->get_translation("kjop"); ?></button>
-				<button onclick="hide_store()" class="locked" style="float: right; width: 45%"><?php print $t->get_translation("cancel");?></button>
+				<button onclick="hide_store(event)" class="locked" style="float: right; width: 45%"><?php print $t->get_translation("cancel");?></button>
 			</form>
 		</div>
 		<span class="close" onclick="hide_store()" >&times;</span>
