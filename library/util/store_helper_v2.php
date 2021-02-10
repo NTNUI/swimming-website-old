@@ -160,8 +160,7 @@ class StoreHelper {
 
 		$query->close();
 		//Send email notification to confirmation email
-		//$sendTo = "svommer-okonomi@ntnui.no";
-		$sendTo = "olavbb@hotmail.com";
+		$sendTo = "svommer-okonomi@ntnui.no";
 //		mail($sendTo, "New order placed", "");
 
 		$this->update_status($id, "FINALIZED", $mysqli);
@@ -172,7 +171,7 @@ class StoreHelper {
 
 	function licence_control($email) {
 		$mysqli = connect("member");
-		$sql = "UPDATE medlem_2018 SET kontrolldato=NOW() WHERE epost=?";
+		$sql = "UPDATE medlem SET kontrolldato=NOW() WHERE epost=?";
 		$query = $mysqli->prepare($sql);
 		$query->bind_param("s", $email);
 		if (!$query->execute()) {

@@ -36,38 +36,14 @@ $base_url = $settings["hosting"]["baseurl"];
 $language = $_REQUEST["lang"];
 $frm_side = $_REQUEST["side"];
 
-//Defaults
-/*if ($language == "") $language = "no";
-if ($frm_side == "") $frm_side = "mainpage"; */
-
+// Defaults
 if ($language == "") $language = $settings["defaults"]["language"];
 if ($frm_side == "") $frm_side = $settings["defaults"]["landing-page"];
 
-
-
-
-function getPage($request = "mainpage", $language = "no") {
-	$side = "${request}_$language.php";
-	if (file_exists($side)) return $side;
-	//Fall back to norwegian
-	$side = "${request}_no.php";
-	if (file_exists($side)) return $side;
-	//Fall back to no language
-	$side = "${request}.php";
-	return $side; //If this doesent exists, we let the thing below handle that
-}
-
-//Legacy filenames
-$side = getPage($frm_side, $language);
+$side = "$frm_side.php";
 
 //Translator
 $t = new Translator($frm_side, $language);
-
-//Deprecated, use $t->get_translation()
-function getTranslation($key) {
-	global $t;
-	return $t->get_translation($key);
-}
 
 //Get access rules
 $access_control = new AccessControl($_SESSION["user"]);
@@ -86,8 +62,8 @@ if ($frm_side == "api") {
 
 	if (!preg_match("#\.\./#",$side)
 		AND preg_match("#^[-a-z0-9_.]+$#i",$side)
-		AND file_exists("$side")) {
-	    include("$side");
+		AND file_exists("public/$side")) {
+	    include("public/$side");
 	} else {
 	  print '<h2 class="box error">Ugyldig side</h2>';
 	}

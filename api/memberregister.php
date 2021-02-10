@@ -47,7 +47,7 @@ if (!isset($_REQUEST['id'])) {
 
 $id = $_REQUEST['id'];
 
-$sql = "UPDATE ". $settings["memberTable"] . " SET kontrolldato=NOW() WHERE id=?";
+$sql = "UPDATE ${settings['memberTable']} SET kontrolldato=NOW() WHERE id=?";
 $query = $conn->prepare($sql);
 $query->bind_param("i", $id);
 
@@ -59,7 +59,7 @@ $query->close();
 
 $access_control->log("api/memberregister", "approve", $id);
 
-$sql = "SELECT fornavn, etternavn, epost FROM ". $settings["memberTable"] . " WHERE id=?";
+$sql = "SELECT fornavn, etternavn, epost FROM ${settings['memberTable']} WHERE id=?";
 $query = $conn->prepare($sql);
 $query->bind_param("i", $id);
 $query->execute();

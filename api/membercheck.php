@@ -1,5 +1,5 @@
 <?php
-$sql = "SELECT fornavn, etternavn FROM medlem_2020 WHERE YEAR(kontrolldato)=YEAR(now()) AND etternavn=? ORDER BY fornavn, etternavn";
+$sql = "SELECT fornavn, etternavn FROM ${settings['memberTable']} WHERE YEAR(kontrolldato)=YEAR(now()) AND etternavn=? ORDER BY fornavn, etternavn";
 $result = mysqli_query($conn, $sql);
 $lastname = $_GET["lname"];
 

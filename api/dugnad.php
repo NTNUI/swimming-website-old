@@ -1,13 +1,14 @@
 <?php 
 session_start();
+include_once("library/util/db.php");
 if (!$access_control->can_access("api", "dugnad")) {
 	header("HTTP/1.0 403 Forbidden");
 	die("You do not have access to this page");
 }
 function setDugnad($id, $value) {
-	include_once("library/util/db.php");
+	global $settings;
 	$conn = connect("member");
-	$sql = "UPDATE medlem_2020 SET `harUtførtFrivilligArbeid`=? WHERE ID=?";
+	$sql = "UPDATE ${settings['memberTable']} SET `harUtførtFrivilligArbeid`=? WHERE ID=?";
 	$query = $conn->prepare($sql);
 	$query->bind_param("ii", $value, $id);
 	$result = $query->execute();
@@ -20,7 +21,7 @@ if (isset($_GET["getRandom"]) && intval($_GET["getRandom"])) {
 
 	$conn = connect("member");
 
-	$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost, `harUtførtFrivilligArbeid` FROM medlem_2020 WHERE (`harUtførtFrivilligArbeid` IS NULL OR `harUtførtFrivilligArbeid`=0) AND kontrolldato IS NOT NULL ORDER BY IFNULL(`harUtførtFrivilligArbeid`, 1) ASC, RAND() LIMIT ?";
+	$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost, `harUtførtFrivilligArbeid` FROM ${settings['memberTable']} WHERE (`harUtførtFrivilligArbeid` IS NULL OR `harUtførtFrivilligArbeid`=0) AND kontrolldato IS NOT NULL ORDER BY IFNULL(`harUtførtFrivilligArbeid`, 1) ASC, RAND() LIMIT ?";
 
 	$query = $conn->prepare($sql);
 	$query->bind_param("i", $_GET["getRandom"]);
@@ -59,9 +60,8 @@ if (isset($_GET["getRandom"]) && intval($_GET["getRandom"])) {
 	return;
 
 } else if (isset($_GET["search"]) && strlen($_GET["search"]) > 0) {
-	include_once("library/util/db.php");
 	$conn = connect("member");
-	$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost, `harUtførtFrivilligArbeid` FROM medlem_2020 WHERE CONCAT(fornavn, ' ', etternavn) LIKE CONCAT('%', ?, '%')";
+	$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost, `harUtførtFrivilligArbeid` FROM ${settings['memberTable']} WHERE CONCAT(fornavn, ' ', etternavn) LIKE CONCAT('%', ?, '%')";
 
 	$query = $conn->prepare($sql);
 	$query->bind_param("s", $_GET["search"]);

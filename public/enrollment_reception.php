@@ -254,23 +254,11 @@ if ($UNSAFE_emailFound) {
 	//sende mail til kasserer
 	if (1) {
 		$sendTo = $settings["emails"]["analyst"];
-
 	} else {
 		$sendTo = "svomming-kasserer@ntnui.no";
 	}
 
-
-	$headers .= 'Fornavn: ' . $UNSAFE_firstName . "\n";
-	$headers .= 'Etternavn: ' . $UNSAFE_lastName . "\n";
-	$headers .= 'Bursdag: ' . $UNSAFE_birthDate . "\n";
-	$headers .= 'Telefonnummer: ' . $UNSAFE_phoneNumber . "\n";
-	$headers .= 'Svømmedyktig: ' . $UNSAFE_proficient . "\n";
-	$headers .= 'Dugnad: ' . $UNSAFE_voluntaryWork . "\n";
-	$headers .= 'Postnummer: ' . $UNSAFE_zipCode . "\n";
-	$headers .= 'Adresse: ' . $UNSAFE_adress . "\n";
-	$headers .= 'E-post: ' . $UNSAFE_email . "\n";
-	$headers .= 'Kortnr: ' . $UNSAFE_cardNumber . "\n";
-	$headers .= 'Beskjed: ' . $UNSAFE_comment . "\n";
+	$headers .= "Ny medlem registrert, logg på adminsiden for mer info";
 
 
 	if (1) {
@@ -279,7 +267,8 @@ if ($UNSAFE_emailFound) {
 		$from = "NTNUI_Svommin_Artificial_Intelligence@ntnui.no";
 	}
 
-	mail($sendTo, "NTNUI-Svømming: Nytt medlem", $headers, "From: $from\r\nContent-type: text/plain; charset=utf-8"); // ADVARSEL: hvis Content-type: blir endret til text/html må variablene som går inn i $headers saniteres mot html injection #Pavel
+	// Depends on the accountant, but many prefer not to get a mail for each new member
+//	mail($sendTo, "NTNUI-Svømming: Nytt medlem", $headers, "From: $from\r\nContent-type: text/plain; charset=utf-8"); // ADVARSEL: hvis Content-type: blir endret til text/html må variablene som går inn i $headers saniteres mot html injection #Pavel
 
 	?>
 		<div class="green box">

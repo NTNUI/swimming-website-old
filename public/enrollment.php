@@ -18,7 +18,10 @@ This file is supposed to:
 
 <?php
 /* Local settings */
-$registatin_open = true;//false;
+$manual_close = false;
+$close_date = $settings["registration_close"];
+$close_date = strtotime("${close_date['date']} ${close_date['month']} this year");
+$registatin_open = $close_date - strtotime("now") > 0 and !$manual_close;
 $tabindex = 0;
 
 function print_textBox($title, $type, $name, $extra = "") {

@@ -28,12 +28,16 @@
     "servertype": "live",
     "os": "linux"
   },
+  "registration_close": {
+	  "month": "december",
+	  "date": 1
+  },
   "defaults": {
     "language": "no",
     "landing-page": "mainpage",
     "licence_key": "NSFLicence2019"
   },
-  "memberTable": "medlem_2020",
+  "memberTable": "medlem",
   "live": null,
   "captia_key": "6LdrnW8UAAAAAIDoJVmceXJ_DxkmlqHMMwF3r4I1"
 }

@@ -13,7 +13,7 @@ if (!$conn) {
 
 $access_control->log("admin/memberCSV", "generate");
 
-$sql = "SELECT * FROM `medlem_2020` WHERE triatlon=0 AND YEAR(kontrolldato) = YEAR(NOW()) AND id IN (439, 440)";
+$sql = "SELECT * FROM ${settings['memberTable']} WHERE triatlon=0 AND YEAR(kontrolldato) = YEAR(NOW()) AND id IN (439, 440)";
 $query = $conn->prepare($sql);
 $query->execute();
 $result = $query->get_result();

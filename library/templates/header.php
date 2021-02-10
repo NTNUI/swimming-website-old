@@ -1,9 +1,14 @@
+<?php
+$title = $t->get_translation("page_title");
+if ($title == "") $title = $t->get_translation($frm_side);
+if ($title == "") $title = ucwords($frm_side);
+?>
 <!DOCTYPE html>
 <html>
 <head>
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
-	<title>NTNUI Svømming - <?php print $t->get_translation("page_title"); ?></title>
+	<title>NTNUI Svømming - <?php print $title; ?></title>
 	<LINK REL="SHORTCUT ICON" HREF="<?php print $base_url ?>/img/icons/logo.ico">
 	<link href="https://fonts.googleapis.com/css?family=M+PLUS+Rounded+1c" rel="stylesheet"> 
 	<link href="https://fonts.googleapis.com/css?family=Heebo&display=swap" rel="stylesheet">
