@@ -33,7 +33,7 @@ function sendEmail($emailAdress){
 
 
 // Create connection
-$conn = connect("member");
+$conn = connect("medlem");
 // Check connection
 if (!$conn) {
     die("Connection failed: " . mysqli_connect_error());

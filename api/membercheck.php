@@ -4,7 +4,7 @@ $result = mysqli_query($conn, $sql);
 $lastname = $_GET["lname"];
 
 
-$conn = connect("member");
+$conn = connect("medlem");
 
 $query = $conn->prepare($sql);
 $query->bind_param("s", $lastname);

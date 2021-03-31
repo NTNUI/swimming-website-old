@@ -41,8 +41,7 @@ function createTime($year, $month, $day) {
 }
 
 if ($_SESSION['innlogget'] == 1) {
-
-	$conn = connect("member");
+	$conn = connect("medlem");
 
 	// Check connection
 	if (!$conn) {

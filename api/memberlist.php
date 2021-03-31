@@ -3,7 +3,7 @@ session_start();
 if ($_SESSION['innlogget'] == 1) {
 
 	// Connect to server
-	$conn = connect("member");
+	$conn = connect("medlem");
 	if (!$conn) {
 	    die("Connection failed: " . mysqli_connect_error());
 	}

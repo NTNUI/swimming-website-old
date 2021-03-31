@@ -5,7 +5,7 @@ if (!$access_control->can_access("admin", "memberCSV")) {
 	die("You do not have access to this page");
 }
 
-$conn = connect("member");
+$conn = connect("medlem");
 
 if (!$conn) {
 	die("Connection failed: " . mysqli_connect_error());

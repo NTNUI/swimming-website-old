@@ -192,7 +192,7 @@ if (!($UNSAFE_firstName != "" && $UNSAFE_lastName != "" && $UNSAFE_birthDate != 
 	return;
 }
 
-$conn = connect("member");
+$conn = connect("medlem");
 if (!$conn) {
 	die("Connection failed: " . mysqli_connect_error());
 }

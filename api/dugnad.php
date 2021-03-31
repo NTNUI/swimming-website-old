@@ -7,7 +7,7 @@ if (!$access_control->can_access("api", "dugnad")) {
 }
 function setDugnad($id, $value) {
 	global $settings;
-	$conn = connect("member");
+	$conn = connect("medlem");
 	$sql = "UPDATE ${settings['memberTable']} SET `harUtførtFrivilligArbeid`=? WHERE ID=?";
 	$query = $conn->prepare($sql);
 	$query->bind_param("ii", $value, $id);
@@ -19,7 +19,7 @@ function setDugnad($id, $value) {
 if (isset($_GET["getRandom"]) && intval($_GET["getRandom"])) {
 	include_once("library/util/db.php");
 
-	$conn = connect("member");
+	$conn = connect("medlem");
 
 	$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost, `harUtførtFrivilligArbeid` FROM ${settings['memberTable']} WHERE (`harUtførtFrivilligArbeid` IS NULL OR `harUtførtFrivilligArbeid`=0) AND kontrolldato IS NOT NULL ORDER BY IFNULL(`harUtførtFrivilligArbeid`, 1) ASC, RAND() LIMIT ?";
 
@@ -60,7 +60,7 @@ if (isset($_GET["getRandom"]) && intval($_GET["getRandom"])) {
 	return;
 
 } else if (isset($_GET["search"]) && strlen($_GET["search"]) > 0) {
-	$conn = connect("member");
+	$conn = connect("medlem");
 	$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost, `harUtførtFrivilligArbeid` FROM ${settings['memberTable']} WHERE CONCAT(fornavn, ' ', etternavn) LIKE CONCAT('%', ?, '%')";
 
 	$query = $conn->prepare($sql);
