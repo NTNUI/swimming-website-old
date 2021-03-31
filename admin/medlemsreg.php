@@ -41,11 +41,9 @@ function createTime($year, $month, $day) {
 }
 
 if ($_SESSION['innlogget'] == 1) {
-	include("src/credentials/credentials_member.php");
 
-	// Create connection
-	$conn = mysqli_connect($servername, $username, $password, $dbname);
-	$conn->set_charset("utf8");
+	$conn = connect("member");
+
 	// Check connection
 	if (!$conn) {
 	    die("Connection failed: " . mysqli_connect_error());

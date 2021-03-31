@@ -15,49 +15,43 @@ if ($_SESSION['innlogget'] == 1) { ?>
 	if($oldpass != null){
 		if($nypass1 == $nypass2){
 			
-			if (1) {
-				$conn = connect("web");
-			} else {
-				include("src/credentials/credentials_web.php");
-				$conn = mysqli_connect($servername, $username, $password, $dbname);
+			$conn = connect("web");
+			if (!$conn) {
+				die('Could not connect: ' . mysql_error());
 			}
-			
-				if (!$conn) {
-				   die('Could not connect: ' . mysql_error());
-				}
 
-				$sql = "SELECT id, passwd, name, last_password FROM users WHERE username=?";
-				$query = $conn->prepare($sql);
-				$query->bind_param("s", $_SESSION['user']);
-				$query->execute();
-				$query->bind_result($id, $passwd, $name, $last_update);
-				if (!$query->fetch()) {
-					die("error fetching from database");
-				}
+			$sql = "SELECT id, passwd, name, last_password FROM users WHERE username=?";
+			$query = $conn->prepare($sql);
+			$query->bind_param("s", $_SESSION['user']);
+			$query->execute();
+			$query->bind_result($id, $passwd, $name, $last_update);
+			if (!$query->fetch()) {
+				die("error fetching from database");
+			}
 
-				$query->close();
-				if(check_password($oldpass, $passwd, $last_update)) {
-					$new_password = password_hash($nypass1, PASSWORD_DEFAULT);
-					$update = $conn->prepare("UPDATE users SET passwd=?, last_password=NOW() WHERE id=?");
-					$update->bind_param("si", $new_password, $id);
-					if ($update->execute()) {
-						$access_control->log("admin/changepass", "change password");
-						print("<div class='box green'>Passordet ble oppdatert");
-						if (isset($_SESSION['changepass'])) {
-							unset($_SESSION['changepass']);?>
-							Du vil taes til riktig side om 2 sekunder, eller klikk <a href="" onclick="">her</a>
-							<script type="text/javascript">
-							setTimeout(function () {
-								window.location = window.location.href;
-							}, 2000);
-							</script>
+			$query->close();
+			if(check_password($oldpass, $passwd, $last_update)) {
+				$new_password = password_hash($nypass1, PASSWORD_DEFAULT);
+				$update = $conn->prepare("UPDATE users SET passwd=?, last_password=NOW() WHERE id=?");
+				$update->bind_param("si", $new_password, $id);
+				if ($update->execute()) {
+					$access_control->log("admin/changepass", "change password");
+					print("<div class='box green'>Passordet ble oppdatert");
+					if (isset($_SESSION['changepass'])) {
+						unset($_SESSION['changepass']);?>
+						Du vil taes til riktig side om 2 sekunder, eller klikk <a href="" onclick="">her</a>
+						<script type="text/javascript">
+						setTimeout(function () {
+							window.location = window.location.href;
+						}, 2000);
+						</script>
 
-							<?php
-						}
-						printf("</div>");
-					} else {
-						printf("Noe gikk galt :/");
+						<?php
 					}
+					printf("</div>");
+				} else {
+					printf("Noe gikk galt :/");
+				}
 
 					$update->close();
 				}else{ ?>
@@ -66,7 +60,6 @@ if ($_SESSION['innlogget'] == 1) { ?>
 					</div>
 	<?php 				}
 				mysqli_close($con);
-				 
 
 		}else{?>
 			<div class="box error">

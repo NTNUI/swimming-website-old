@@ -1,14 +1,6 @@
 <?php
-if (1) {
-$conn = connect("web");
-}
-else {
-	include("src/credentials/credentials_web.php");
-	$conn = mysqli_connect($servername, $username, $password, $dbname);
-	$conn->set_charset("utf8");
-	
-}
 
+$conn = connect("web");
 if (!$conn) {
 	die("Connection failed: " . mysqli_connect_error());
 }

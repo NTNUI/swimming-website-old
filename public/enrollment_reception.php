@@ -192,27 +192,12 @@ if (!($UNSAFE_firstName != "" && $UNSAFE_lastName != "" && $UNSAFE_birthDate != 
 	return;
 }
 
-//lagre i database
-// Check connection
-// Old thing:
-//Properly escape user input
-if(1){
-	$conn = connect("member");
-	$query = $conn->prepare("SELECT epost FROM " . $settings["memberTable"] . " WHERE epost=?");
-}else{
-	include('src/credentials/credentials_member.php');
-	// Create connection
-	$conn = mysqli_connect($servername, $username, $password, $dbname);
-	$conn->set_charset("utf8");
-	$query = $conn->prepare("SELECT epost FROM medlem_2019 WHERE epost=?");
-}
-
+$conn = connect("member");
 if (!$conn) {
 	die("Connection failed: " . mysqli_connect_error());
 }
 
-
-
+$query = $conn->prepare("SELECT epost FROM " . $settings["memberTable"] . " WHERE epost=?");
 $query->bind_param("s", $UNSAFE_email);
 $query->execute();
 $UNSAFE_emailFound = $query->fetch();

@@ -1,22 +1,14 @@
 <?php
 session_start();
 if ($_SESSION['innlogget'] == 1) {
-if (0) {
-	include_once("../src/credentials/credentials_member.php");
-	// Create connection
-	$conn = mysqli_connect($servername, $username, $password, $dbname);
-	$conn->set_charset("utf8");
-}else {
-	$conn = connect("member");
-}
 
-	// Check connection
+	// Connect to server
+	$conn = connect("member");
 	if (!$conn) {
 	    die("Connection failed: " . mysqli_connect_error());
 	}
 
 	$sql = "SELECT id, regdato, etternavn, fornavn, kommentar, epost FROM ". $settings["memberTable"] . " WHERE kontrolldato IS NULL OR YEAR(kontrolldato) <> YEAR(NOW()) ORDER BY regdato";
-
 	$query = $conn->prepare($sql);
 
 	if (!$query->execute()) {
