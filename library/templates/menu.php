@@ -19,7 +19,6 @@ function menu_item($url, $name = "") {
 		menu_item("isMember");
 		menu_item("board");
 		menu_item("FAQ");
-		menu_item("links");
 		menu_item("store_v2");
 			
 		?>
