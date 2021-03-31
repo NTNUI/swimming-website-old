@@ -18,23 +18,6 @@ class Translator {
 			$this->translations->$page = json_decode(file_get_contents($file));
 		}
 	}
-	
-	/*
-	
-	public function load_translation($page) {
-		$file = "$this->directory/$page.json";
-		if (file_exists($file)) {
-			$this->translations->$page = json_decode(file_get_contents($file));
-			
-		}
-	}
-	
-	
-	
-	
-	
-	*/
-	
 
 	public function get_translation($key, $page = "") {
 		$language = $this->language;

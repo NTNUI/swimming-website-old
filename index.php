@@ -1,5 +1,5 @@
 <?php
-//kode for å ta vare på eller eventuelt starte sessions
+// start session
 session_save_path("sessions");
 session_set_cookie_params(4*60*60);
 ini_set("session.gc_maxlifetime", 4*60*60);
@@ -18,17 +18,13 @@ if($settings == ""){
 	print("empty settings file");
 }
 
-
 //Libraries
-
 include_once("vendor/autoload.php");
 include_once("library/util/db.php");
 include_once("library/util/translation.php");
 include_once("library/util/access_control.php");
 
-$translations_dir = "translations";
 
-// $base_url = "https://org.ntnu.no/svommer"; // old #pavel
 $base_url = $settings["hosting"]["baseurl"];
 
 
@@ -43,6 +39,7 @@ if ($frm_side == "") $frm_side = $settings["defaults"]["landing-page"];
 $side = "$frm_side.php";
 
 //Translator
+$translations_dir = "translations";
 $t = new Translator($frm_side, $language);
 
 //Get access rules
