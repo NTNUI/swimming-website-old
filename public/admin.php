@@ -30,13 +30,11 @@ $action = $_REQUEST['action'];
 
 if(!isset($_SESSION['innlogget'])){
 	if($bruker != null){
-
-
-	$conn = connect("web");
-
+		
 		// Check connection
+		$conn = connect("web");
 		if (!$conn) {
-		    die("Connection failed: " . mysqli_connect_error());
+			die("Connection failed: " . mysqli_connect_error());
 		}
 
 		$sql = "SELECT passwd, name, last_password FROM users WHERE username=?";
@@ -116,24 +114,6 @@ if ($_SESSION['changepass'] == 1) { ?>
 		print("Page $action not found");
 	}
 	?>
-	<div class="box">
-		<h1>Trends</h1>
-	<!-- Below are some trends just for fun-->
-<!--
-
-
-This shit uses like 4GB of memory, put a link instead
-
-
-                  <script type="text/javascript" src="https://ssl.gstatic.com/trends_nrtr/1754_RC01/embed_loader.js"></script>
-  <script type="text/javascript">
-    trends.embed.renderExploreWidget("TIMESERIES", {"comparisonItem":[{"keyword":"NTNUI Svømming","geo":"NO","time":"today 12-m"}],"category":0,"property":""}, {"exploreQuery":"geo=NO&q=NTNUI%20Sv%C3%B8mming&date=today 12-m","guestPath":"https://trends.google.com:443/trends/embed/"});
-  </script>
--->
-<!--Trends until this point -->
-
-
-	</div>
 
 	<div class="box">
 		<h1>Web</h1>
