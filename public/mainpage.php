@@ -1,10 +1,4 @@
 <?php use Michelf\Markdown; ?>
-<?php
-//include "test.php";
-//print (get_page_title());
-?>
-
-
 <head>
 	<meta property="og:title" content="NTNUI Svømming"/>
 	<meta name="description" content="NTNUI Svømming er en svømmeklubb for studenter ved universitetet NTNU i Trondheim."/>
@@ -50,23 +44,9 @@
 
 </div>
 
-<div class="box">
-	<h1><a href="https://www.instagram.com/ntnuisvommegruppa" style="color: black; text-decoration: none;">Instagram</a></h1>
-	<p>
-		<script src="https://snapwidget.com/js/snapwidget.js"></script>
-		<iframe src="https://snapwidget.com/embed/603626" class="snapwidget-widget"
-		allowtransparency="true"
-		frameborder="0"
-		scrolling="no"
-		style="border:none; overflow:hidden; width:100%;">
-		</iframe>
-	</p>
-</div>
-
 <div class="news-box">
-	<h1><?php print $t->get_translation("news");?></h1>
-	<h2>Keep up to date in our fb group: <a href="https://www.facebook.com/groups/2250060697">https://www.facebook.com/groups/2250060697</a></h2>
-	<br>
+	<h1><?php print $t->get_translation("news_header");?></h1>
+	<h2><?php print $t->get_translation("news_content");?></h2>
 
 	<?php
 
@@ -100,5 +80,4 @@
 	?>
 </div>
 
-<script src="https://cdn.lightwidget.com/widgets/lightwidget.js"></script>
 <script type="text/javascript" src="<?php print "$base_url/js/slideshow.js" ?>"></script>
