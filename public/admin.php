@@ -141,13 +141,6 @@ if ($_SESSION['changepass'] == 1) { ?>
 		<a href='<?php print $t->get_url("isMember") ?>'>Medlemsliste</a> (Det er denne Pirbadet skal ha)<br>
 	</div>
 
-<!--
-	// Old stuff never used
-	/*printf("<a href='?side=kurs.php'>Kurs</a> (ikke i bruk)<br>");
-	printf("<a href='?side=ninst.php'>Legge til instruktør</a> (ikke i bruk)<br>");
-	printf("<a href='?side=nkurs.php'>Sette opp nytt kurs</a> (ikke i bruk)<br><br>");
-
-	printf("<a href='index.php?side=resmenu.php'>RESULTATOR  !!UNDER CONSTRUCTION!!</a><br>"); */ -->
 <?php	}else{
 	//hvis ikke innlogget vises innloggingsskjema
 ?>
