@@ -9,6 +9,7 @@ function check_password($password, $db_password, $lastcheck) {
 	return password_verify($password, $db_password);
 }
 
+// TODO: change this to return a boolean. printing should be done by functions starting with print.
 function access_link($page, $inline = false) {
 	global $t, $access_control;
 	$link = $t->get_url("admin/$page");
@@ -19,6 +20,70 @@ function access_link($page, $inline = false) {
 	if (!$inline) print "<br>";
 }
 
+function print_password_change_required(){
+	print("<div class='box error'>");
+	print("<h1>A password reset has been requested for your user</h1>");
+	print("Please change password before accessing admin features");
+	print("</div>");
+}
+
+function print_admin_header($user){
+	print("<div class='box green' style='position: relative'>");
+	print("<h1><a href='/svommer/admin/' style='color: #ff0 !important;'>Admin</a></h1>");
+	print("Innlogget som: <b style='color: orange'>" . $user . "</b><br>");
+	access_link("logout", true);
+	print(" - ");
+	access_link("changepass", true);
+	print("</div>");
+
+}
+
+function print_no_access($page){
+	print "<div class='error box'><h1>You don't have access to the page $page</h1>";
+	print "<p>Spør noen i styret om du mener dette er feil</p>";
+}
+
+function print_web_section(){
+	print("<div class='box'>");
+	print("<h1>Web</h1>");
+
+	access_link("nyhet");
+	access_link("referat");
+	access_link("users");
+	access_link("access");
+	access_link("translations");
+	access_link("store");
+	access_link("fredagspils");
+
+	print("</div>");
+}
+
+function print_member_section(){
+	print("<div class='box'>");
+	print("<h1>Medlemmer</h1>");
+
+	access_link("medlemsreg");
+	access_link("autopay");
+	access_link("dugnad");
+	access_link("alumni");
+	print("<a href=" . $t->get_url("isMember") . ">Medlemssøk</a><br>");
+
+	print("</div>");
+}
+
+function print_login_box(){
+	print("<div class='box green'>");
+	print("<h1>Admin</h1>");
+	print("Logg inn først");
+	print("</div>");
+	print("<form method='post'>");
+	print("<label for='bruker'>Brukernavn:</label>");
+	print("<input type='text' name='bruker' placeholder='Brukernavn' required/>");
+	print("<label for='pass'>Passord:</label>");
+	print("<input type='password' name='pass' placeholder='hunter2' required/>");
+	print("<input type='submit' value='Logg inn'/>");
+	print("</form>");
+}
 
 // Request users with passwords older than this to update
 $UPDATE_PASSWORDS_FROM_BEFORE = strtotime("20-09-2018");
@@ -71,28 +136,18 @@ if(!isset($_SESSION['innlogget'])){
 }
 
 // Has to change password
-if ($_SESSION['changepass'] == 1) { ?>
-	<div class="box error">
-		<h1>A password reset has been requested for your user</h1>
-		Please change password before accessing admin features
-	</div>
-
-<?php
+if ($_SESSION['changepass'] == 1) {
+	print_password_change_required();
 	include("admin/changepass.php");
 
 //hvis innlogget
 } else if ($_SESSION['innlogget'] == 1) {
-	if ($action != "logout") { ?>
-	<div class="box green" style="position: relative">
-<h1><a href="/svommer/admin/" style="color: #ff0 !important;">Admin</a></h1>
-		Innlogget som: <b style="color: orange"><?php print($_SESSION['navn']);?></b><br>
-		<?php access_link("logout", true) ?> - <?php access_link("changepass", true) ?>
-	</div>
-<?php    	}
+	if ($action != "logout") {
+		print_admin_header($_SESSION['navn']);
+	}
 	$result = $access_control->can_access("admin", $action);
 	if (!$result) {
-		print "<div class='error box'><h1>You don't have access to the page $page</h1>";
-		print "<p>Spør noen i styret om du mener dette er feil</p>";
+		print_no_access($page);
 		return;
 	}
 	if ($action != "") {
@@ -113,49 +168,13 @@ if ($_SESSION['changepass'] == 1) { ?>
 		}
 		print("Page $action not found");
 	}
-	?>
 
-	<div class="box">
-		<h1>Web</h1>
-		<?php
-			access_link("nyhet");
-			access_link("referat");
-			access_link("users");
-			access_link("access");
-			access_link("translations");
-			access_link("store");
-			access_link("fredagspils");
-		?>
+	print_web_section();
+	print_member_section();
 
-	</div>
-
-	<div class="box">
-		<h1>Medlemmer</h1>
-		<?php
-		access_link("medlemsreg");
-		access_link("autopay");
-		access_link("dugnad");
-		
-		access_link("alumni");
-		?>
-		<a href='<?php print $t->get_url("isMember") ?>'>Medlemsliste</a> (Det er denne Pirbadet skal ha)<br>
-	</div>
-
-<?php	}else{
+	}else{
 	//hvis ikke innlogget vises innloggingsskjema
-?>
-		<div class="box green">
-			<h1>Admin</h1>
-			Logg inn først
-		</div>
-		<form method='post'>
-			<label for="bruker">Brukernavn:</label>
-			<input type="text" name="bruker" placeholder="Brukernavn" required/>
-			<label for="pass">Passord:</label>
-			<input type="password" name="pass" placeholder="hunter2" required/>
-			<input type="submit" value="Logg inn"/>
-		</form>
-<?php
+	print_login_box();
 }
 
 ?>
