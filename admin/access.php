@@ -133,7 +133,7 @@ $conn->close();
 </table>
 <?php } ?>
 <h4>Ny regel</h4>
-<form method="POST" action="?role=<?php print $roleId?>&type=addRole"<
+<form method="POST" action="?role=<?php print $roleId?>&type=addRole">
 <label for="ruleType">Type:</label>
 <select name="ruleType"><option value="ALLOW">ALLOW</option><option value="DENY">DENY</option></select>
 <label for="page">Side:</label>
