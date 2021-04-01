@@ -48,7 +48,7 @@ function print_web_section(){
 	print("<h1>Web</h1>");
 
 	access_link("nyhet");
-	access_link("referat");
+	// access_link("referat");
 	access_link("users");
 	access_link("access");
 	access_link("translations");
@@ -59,6 +59,7 @@ function print_web_section(){
 }
 
 function print_member_section(){
+	global $t;
 	print("<div class='box'>");
 	print("<h1>Medlemmer</h1>");
 
@@ -66,6 +67,7 @@ function print_member_section(){
 	access_link("autopay");
 	access_link("dugnad");
 	access_link("alumni");
+	access_link("kid");
 	print("<a href=" . $t->get_url("isMember") . ">Medlemssøk</a><br>");
 
 	print("</div>");
