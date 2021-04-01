@@ -25,7 +25,7 @@ if (!$conn) {
 global $settings;
 $table = $settings["memberTable"];
 // TODO: remove unessesarry info
-$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost FROM " . $table . " WHERE `KID` = '' AND kontrolldato IS NOT NULL";
+$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost FROM " . $table . " WHERE `KID` = '' AND kontrolldato IS NOT NULL AND triatlon = 0";
 
 $query = $conn->prepare($sql);
 if (!$query->execute()) {
