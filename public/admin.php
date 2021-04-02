@@ -1,3 +1,13 @@
+<style>
+.admin_header{
+	color: #000 !important;
+}
+
+.admin_username{
+	color: #000 ;
+}
+</style>
+
 <?php
 
 function check_password($password, $db_password, $lastcheck) {
@@ -28,9 +38,10 @@ function print_password_change_required(){
 }
 
 function print_admin_header($user){
+	global $t;
 	print("<div class='box green' style='position: relative'>");
-	print("<h1><a href='/svommer/admin/' style='color: #ff0 !important;'>Admin</a></h1>");
-	print("Innlogget som: <b style='color: orange'>" . $user . "</b><br>");
+	print("<h1><a href='/svommer/admin/' class='admin_header'>" . $t->get_translation("admin_header") . "</a></h1>");
+	print( $t->get_translation("admin_logged_in_as") . "<b class='admin_username'>" . $user . "</b><br>");
 	access_link("logout", true);
 	print(" - ");
 	access_link("changepass", true);
@@ -44,8 +55,9 @@ function print_no_access($page){
 }
 
 function print_web_section(){
+	global $t;
 	print("<div class='box'>");
-	print("<h1>Web</h1>");
+	print("<h2> ". $t->get_translation("admin_header_web") . "</h2>");
 
 	access_link("nyhet");
 	// access_link("referat");
@@ -61,14 +73,13 @@ function print_web_section(){
 function print_member_section(){
 	global $t;
 	print("<div class='box'>");
-	print("<h1>Medlemmer</h1>");
+	print("<h2>" . $t->get_translation("admin_header_member") . "</h2>");
 
 	access_link("medlemsreg");
 	access_link("autopay");
 	access_link("dugnad");
 	access_link("alumni");
 	access_link("kid");
-	print("<a href=" . $t->get_url("isMember") . ">Medlemssøk</a><br>");
 
 	print("</div>");
 }

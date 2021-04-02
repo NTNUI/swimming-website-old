@@ -145,7 +145,8 @@ if ($page != "" and file_exists("$dir/$page.json")) {
 <?php
 	
 } else {
-	print "<h1>Please choose a file to edit</h1>";
+	print("<div class='box'>");	
+	print "<h2>Please choose a file to edit</h2>";
 	foreach (glob("$dir/*") as $trans) {
 		//Omit directory and file extension
 		$pageName = substr($trans, strlen("$dir/"));
@@ -154,4 +155,6 @@ if ($page != "" and file_exists("$dir/$page.json")) {
 		<a href="?page=<?php print $pageName ?>"><?php print $pageName ?></a><br>
 	<?php
 	}
+	print("</div>");
 }
+?>

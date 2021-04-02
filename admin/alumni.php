@@ -48,7 +48,7 @@ print "</div>";
 ?>
 
 <div class="box green" id="matrix">
-	<h1>Alumni Matrise</h1>
+	<h2>Alumni Matrise</h2>
 	<div id="table"></div>
 </div>
 <link href="https://unpkg.com/tabulator-tables@4.5.3/dist/css/tabulator.min.css" rel="stylesheet">

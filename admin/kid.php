@@ -16,9 +16,11 @@ TODO:
 </style>
 
 <div class="box">
-
-
 	<h2>Kid nummer registrering</h2>
+	<p>Her finner man en liste over medlemmer uten gyldig KID nummer i databasen</p>
+</div>
+
+<div class="box">
 
 	<h3 id="title-status">Laster...</h3>
 
@@ -35,11 +37,11 @@ TODO:
 
 	<template id="member">
 		<tr>
-			<td class="name">Johannes Hope</td>
+			<td class="name"></td>
 			<td class="email"></td>
-			<td class="phone-number">12345678</td>
+			<td class="phone-number"></td>
 			<td class="KID"><input type="number" pattern="/^\d{8}$/gm"></input></td>
-			<td class="actions"><button class="save">Lagrre</button></td>
+			<td class="actions"><button class="save">Lagre</button></td>
 		</tr>
 	</template>
 

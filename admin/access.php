@@ -44,9 +44,9 @@ if ($type != "") {
 		$query->bind_param("iss", $roleId, $ruleType, $page);
 		if ($query->execute()) { ?>
 			<h1 class="box green">Record created</h1>
-<?php		} else { ?>
+		<?php		} else { ?>
 			<h1 class="box error">Something went wrong...</h1>
-<?php
+		<?php
 		}
 		$query->close();
 		$access_control->log("admin/access", "add " . $page . " rule for g[" . $roleId . "] ", $ruleType);
@@ -66,7 +66,7 @@ if ($type != "") {
 		}
 		if ($query->execute()) { ?>
 			<h1 class="box green">Record updated</h1>
-<?php		} else { ?>
+		<?php		} else { ?>
 			<h1 class="box error">Something went wrong...</h1>
 <?php
 		}
@@ -83,7 +83,7 @@ if ($roleId != 0) {
 	$query->execute();
 	$query->bind_result($id, $type, $page);
 	while ($query->fetch()) {
-		$rolerules[] = array( "id" => $id, "type" => $type, "page" => $page);
+		$rolerules[] = array("id" => $id, "type" => $type, "page" => $page);
 	}
 	$query->close();
 }
@@ -94,55 +94,88 @@ if ($userId != 0) {
 	$query->execute();
 	$query->bind_result($id, $type, $page);
 	while ($query->fetch()) {
-		$userrules[] = array( "id" => $id, "type" => $type, "page" => $page);
+		$userrules[] = array("id" => $id, "type" => $type, "page" => $page);
 	}
 	$query->close();
 }
 
 $conn->close();
 ?>
-<h1>Role access rules</h1>
-<form method="GET">
-	<select name="role" style="width: 50%">
+
+<div class="box">
+	<h2>Role access rules</h2>
+	<p>Create groups, put users in groups, create rules for groups.</p>
+</div>
+
+<div class="box">
+	<label>Groups</label>
+	<form method="GET">
+		<select name="role" style="width: 50%">
 			<?php foreach ($roles as $i => $role) {
-			print("<option value=$i" . ($roleId == $i ? " selected" : "" ) . ">$role</option>");
-} ?>
-	</select>
-	<button type="submit">Vis</button>
-</form>
-<?php if (sizeof($rolerules) > 0) { ?>
-<table style="width: 100%">
-	<tr><th>Type</th><th>Page</th><th>Actions</th></tr>
-	<?php foreach ($rolerules as $rule) { 
-		?>
-		<form method="POST" action="?role=<?php print $roleId ?>&type=editRole">
-		<input name="key" type="hidden" value="<?php print $rule["id"] ?>" />
-		<tr>
-		<td><select name="ruleType"><option value="ALLOW" <?php if ($rule["type"] == "ALLOW") { print "selected"; }?>>ALLOW</option><option value="DENY" <?php if ($rule["type"] == "DENY") { print "selected"; }?>>DENY</option></select></td>
-		<td><input name="page" value="<?php print $rule["page"] ?>"/></td>
-		<td><button type="submit">Lagre</button><button name="delete" value="1" type="submit">Slett</button></td>
-		</tr>	
+				print("<option value=$i" . ($roleId == $i ? " selected" : "") . ">$role</option>");
+			} ?>
+		</select>
+		<button type="submit">Vis</button>
 	</form>
-<?php	}
-?>
-</table>
+</div>
+
+<div class="box">
+	<label for="">Rules</label>
+
+	<?php if (sizeof($rolerules) > 0) { ?>
+		<table style="width: 100%">
+			<tr>
+				<th>Type</th>
+				<th>Page</th>
+				<th>Actions</th>
+			</tr>
+			<?php foreach ($rolerules as $rule) {
+			?>
+				<form method="POST" action="?role=<?php print $roleId ?>&type=editRole">
+					<input name="key" type="hidden" value="<?php print $rule["id"] ?>" />
+					<tr>
+						<td><select name="ruleType">
+								<option value="ALLOW" <?php if ($rule["type"] == "ALLOW") {
+															print "selected";
+														} ?>>ALLOW</option>
+								<option value="DENY" <?php if ($rule["type"] == "DENY") {
+															print "selected";
+														} ?>>DENY</option>
+							</select></td>
+						<td><input name="page" value="<?php print $rule["page"] ?>" /></td>
+						<td><button type="submit">Lagre</button><button name="delete" value="1" type="submit">Slett</button></td>
+					</tr>
+				</form>
+			<?php	}
+			?>
+		</table>
+</div>
 <?php } ?>
-<h4>Ny regel</h4>
-<form method="POST" action="?role=<?php print $roleId?>&type=addRole">
-<label for="ruleType">Type:</label>
-<select name="ruleType"><option value="ALLOW">ALLOW</option><option value="DENY">DENY</option></select>
-<label for="page">Side:</label>
-<input name="page" type="text" placeholder="admin/translations.php"/>
-<button type="submit">Legg til</button>
-</form>
-<h1>User access rules</h1>
-<h3 class="box error">Ikke implementert enda</h3>
-<form method="GET">
-	<select name="user" style="width: 50%">
-		<?php foreach ($users as $i => $user) {
-			print("<option value=$i" . ($userId == $i ? " selected" : "") . ">$user</option>");
-		} ?>
-	</select>
-	<button type="submit">Vis</button>
-</form>
+
+<div class="box">
+	<label for="">Create new rule</label>
+	<form method="POST" action="?role=<?php print $roleId ?>&type=addRole">
+		<label for="ruleType">Type:</label>
+		<select name="ruleType">
+			<option value="ALLOW">ALLOW</option>
+			<option value="DENY">DENY</option>
+		</select>
+		<label for="page">Side:</label>
+		<input name="page" type="text" placeholder="admin/translations.php" />
+		<button type="submit">Legg til</button>
+	</form>
+</div>
+
+<div class="box">
+	<label for="">User access rules</label>
+	<h3 class="box error">Ikke implementert enda</h3>
+	<form method="GET">
+		<select name="user" style="width: 50%">
+			<?php foreach ($users as $i => $user) {
+				print("<option value=$i" . ($userId == $i ? " selected" : "") . ">$user</option>");
+			} ?>
+		</select>
+		<button type="submit">Vis</button>
+	</form>
+</div>
 <?php
