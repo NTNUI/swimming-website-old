@@ -17,7 +17,7 @@
     "username": "svommer_web",
     "password": "j2s20OSWCADYT9lw",
     "databases": {
-      "member": "svommer_medlem",
+      "medlem": "svommer_medlem",
       "web": "svommer_web"
     }
   },

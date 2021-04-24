@@ -1,31 +1,26 @@
 <?php 
 function connect($database) {
-
 	global $settings;
-	if($database == "web" || $database == "medlem")
-	{
-		$database = "svommer_$database";
-	}
 
+	$database = $settings["SQL_server"]["databases"][$database];
 	$servername = $settings["SQL_server"]["servername"];
 	$username = $settings["SQL_server"]["username"];
 	$password = $settings["SQL_server"]["password"];
 
-	$STUPIDCONSTANT = 3; // NEEDS TO BE FIXED SOME WAY
-	for ($i=0; $i < $STUPIDCONSTANT; $i++) {
-		if($settings["SQL_server"]["databases"][$i] == $database){
-			$database = $settings["SQL_server"]["databases"][$i];
-		}
+	if(!$database){
+		print("Failed to retrieve database name");
+		die();
 	}
+	$mysqli = mysqli_connect($servername, $username, $password, $database);
+	if(!$mysqli){
+		print("Failed to connect to database");
+		die();
 
-	$dbname = $database;
-	if(!$dbname){
-		print("error on connect() inside bd.php ");
-		return;
 	}
-
-	$mysqli = mysqli_connect($servername, $username, $password, $dbname);
-	$mysqli->set_charset("utf8");
+	if (!$mysqli->set_charset("utf8")){
+		print("Failed to set utf8 charset");
+		die();
+	}
 
 	return $mysqli;
 }
