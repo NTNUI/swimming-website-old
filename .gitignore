@@ -3,3 +3,4 @@ img/
 filer/
 *.swp
 *.save
+settings/settings.json
