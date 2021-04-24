@@ -1,10 +1,18 @@
 html {
-  background: url("../img/background.jpg") no-repeat center center fixed;
-  background-color: #333;
+  background: url("https://org.ntnu.no/svommer/img/background.jpg") no-repeat center center fixed;
+  /* background-color: #333;*/
   background-size: cover;
+  font-family: "heebo", serif;
+  text-rendering: optimizelegibility;
+}
+body  {
+	max-width: 100vw;
 }
 h1{
 margin: 0px;
+font-family: "heebo", serif;
+font-weight: 800;
+font-size: 55px;
 }
 
 hr{
@@ -25,17 +33,15 @@ align: center;
 }
 
 .maintable {
-	background-color: #FFFFFF;
-	border: 1px solid #000000;
 	margin-left: auto;
 	margin-right: auto;
 	max-width: 900px;
-	margin-top: 5px;
+	margin-top: 54px;
+	padding-top: 15px;
 }
 
 .textboks {
-	background-color: #FFFFFF;
-  font-family: 'M PLUS Rounded 1c', sans-serif;
+	font-family: "heebo", serif;
 	text-align:left;
 	padding-left: 10px;
 	padding-right: 10px;
@@ -45,7 +51,7 @@ align: center;
 }
 
 .banner {
-	width: 100%;
+	display: none;
 	border-style: solid;
 	border-top-width: 0px;
 	border-left-width: 0px;
@@ -88,21 +94,20 @@ font-family: 'M PLUS Rounded 1c', sans-serif;
 }
 
 .box {
-	background-color: #788599;
+	background-color: #fff;
 	padding: 25px;
 	overflow: auto;
 	border-radius: 3px;
 	align-content:center;
 	text-align: center;
 	margin: 20px 0px;
+	margin-top: 10px;
+	/* box-shadow: 3px 3px 10px 1px #000; */
+	border-radius: 10px;
 }
 
-.box:nth-of-type(even) {
-  background-color: #282c34;
-	color: #abb2bf;
-}
 .news-box{
-    background-color: #9e9e9e;
+    background-color: rgba(255, 255, 255, 0.5);
     padding: 25px;
     overflow: auto;
     border-radius: 3px;
@@ -111,10 +116,20 @@ font-family: 'M PLUS Rounded 1c', sans-serif;
     margin: 20px 0px;
 }
 .box a {
-	color: aqua;
+	color: #00f;
 }
-.box:nth-of-type(odd) a {
-	color: #185416;
+.box.green {
+	background-color: rgba(255, 255, 255, 0.7);
+	box-shadow: none;
+	border: 0px;
+}
+.backdrop {
+	/* background: url("../img/NDittrich28-min.jpg"); */
+	background: url("../img/PSkipenes-min.png");
+	background-size: cover;
+	background-position: center;
+	color: #000; 
+	text-shadow: -1px 0px #fff, 0px 1px #fff, 1px 0px #fff, 0px -1px #fff;
 }
 .container {
     padding: 2px 16px;
@@ -130,14 +145,11 @@ margin: 0;
 color: #00FFFF;
 }
 .green {
-	background-color: #006629 !important;
-	color: #fff !important;
+	/*! background-color: #006629 !important; */
+	/*! color: #fff !important; */
 }
 .green h1 {
-	color:#ff0;
-}
-.green a {
-	color: aqua !important;
+	/*! color:#ff0; */
 }
 
 .error {
@@ -146,30 +158,39 @@ color: #00FFFF;
 }
 
 .meny {
-position: relative;
-background-color: #333;
+position: fixed;
+background-color: #fff;
 overflow: hidden;
-margin: 0px;
-padding: 0px;
+/*! margin: 50% auto; */
+padding: 10px;
+/*! height: 60px; */
+box-shadow: 0px 1px 10px 1px #000;
+	width: 100%;
+	left: 0;
+	top: 0;
+	z-index: 50;
+	font-size: 1.0625rem;
+	font-weight: 600;
 }
 
 
 #meny ul
 {
 list-style-type: none;
-margin: 0px;
+margin: auto;
 padding: 0px;
+max-width: 1080px;
 }
 
 #meny ul li
 {
 padding: 0px;
 margin: 0px;
+color: black;
 }
 
 #meny ul li a
 {
-font-family: 'M PLUS Rounded 1c', sans-serif;
 float: left;
 padding-top: 10px;
 padding-bottom: 10px;
@@ -181,13 +202,16 @@ margin-left: auto;
 margin-right: auto;
 offset: 0px;
 border: 0px;
-color: #FFFF00;
+color: #000;
 display: inline;
 text-decoration: none;
 font-size: 14px;
-width: calc(900px/10.3);
+width: calc(900px/10.3); 
 text-align: center;
 line-height: 1.0;
+}
+#meny ul li a.selected {
+	border-bottom: 3px solid green;
 }
 
 #meny ul li a:hover
@@ -207,7 +231,12 @@ border-radius: 3px;
 .board:nth-child(odd) div {
 	float: left;
 }
-
+.box h1 {
+	font-size: 36px;
+}
+.box.green h1 {
+	font-size: 56px;
+}
 .card-left {
     box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2);
     transition: 0.3s;

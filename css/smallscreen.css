@@ -34,9 +34,9 @@
 	top: 0;
 	left: 0;
 	width: 100%;
-	background-color: rgb(0, 0, 0);
-	color: rgb(255, 255, 255);
-	font-size: 3em;
+	background-color: rgb(255, 255, 255);
+	box-shadow: 0px 1px 10px 1px #000;
+	padding: 18px;
 	z-index: 1;
 }
 
@@ -53,17 +53,26 @@
 
 #menu_show > .left, #menu_show > .right {
 	width: unset;
+	margin-left: 40px;
 }
 #menu_show > .right {
 	float: right;
+	margin-right: 40px;
 }
 .visible {
 	display: block !important;
 }
 
-
 .board div {
 	width: 100%;
+}
+
+.box {
+	overflow-wrap: break-word;
+}
+
+.box.green h1 {
+	font-size: 36px;
 }
 
 .board > .card {
