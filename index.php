@@ -1,20 +1,20 @@
 <?php
 // start session
 session_save_path("sessions");
-session_set_cookie_params(4*60*60);
-ini_set("session.gc_maxlifetime", 4*60*60);
+session_set_cookie_params(4 * 60 * 60);
+ini_set("session.gc_maxlifetime", 4 * 60 * 60);
 ini_set("session.gc_probability", 1);
 ini_set("session.gc_divisor", 100);
 session_start();
 
 // put this shit inside a function or class
-$settings_raw = file_get_contents('./settings/live.json');
-if(!$settings_raw){
-    print("error reading settings file");
+$settings_raw = file_get_contents('./settings/settings.json');
+if (!$settings_raw) {
+	print("error reading settings file");
 }
 
-$settings = json_decode($settings_raw,true);
-if($settings == ""){
+$settings = json_decode($settings_raw, true);
+if ($settings == "") {
 	print("empty settings file");
 }
 
@@ -23,6 +23,7 @@ include_once("vendor/autoload.php");
 include_once("library/util/db.php");
 include_once("library/util/translation.php");
 include_once("library/util/access_control.php");
+include_once("library/util/request.php");
 
 
 $base_url = $settings["hosting"]["baseurl"];
@@ -31,6 +32,7 @@ $base_url = $settings["hosting"]["baseurl"];
 //Get request
 $language = $_REQUEST["lang"];
 $frm_side = $_REQUEST["side"];
+$action = $_REQUEST["action"];
 
 // Defaults
 if ($language == "") $language = $settings["defaults"]["language"];
@@ -44,26 +46,42 @@ $t = new Translator($frm_side, $language);
 
 //Get access rules
 $access_control = new AccessControl($_SESSION["user"]);
-error_reporting(E_ALL);
-if ($frm_side == "api") {
-	$action = $_REQUEST['action'];
-	if (!preg_match("#\.\./#",$action)
-		AND preg_match("#^[-a-z0-9_.]+$#i", $action)
-		AND file_exists("api/$action.php")) {
-	    include("api/$action.php");
-	}
-} else {
 
-	include("library/templates/header.php");
-	//inkluderer side
 
-	if (!preg_match("#\.\./#",$side)
-		AND preg_match("#^[-a-z0-9_.]+$#i",$side)
-		AND file_exists("public/$side")) {
-	    include("public/$side");
-	} else {
-	  print '<h2 class="box error">Ugyldig side</h2>';
-	}
+// handle the request
 
-	include("library/templates/footer.php");
+// block fucker that tries shit
+if (!isValidURL($frm_side)) {
+	print($side);
+	printIllegalRequest();
+	return;
 }
+
+switch ($frm_side) {
+	case "api":
+
+		// file does not exist
+		if (!file_exists("private/api/$action.php")) {
+			// TODO: wrong request or something like that.
+			print("Api: does not exists");
+			return;
+		}
+
+		include("private/api/$action.php");
+		return;
+	default:
+		// file does not exist
+		if (!file_exists("public/$side")) {
+			break;
+		}
+
+		// valid file, accept request
+		include("library/templates/header.php");
+		include("public/$side");
+		include("library/templates/footer.php");
+		return;
+}
+
+// Illegal request
+printIllegalRequest();
+return;
