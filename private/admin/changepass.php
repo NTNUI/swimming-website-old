@@ -17,7 +17,7 @@ if ($_SESSION['innlogget'] == 1) { ?>
 			
 			$conn = connect("web");
 			if (!$conn) {
-				die('Could not connect: ' . mysql_error());
+				die('Could not connect: ' . mysqli_error($conn));
 			}
 
 			$sql = "SELECT id, passwd, name, last_password FROM users WHERE username=?";

@@ -3,13 +3,7 @@ include_once("library/util/store_helper.php");
 
 $store = new StoreHelper("en");
 
-//if(1){
-//	$secret = $settings["stripe"]["secret_key"];
-//}else {
-	$secret = "whsec_Xkpj5LTAjDtrW3kN5hcNX1412njJfoTr";
-//}
-
-
+$secret = $settings["stripe"]["secret_key"];
 
 $data = @file_get_contents("php://input");
 $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];

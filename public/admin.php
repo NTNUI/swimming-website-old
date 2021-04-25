@@ -102,12 +102,12 @@ function print_login_box(){
 $UPDATE_PASSWORDS_FROM_BEFORE = strtotime("20-09-2018");
 //sjekk brukernavn og passord hvis ikke allerede innlogget
 
-$bruker = $_POST['bruker'];
+$user = $_POST['bruker'];
 $pass = $_POST['pass'];
 $action = $_REQUEST['action'];
 
 if(!isset($_SESSION['innlogget'])){
-	if($bruker != null){
+	if($user != null){
 		
 		// Check connection
 		$conn = connect("web");
@@ -117,7 +117,7 @@ if(!isset($_SESSION['innlogget'])){
 
 		$sql = "SELECT passwd, name, last_password FROM users WHERE username=?";
 		$query = $conn->prepare($sql);
-		$query->bind_param("s", $bruker);
+		$query->bind_param("s", $user);
 		$query->execute();
 		$query->bind_result($db_passwd, $name, $last_date);
 		if (!$query->fetch()) {
@@ -128,12 +128,11 @@ if(!isset($_SESSION['innlogget'])){
 			//variable "innlogget" = true
 			$_SESSION['innlogget'] = 1;
 			$_SESSION['navn'] = $name;
-			$_SESSION['user'] = $bruker;
+			$_SESSION['user'] = $user;
 			//Old password
 			if ($last_date == null or strtotime($last_date) < $UPDATE_PASSWORDS_FROM_BEFORE) {
 				$_SESSION['changepass'] = 1;
 			}
-			//printf("Innlogging suksessfull som: %s\n<br>", mysql_result($result,$n,"name"));
 		}else{
 			printf("Feil brukernavn eller passord!");
 		}
@@ -141,7 +140,7 @@ if(!isset($_SESSION['innlogget'])){
 		$query->close();
 
 		//Referesh access control
-		$access_control = new AccessControl($bruker, $conn);
+		$access_control = new AccessControl($user, $conn);
 		mysqli_close($conn);
 
 		//slutt på gammel mysql kode
@@ -151,7 +150,7 @@ if(!isset($_SESSION['innlogget'])){
 // Has to change password
 if ($_SESSION['changepass'] == 1) {
 	print_password_change_required();
-	include("admin/changepass.php");
+	include("private/admin/changepass.php");
 
 //hvis innlogget
 } else if ($_SESSION['innlogget'] == 1) {
@@ -164,17 +163,17 @@ if ($_SESSION['changepass'] == 1) {
 		return;
 	}
 	if ($action != "") {
-		$side = "admin/${action}_$language.php";
+		$side = "private/admin/${action}_$language.php";
 		if (file_exists($side)) {
 			include($side);
 			return;
 		}
-		$side = "admin/${action}_no.php";
+		$side = "private/admin/${action}_no.php";
 		if (file_exists($side)) {
 			include($side);
 			return;
 		}
-		$side = "admin/${action}.php";
+		$side = "private/admin/${action}.php";
 		if (file_exists($side)) {
 			include($side);
 			return;
@@ -186,7 +185,6 @@ if ($_SESSION['changepass'] == 1) {
 	print_member_section();
 
 	}else{
-	//hvis ikke innlogget vises innloggingsskjema
 	print_login_box();
 }
 

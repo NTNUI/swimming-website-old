@@ -1,25 +1,34 @@
+# Disable indexing
 Options -Indexes
-# To renable indexing for some folders, add a .htaccess with "Options +Indexes" in the dir
+
+# Logging
+php_flag log_errors on
+php_value error_log /home/others/groupswww/svommer/php.log
+php_flag display_startup_errors off
+php_flag html_errors off
+php_flag ignore_repeated_errors off
+
+# Rules
+# Documentation: https://httpd.apache.org/docs/current/rewrite/
 
 RewriteEngine On
-
 
 # Force ssl
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# Directories to allow from anywhere
-RewriteCond %{REQUEST_URI}% "/(img|filer|src|css|js)/" 
+# Allow access to directories img, css and js
+RewriteCond %{REQUEST_URI}% "/(img|css|js)/"
 RewriteRule (.*) $1 [L]
 
-#Languages
-RewriteRule ^(en)(?:/(.*)|)$ $2?lang=$1 [L,QSA]
+# Languages
+#RewriteRule ^(en)(?:/(.*)|)$ $2?lang=$1 [L,QSA]
 
-#Api directory
-RewriteRule ^api/?(.*)/?$ "index.php&side=api&action=$1" [L,QSA]
+# Api directory
+RewriteRule ^api/?(.*)/?$ "&side=api&action=$1" [L]
 
-#Admin directory
-RewriteRule ^admin/?(.*)/?$ "index.php&side=admin&action=$1" [L,QSA]
+# Admin directory
+RewriteRule ^admin/(.*)$ "&side=admin?&action=$1" [L]
 
-#Finally let the request to an actual page
+# Finally let the request to an actual page
 RewriteRule ^(.*)/?$ index.php?side=$1 [QSA]
