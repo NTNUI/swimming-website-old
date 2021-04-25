@@ -1,4 +1,5 @@
 <?php 
+// returns some sort of connection object on success and false on failure
 function connect($database) {
 	global $settings;
 
@@ -9,17 +10,17 @@ function connect($database) {
 
 	if(!$database){
 		print("Failed to retrieve database name");
-		die();
+		return false;
 	}
 	$mysqli = mysqli_connect($servername, $username, $password, $database);
 	if(!$mysqli){
 		print("Failed to connect to database");
-		die();
+		return false;
 
 	}
 	if (!$mysqli->set_charset("utf8")){
 		print("Failed to set utf8 charset");
-		die();
+		return false;
 	}
 
 	return $mysqli;

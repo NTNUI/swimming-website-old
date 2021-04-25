@@ -1,7 +1,7 @@
 <?php
 
 class AccessControl {
-	private $user, $rolerules, $userrules;
+	private $user, $rolerules;
 	
 	function __construct($username, &$mysqli = NULL) {
 		$this->user = $username;
@@ -9,13 +9,13 @@ class AccessControl {
 			include_once("library/util/db.php");
 			$mysqli = connect("web");
 		}
-
-		$this->get_rolerules($mysqli);
 		
+		$this->get_rolerules($mysqli);
+
 	}
 
 	public function get_rolerules(&$mysqli) {
-		$query;
+		$query = NULL;
 		if ($this->user != "") {
 			$sql = "SELECT role.type, role.page FROM role_access AS role JOIN users ON role.role = users.role WHERE users.username=?";
 			$query = $mysqli->prepare($sql);
@@ -30,7 +30,19 @@ class AccessControl {
 			$query->bind_param("s", $unregistered);
 		}
 		$query->execute();
+		if(!$query){
+			// querry failed to execure.
+			print("Failed to execute querry in access control");
+			die();
+		}
+
+		$type =  "";
+		$pattern = "";
 		$query->bind_result($type, $pattern);
+		if(!$query){
+			print("Failed to bind result in access control");
+			die();
+		}
 		
 		while ($query->fetch()) {
 			$this->rolerules[] = array("type" => $type, "pattern" => $pattern);
@@ -76,8 +88,23 @@ class AccessControl {
 		include_once("library/util/db.php");
 		$mysqli = connect("web");
 		$query = $mysqli->prepare($sql);
+		if(!$query){
+			print("Failed to prepare query in access control");
+			die();
+		}
+
 		$query->bind_param("ssss", $page, $username, $action, $value);
+		if(!$query){
+			print("Failed to bind parameters in access control");
+			die();
+		}
+
 		$query->execute();
+		if(!$query){
+			print("Failed to execute query in access control");
+			die();
+		}
+
 		$query->close();
 		$mysqli->close();
 	}
