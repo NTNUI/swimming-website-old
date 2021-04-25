@@ -1,4 +1,4 @@
-var stripe = Stripe('pk_live_0cuW9KUctZXbUAAyGBSf04uk');
+var stripe = Stripe('pk_live_51DJlYeDrXat4oW2LvJSKiPpXlULKiXn2BiMgV8WtEsQ3FGmw0JiMfqWEptkjb70quqdCkojzfgQEdQwDFU6EelIo005aPGDyTZ');
 //var stripe = Stripe('pk_test_JkjQkK0cGEWUQ0NUWh6LytP8');
 
 

@@ -5,10 +5,7 @@ class StoreHelper {
 	private $licence_key = "NSFLicence2019";
 	function __construct($lang) {
 		//Set API key
-		\Stripe\Stripe::setApiKey("sk_live_r51zgekQ1xLUvPavrfCwCqRo");
-		//\Stripe\Stripe::setApiKey("sk_test_8NXxtSWrHXG33iGpr07ec3fo");
-
-
+		\Stripe\Stripe::setApiKey("pk_live_51DJlYeDrXat4oW2LvJSKiPpXlULKiXn2BiMgV8WtEsQ3FGmw0JiMfqWEptkjb70quqdCkojzfgQEdQwDFU6EelIo005aPGDyTZ");
 		$this->language = $lang;
 	}
 
