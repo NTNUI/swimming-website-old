@@ -24,10 +24,9 @@ include_once("library/util/db.php");
 include_once("library/util/translation.php");
 include_once("library/util/access_control.php");
 include_once("library/util/request.php");
-
+include_once("library/util/log.php");
 
 $base_url = $settings["hosting"]["baseurl"];
-
 
 //Get request
 $language = $_REQUEST["lang"];
