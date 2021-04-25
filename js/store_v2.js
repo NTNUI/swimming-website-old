@@ -165,8 +165,6 @@ function getItems() {
 
 // Create a Stripe client.
 var stripe = Stripe('pk_live_51DJlYeDrXat4oW2LvJSKiPpXlULKiXn2BiMgV8WtEsQ3FGmw0JiMfqWEptkjb70quqdCkojzfgQEdQwDFU6EelIo005aPGDyTZ');
-//var stripe = Stripe('pk_test_JkjQkK0cGEWUQ0NUWh6LytP8');
-
 
 // Create an instance of Elements.
 var elements = stripe.elements();

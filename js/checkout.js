@@ -1,6 +1,4 @@
 var stripe = Stripe('pk_live_51DJlYeDrXat4oW2LvJSKiPpXlULKiXn2BiMgV8WtEsQ3FGmw0JiMfqWEptkjb70quqdCkojzfgQEdQwDFU6EelIo005aPGDyTZ');
-//var stripe = Stripe('pk_test_JkjQkK0cGEWUQ0NUWh6LytP8');
-
 
 // After some amount of time, we should stop trying to resolve the order synchronously:
 var MAX_POLL_COUNT = 10;
