@@ -5,3 +5,4 @@ filer/
 *.save
 settings/settings.json
 .vscode
+php.log
