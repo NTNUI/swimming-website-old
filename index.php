@@ -52,7 +52,6 @@ $access_control = new AccessControl($_SESSION["user"]);
 
 // block fucker that tries shit
 if (!isValidURL($frm_side)) {
-	print($side);
 	printIllegalRequest();
 	return;
 }
