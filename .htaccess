@@ -28,7 +28,10 @@ RewriteRule ^(en)(?:/(.*)|)$ $2?lang=$1 [L,QSA]
 RewriteRule ^api/?(.*)/?$ "&side=api&action=$1" [L]
 
 # Admin directory
-RewriteRule ^admin/(.*)$ "&side=admin?&action=$1" [L]
+RewriteRule ^admin/(.*)$ "&side=admin?&action=$1" [QSA,L]
+
+# in admin. grab last element and slap it into action variable
+RewriteRule ^admin/(.*)/?$ action=$1 [L]
 
 # Finally let the request to an actual page
 RewriteRule ^(.*)/?$ index.php?side=$1 [QSA]
