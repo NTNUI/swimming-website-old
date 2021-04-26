@@ -22,7 +22,7 @@ RewriteCond %{REQUEST_URI}% "/(img|css|js)/"
 RewriteRule (.*) $1 [L]
 
 # Languages
-#RewriteRule ^(en)(?:/(.*)|)$ $2?lang=$1 [L,QSA]
+RewriteRule ^(en)(?:/(.*)|)$ $2?lang=$1 [L,QSA]
 
 # Api directory
 RewriteRule ^api/?(.*)/?$ "&side=api&action=$1" [L]
