@@ -6,7 +6,7 @@ class Translator
 	private $directory;		// path to translation directory
 	private $translations; 	// global array of all translations
 
-	function __construct(string $page, string $lang = "no", string $dir="translations")
+	function __construct(string $page, string $lang = "no", string $dir = "translations")
 	{
 		$this->page = $page;
 		$this->language = $lang;
@@ -19,16 +19,16 @@ class Translator
 		$file = "$this->directory/$page.json";
 
 		if (!file_exists($file)) {
+			log_message("Warning: Requesting a non existing page: $page", __FILE__, __LINE__);
 			return;
 		}
-	
+
 		$decoded = json_decode(file_get_contents($file));
-		if ($decoded === NULL){
+		if ($decoded === NULL) {
 			log_message("Warning: Could not decode json file: " . $file, __FILE__, __LINE__);
 			return;
 		}
 		$this->translations[$page] = $decoded;
-
 	}
 
 	public function get_translation($key, $page = "")
@@ -47,26 +47,27 @@ class Translator
 
 		// if translatons for this page is still not loaded return.
 		if (!isset($this->translations[$page])) {
-			// Bug here: We want logs when we are trying to use keys but not loaded the page. That means all illegal requests are logged here. They should be dropped.
-			log_message("Warning: requesting a translation for a page: ". $page . " that has not been loaded yet", __FILE__, __LINE__);
-			return "";
+			// loading translation failed and we are still trying to access the page. Some permission erors?
+			log_message("Fatal Error: requesting a translation for a page: " . $page . " that has not been loaded yet", __FILE__, __LINE__);
+			die("Fatal error occoured. Check logs.");
 		}
 
 		$translations_this_page = $this->translations[$page];
 
 		// try to get requested language
-		if(property_exists($translations_this_page->$language, $key)){
+		if (property_exists($translations_this_page->$language, $key)) {
 			$ret = $translations_this_page->$language->$key;
 		}
 
 		// if requested language is not set use norwegian as fallback 
-		if(!isset($ret)){
-			if(property_exists($translations_this_page->no, $key)){
+		if ($ret == "") {
+			if (property_exists($translations_this_page->no, $key)) {
 				$ret = $translations_this_page->no->$key;
 			}
 		}
 
-		if(!isset($ret)){
+		if ($ret == "") {
+			log_message("Warning: page: $page does not have translations for $key", __FILE__, __LINE__);
 			$ret = "";
 		}
 
