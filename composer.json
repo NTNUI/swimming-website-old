@@ -1,5 +1,6 @@
 {
     "name": "ntnuisvomming/webpage",
+    "description" : "Professional swimming beer relay team",
     "type": "project",
     "require": {
         "stripe/stripe-php": "^6.19",
