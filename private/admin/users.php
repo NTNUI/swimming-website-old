@@ -4,10 +4,18 @@ $conn = connect("web");
 if (!$conn) {
 	die("Connection failed: " . mysqli_connect_error());
 }
-
-$type = $_REQUEST["type"];
-$username = $_REQUEST["username"];
-$realname = $_REQUEST["realname"];
+$type = NULL;
+if(isset($_REQUEST["type"])){
+	$type = $_REQUEST["type"];
+}
+$username = NULL;
+if(isset($_REQUEST["username"])){
+	$username = $_REQUEST["username"];
+}
+$realname = NULL;
+if(isset($_REQUEST["realname"])){
+	$realname = $_REQUEST["realname"];
+}
 
 if ($type != "" && $username != "" && $realname != "") {
 	if ($type == "edit") {
@@ -22,7 +30,7 @@ if ($type != "" && $username != "" && $realname != "") {
 		<?php } else { ?>
 			<div class="box error">
 				<h1>Something went wrong</h1>
-				<p><?php print mysqli_error() ?></p>
+				<p><?php print mysqli_error($query) ?></p>
 			</div>
 		<?php		}
 		$access_control->log("admin/users", "edited user", $key);
@@ -65,7 +73,7 @@ if ($type != "" && $username != "" && $realname != "") {
 	<?php } else { ?>
 		<div class="box error">
 			<h1>Something went wrong</h1>
-			<p><?php print mysqli_error() ?></p>
+			<p><?php print mysqli_error($query) ?></p>
 		</div>
 <?php		}
 	$query->close();

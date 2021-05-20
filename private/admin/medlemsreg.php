@@ -40,7 +40,7 @@ function createTime($year, $month, $day) {
 	return $time;
 }
 
-if ($_SESSION['innlogget'] == 1) {
+if ($_SESSION['logged_in'] == 1) {
 	$conn = connect("medlem");
 
 	// Check connection
@@ -60,7 +60,6 @@ if ($_SESSION['innlogget'] == 1) {
 	while($query->fetch()) {
 		$etternavn = htmlspecialchars($etternavn);
 		$fornavn = htmlspecialchars($fornavn);
-		$skole = ""; //htmlspecialchars($skole);
 		$kommentar = htmlspecialchars($kommentar);
 		$epost = htmlspecialchars($epost);
 
@@ -108,20 +107,6 @@ var getJSON = function(url, callback) {
 	};
 	xhr.send();
 };
-/*
-var container = document.getElementById("member_container");
-
-function Member(id, fornavn, etternavn, epost, skole, kommentar) {
-	var box = document.createElement("div");
-	box.class = "box";
-	var table =
-	container.appendChild(box);
-}
-
-function getMembers() {
-	container.innerHTML = "";
-	var box = document.createEleme
-}*/
 
 function godkjenn(id) {
 	let button = document.querySelector("#medlem-" + id).querySelector("button");

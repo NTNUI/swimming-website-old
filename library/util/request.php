@@ -15,8 +15,3 @@ function isValidURL($URL_part)
 
     return true;
 }
-
-
-function printIllegalRequest(){
-    print("<div class='box'><h2>Illegal request</h2></div>");
-}

@@ -21,7 +21,7 @@
 	<div class="slideshow-container">
 <?php
 		//Make image containers
-		$image_count = 6;
+		$image_count = 9;
 		for ($i = 1; $i <= $image_count; $i++) { ?>
 		<div class="mySlides fade">
 			<div class="numbertext"><?php print "$i / $image_count" ?></div>
@@ -67,7 +67,7 @@
 		// output data of each row
 		while($query->fetch()) {
 
-			$content_html = Markdown::defaultTransform($content);
+			$content_html = Markdown::defaultTransform($content); // does not work
 				echo "<div class='box'><h2>$header</h2><br><p>" . $content_html . "</p><br><small><small> Av: " . $author. " Tid ". $time ."<br> </small></small></div><br>";
 			}
 	} else {

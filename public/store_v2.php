@@ -1,3 +1,10 @@
+<div class="box">
+	<h2>
+		<?php print $t->get_translation("header"); ?>
+	</h2>
+</div>
+
+
 <?php
 //$t->page = "store";
 if (isset($_REQUEST["error"])) { ?>

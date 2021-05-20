@@ -21,7 +21,7 @@ function valid_ID($ID){
 // remove randoms from the internet
 session_start();
 include_once("library/util/db.php");
-if ($_SESSION['innlogget'] != 1){
+if ($_SESSION['logged_in'] != 1){
     header("HTTP/1.0 403 You need to log in first");
     print("access denied");
     return;

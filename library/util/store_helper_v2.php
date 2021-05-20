@@ -1,20 +1,29 @@
 <?php
-
 class StoreHelper {
 	private $language;
-	private $licence_key = "NSFLicence2019";
+	private $licence_key;
 	function __construct($lang) {
 		//Set API key
 		\Stripe\Stripe::setApiKey("pk_live_51DJlYeDrXat4oW2LvJSKiPpXlULKiXn2BiMgV8WtEsQ3FGmw0JiMfqWEptkjb70quqdCkojzfgQEdQwDFU6EelIo005aPGDyTZ");
 		$this->language = $lang;
+		global $settings;
+		$this->licence_key = $settings["defaults"]["licence_key"];
 	}
 
 	function get_items($start = 0, $limit = 10, $id = "", $rawData = false, $visibility_check=true) {
 		$language = $this->language;
 		include_once("library/util/db.php");
 		$mysqli = connect("web");
+		if(!$mysqli){
+			header('HTTP/1.1 500 Internal Server Error');
+			print("Failed to connect to database in store_helper_v2\n");
+			log_message("Failed to connect to database", __FILE__, __LINE__);
+			die();
+		}
 		$visibility = "";
-		if ($visibility_check) $visibility = "WHERE visible=TRUE";
+		if ($visibility_check){
+			$visibility = "WHERE visible=TRUE";
+		}
 		
 		if ($id == "") {
 			$sql = "SELECT id, api_id, name, description, price, available_from, available_until, require_phone, visible, (SELECT COUNT(*) FROM store_orders WHERE store_orders.item_id = store_items.id AND (store_orders.order_status='FINALIZED' OR store_orders.order_status='DELIVERED')) AS amount, amount_available, image, group_id FROM store_items AS store_items $visibility ORDER BY visible DESC, id DESC LIMIT ? OFFSET ?"; 
@@ -28,11 +37,18 @@ class StoreHelper {
 			$query->bind_param("sii", $id, $limit, $start);
 		}
 
-		if (!$query->execute()) return false;
+		if (!$query->execute()){
+			return false;
+		}
 		
 		$result = array();
 		$query->bind_result($id, $api_id, $name, $description, $price, $available_from, $available_until, $require_phone, $visibility, $amount, $amount_available, $image, $group_id);
-
+		if(!$query){
+			header('HTTP/1.1 500 Internal Server Error');
+			print("Failed to bind result in store_helper_v2\n");
+			log_message("Failed to bind result", __FILE__, __LINE__);
+			die();
+		}
 		while ($query->fetch()) {
 			if (!$rawData) {
 				$name = json_decode($name);
@@ -148,20 +164,56 @@ class StoreHelper {
 	function finalize_order($intentId) {
 		include_once("library/util/db.php");
 		$mysqli = connect("web");
+
+		if(!$mysqli){
+			header('HTTP/1.1 500 Internal Server Error');
+			print("failed to connect to database in store_helper_v2\n");
+			log_message("failed to connect to database", __FILE__,__LINE__);
+			die();
+		}
+
 		$sql = "SELECT id, item_id, email FROM store_orders WHERE source_id=?";
 		$query = $mysqli->prepare($sql);
+		if(!$query){
+			header('HTTP/1.1 500 Internal Server Error');
+			print("Failed to prepare query in store_helper_v2\n");
+			log_message("Failed to prepare query", __FILE__,__LINE__);
+			die();
+		}
+
 		$query->bind_param("s", $intentId);
+		if(!$query){
+			header('HTTP/1.1 500 Internal Server Error');
+			print("Failed to bind params in store_helper_v2\n");
+			log_message("Failed to bind params", __FILE__,__LINE__);
+			die();
+		}
+
 		$query->execute();
+		if(!$query){
+			header('HTTP/1.1 500 Internal Server Error');
+			print("Failed to execute query in store_helper_v2\n");
+			log_message("Failed to execute query", __FILE__,__LINE__);
+			die();
+		}
+
 		$query->bind_result($id, $api_id, $email);
+		if(!$query){
+			header('HTTP/1.1 500 Internal Server Error');
+			print("Failed to bind results in store_order_v2\n");
+			log_message("Failed to bind results", __FILE__,__LINE__);
+			die();
+		}
+
 		if (!$query->fetch()) throw new Exception("no_such_order");
 
 		$query->close();
-		//Send email notification to confirmation email
-		$sendTo = "svommer-okonomi@ntnui.no";
-//		mail($sendTo, "New order placed", "");
+		// Send email notification to confirmation email
+		// $sendTo = "svommer-okonomi@ntnui.no";
+		// mail($sendTo, "New order placed", "");
 
 		$this->update_status($id, "FINALIZED", $mysqli);
-		//Member registration hook
+		// Member registration hook
 		if ($api_id == $this->licence_key) $this->licence_control($email);
 		$mysqli->close();
 	}
