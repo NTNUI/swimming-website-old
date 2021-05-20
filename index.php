@@ -1,4 +1,6 @@
 <?php
+error_reporting(E_STRICT | E_ALL);
+
 // start session
 session_save_path("sessions");
 session_set_cookie_params(4 * 60 * 60);
@@ -29,9 +31,25 @@ include_once("library/util/log.php");
 $base_url = $settings["hosting"]["baseurl"];
 
 //Get request
-$language = $_REQUEST["lang"];
-$frm_side = $_REQUEST["side"];
-$action = $_REQUEST["action"];
+$language = NULL;
+$frm_side = NULL;
+$action = NULL;
+$user = NULL;
+
+if (isset($_REQUEST["lang"])) {
+	$language = $_REQUEST["lang"];
+}
+if (isset($_REQUEST["side"])) {
+	$frm_side = $_REQUEST["side"];
+}
+if (isset($_REQUEST["action"])) {
+	$action = $_REQUEST["action"];
+}
+if (isset($_SESSION["user"])) {
+	$user = $_SESSION["user"];
+}
+
+
 
 // Defaults
 if ($language == "") $language = $settings["defaults"]["language"];
@@ -44,14 +62,16 @@ $translations_dir = "translations";
 $t = new Translator($frm_side, $language);
 
 //Get access rules
-$access_control = new AccessControl($_SESSION["user"]);
+$access_control = new AccessControl($user);
 
 
 // handle the request
 
 // block fucker that tries shit
 if (!isValidURL($frm_side)) {
-	printIllegalRequest();
+	include("library/templates/header.php");
+	include("library/templates/not_found.php");
+	include("library/templates/footer.php");
 	return;
 }
 
@@ -60,7 +80,7 @@ switch ($frm_side) {
 
 		// file does not exist
 		if (!file_exists("private/api/$action.php")) {
-			// TODO: wrong request or something like that.
+			// TODO: Redirect to some default error page
 			print("Api: does not exists");
 			return;
 		}
@@ -81,5 +101,7 @@ switch ($frm_side) {
 }
 
 // Illegal request
-printIllegalRequest();
+include("library/templates/header.php");
+include("library/templates/not_found.php");
+include("library/templates/footer.php");
 return;
