@@ -1,5 +1,26 @@
+<style>
+	.box {
+		padding: 0px;
+		margin: 0px;
+	}
+
+	button:disabled {
+		background-color: darkgray;
+		cursor: default;
+	}
+
+	h2 {
+		margin: 0;
+	}
+</style>
+
 <?php include_once("library/util/store_helper_v2.php");
 $store = new StoreHelper($language);
+log_message("item_id: " . $_GET["item_id"], __FILE__, __LINE__);
+
+$item_id = isset($_GET["item_id"]);
+$add = isset($_POST["add"]); 
+
 if (isset($_GET["item_id"])) {
 	$item = $store->get_item($_GET["item_id"]);
 	if ($item === false) {
@@ -11,9 +32,33 @@ if (isset($_GET["item_id"])) {
 	$conn = connect("web");
 	$sql = "SELECT id, name, email, phone, kommentar, order_status FROM store_orders WHERE item_id=? AND (order_status='FINALIZED' OR order_status='DELIVERED') ORDER BY FIELD(order_status, 'FINALIZED', 'DELIVERED')";
 	$query = $conn->prepare($sql);
+	if (!$query) {
+		header('HTTP/1.1 500 Internal Server Error');
+		log_message("Failed to prepare query in store", __FILE__, __LINE__);
+		die();
+	}
+
 	$query->bind_param("i", $item["id"]);
+	if (!$query) {
+		header('HTTP/1.1 500 Internal Server Error');
+		log_message("Failed to bind parameters in store", __FILE__, __LINE__);
+		die();
+	}
+
 	$query->execute();
+	if (!$query) {
+		header('HTTP/1.1 500 Internal Server Error');
+		log_message("Failed to execute query in membercheck", __FILE__, __LINE__);
+		die();
+	}
+
 	$query->bind_result($id, $name, $email, $phone, $kommentar, $status);
+	if (!$query) {
+		header('HTTP/1.1 500 Internal Server Error');
+		log_message("Failed to bind result in store", __FILE__, __LINE__);
+		die();
+	}
+
 	while ($query->fetch()) {
 		$name = htmlspecialchars($name);
 		$email = htmlspecialchars($email);
@@ -31,23 +76,6 @@ if (isset($_GET["item_id"])) {
 	$query->close();
 	$conn->close();
 ?>
-	<style>
-		.box {
-			padding: 0px;
-			margin: 0px;
-		}
-
-		button:disabled {
-			background-color: darkgray;
-			cursor: default;
-		}
-
-		h2 {
-			margin: 0;
-		}
-	</style>
-
-
 	<script type="text/javascript">
 		function mark_delivered(item_id, id) {
 			fetch("https://org.ntnu.no/svommer/api/storeadmin?type=mark_delivered&item_id=" + item_id + "&id=" + id)
@@ -87,13 +115,13 @@ if (isset($_GET["item_id"])) {
 		else $end = null;
 
 		$image = $_POST['image'];
-		//Stores the filename as it was on the client computer.
+		// Stores the filename as it was on the client computer.
 		$imagename = $_FILES['image']['name'];
-		//Stores the filetype e.g image/jpeg
+		// Stores the filetype e.g image/jpeg
 		$imagetype = $_FILES['image']['type'];
-		//Stores any error codes from the upload.
+		// Stores any error codes from the upload.
 		$imageerror = $_FILES['image']['error'];
-		//Stores the tempname as it is given by the host when uploaded.
+		// Stores the tempname as it is given by the host when uploaded.
 		$imagetemp = $_FILES['image']['tmp_name'];
 
 		//The path you wish to upload the image to
@@ -125,7 +153,7 @@ if (isset($_GET["item_id"])) {
 		$access_control->log("admin/store", "created item", $api_id);
 	}
 
-	// 			start, limit, api_id, raw_data, visiblity_check
+	// start, limit, api_id, raw_data, visiblity_check
 	$items = $store->get_items(0, 100, "", false, false);
 	$conn = connect("web");
 	$sql = "SELECT id, name FROM store_groups";
@@ -318,7 +346,7 @@ if (isset($_GET["item_id"])) {
 		</div>
 
 		<div class="box">
-		<h2>Legg til ny ting i butikken</h2>
+			<h2>Legg til ny ting i butikken</h2>
 			<form method="POST" enctype="multipart/form-data">
 				<label for="name_no">Tittel (Norsk):</label>
 				<input name="name_no" type="text" required />
