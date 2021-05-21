@@ -65,7 +65,6 @@ function print_web_section()
 	print("<h2> " . $t->get_translation("admin_header_web") . "</h2>");
 
 	access_link("nyhet");
-	// access_link("referat");
 	access_link("users");
 	access_link("access");
 	access_link("translations");
@@ -109,30 +108,14 @@ function print_login_box()
 $UPDATE_PASSWORDS_FROM_BEFORE = strtotime("25-04-2021");
 //sjekk brukernavn og passord hvis ikke allerede innlogget
 
-$user = NULL;
-$pass = NULL;
-$action = NULL;
-$logged_in = NULL;
-$change_pass = NULL;
+$user = argsURL("POST", "bruker");
+$pass = argsURL("POST", "pass");
+$action = argsURL("REQUEST", "action");
+$logged_in = argsURL("SESSION", "logged_in");
+$change_pass = argsURL("SESSION", "changepass");
+$name = argsURL("SESSION", "navn");
 
-if (isset($_POST["bruker"])) {
-	$user = $_POST["bruker"];
-}
-if (isset($_POST["pass"])) {
-	$pass = $_POST["pass"];
-}
-if (isset($_REQUEST["action"])) {
-	$action = $_REQUEST["action"];
-}
-if (isset($_SESSION["logged_in"])) {
-	$logged_in = $_POST["logged_in"];
-}
-if (isset($_SESSION["changepass"])) {
-	$change_pass = $_POST["changepass"];
-}
-
-
-if (!isset($_SESSION['logged_in'])) {
+if (!$logged_in) {
 	if ($user != null) {
 
 		// Check connection
@@ -170,19 +153,18 @@ if (!isset($_SESSION['logged_in'])) {
 		$access_control = new AccessControl($user, $conn);
 		mysqli_close($conn);
 
-		//slutt på gammel mysql kode
 	}
 }
 
 // Has to change password
-if ($_SESSION['changepass'] == 1) {
+if ($change_pass) {
 	print_password_change_required();
 	include("private/admin/changepass.php");
 
 	//hvis innlogget
-} else if ($_SESSION['logged_in'] == 1) {
+} else if ($logged_in) {
 	if ($action != "logout") {
-		print_admin_header($_SESSION['navn']);
+		print_admin_header($name);
 	}
 	$result = $access_control->can_access("admin", $action);
 	if (!$result) {

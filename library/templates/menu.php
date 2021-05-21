@@ -21,7 +21,6 @@ function menu_item($url, $name = "")
 	menu_item("board");
 	menu_item("FAQ");
 	// menu_item("store_v2");
-
 	?>
 	<li id="lang_switch">
 		<a href="<?php print($base_url . ($language != "no" ? "" : "/en") . "/$frm_side"); ?>">

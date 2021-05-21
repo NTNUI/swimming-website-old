@@ -1,24 +1,10 @@
 <?php
-$dir = $translations_dir;
+global $settings;
+$dir = $settings["translations_dir"];
 
-$page = NULL;
-$type = NULL;
-$action = NULL;
-
-if (isset($_REQUEST["page"])) {
-	$page = $_REQUEST["page"];
-}
-if (isset($_REQUEST["type"])) {
-	$type = $_REQUEST["type"];
-}
-if (isset($_REQUEST["action"])) {
-	$type = $_REQUEST["action"];
-}
-
-
-log_message("page variable: " . $_REQUEST["page"], __FILE__, __LINE__);
-log_message("type variable: " . $_REQUEST["type"], __FILE__, __LINE__);
-log_message("action variable: " . $_REQUEST["action"], __FILE__, __LINE__);
+$page = argsURL("REQUEST", "page");
+$type = argsURL("REQUEST", "type");
+$action = argsURL("REQUEST", "action");
 
 if ($page != "" and file_exists("$dir/$page.json")) {
 	$text = json_decode(file_get_contents("$dir/$page.json"));
