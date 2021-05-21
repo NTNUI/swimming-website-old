@@ -21,7 +21,7 @@ if (isset($_REQUEST["error"])) { ?>
 <div id="store_container"></div>
 <div id="loading_box" class="modal">
 	<div>
-		<h1 id="waitingHeader" class="hidden"><?php print $t->get_translation("waiting_nessage"); ?></h1>
+		<h1 id="waitingHeader" class="hidden"><?php print $t->get_translation("waiting_message"); ?></h1>
 		<h1 id="completedHeader" class="t hidden"><?php print $t->get_translation("payment_complete"); ?></h1>
 		<h1 id="failedHeader" class="hidden t">error found:<span id="failedContent"></span></h1>
 		<div id="waitingGlass" class="lds-hourglass hidden"></div>
@@ -85,7 +85,7 @@ if (isset($_REQUEST["error"])) { ?>
 				<button class="locked soldout"><?php print $t->get_translation("soldout");  ?></button>
 				<button class="locked timeout"><?php print $t->get_translation("timeout"); ?></button>
 				<div class="store_countdown" style="display: none">
-					<?php print $t->get_translation("closesin"); ?>
+					<?php print $t->get_translation("closes_in"); ?>
 					<span class="store_timeleft"></span>
 				</div>
 			</div>

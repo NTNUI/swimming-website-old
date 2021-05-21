@@ -45,7 +45,7 @@ function print_admin_header($user)
 	global $t;
 	print("<div class='box green' style='position: relative'>");
 	print("<h1><a href='/svommer/admin/' class='admin_header'>" . $t->get_translation("admin_header") . "</a></h1>");
-	print($t->get_translation("admin_logged_in_as") . "<b class='admin_username'>" . $user . "</b><br>");
+	print($t->get_translation("logged_in_as") . "<b class='admin_username'>" . $user . "</b><br>");
 	access_link("logout", true);
 	print(" - ");
 	access_link("changepass", true);
