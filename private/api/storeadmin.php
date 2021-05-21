@@ -11,7 +11,7 @@ if (!isset($_GET["type"])) {
 }
 
 include_once("library/util/db.php");
-include_once("library/util/store_helper_v2.php");
+include_once("library/util/store_helper.php");
 
 $store = new StoreHelper($language);
 header("Content-Type: application/json");

@@ -14,7 +14,7 @@
 	}
 </style>
 
-<?php include_once("library/util/store_helper_v2.php");
+<?php include_once("library/util/store_helper.php");
 $store = new StoreHelper($language);
 log_message("item_id: " . $_GET["item_id"], __FILE__, __LINE__);
 

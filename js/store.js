@@ -243,7 +243,7 @@ form.addEventListener('submit', function(event) {
 			errorElement.textContent = result.error.message;
 			lock = false;
 		} else {
-			fetch("api/charge_v2", {
+			fetch("api/charge", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json"
@@ -315,7 +315,7 @@ function handleAction (response) {
 			const owner = { name: name, email: email };
 			if (phone != "") owner.phone = phone;
 			const kommentar = document.querySelector("textarea[name=kommentar]").value;
-			fetch("api/charge_v2", {
+			fetch("api/charge", {
 				method: "POST",
 				headers: {
 					"Content-Type": "application/json",

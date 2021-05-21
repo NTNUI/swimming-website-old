@@ -22,7 +22,7 @@ $debugging = $settings["hosting"]["debugging"];
 $licence_key = $settings["defaults"]["licence_key"];
 
 $t->load_translation("store");
-include_once("library/util/store_helper_v2.php");
+include_once("library/util/store_helper.php");
 $store = new StoreHelper($language);
 error_reporting($settings["hosting"]["errorReporting"]);
 

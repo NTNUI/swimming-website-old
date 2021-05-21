@@ -20,7 +20,7 @@ function menu_item($url, $name = "")
 	menu_item("isMember");
 	menu_item("board");
 	menu_item("FAQ");
-	// menu_item("store_v2");
+	// menu_item("store");
 	?>
 	<li id="lang_switch">
 		<a href="<?php print($base_url . ($language != "no" ? "" : "/en") . "/$frm_side"); ?>">

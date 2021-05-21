@@ -16,7 +16,7 @@ class StoreHelper {
 		$mysqli = connect("web");
 		if(!$mysqli){
 			header('HTTP/1.1 500 Internal Server Error');
-			print("Failed to connect to database in store_helper_v2\n");
+			print("Failed to connect to database in store_helper\n");
 			log_message("Failed to connect to database", __FILE__, __LINE__);
 			die();
 		}
@@ -45,7 +45,7 @@ class StoreHelper {
 		$query->bind_result($id, $api_id, $name, $description, $price, $available_from, $available_until, $require_phone, $visibility, $amount, $amount_available, $image, $group_id);
 		if(!$query){
 			header('HTTP/1.1 500 Internal Server Error');
-			print("Failed to bind result in store_helper_v2\n");
+			print("Failed to bind result in store_helper\n");
 			log_message("Failed to bind result", __FILE__, __LINE__);
 			die();
 		}
@@ -167,7 +167,7 @@ class StoreHelper {
 
 		if(!$mysqli){
 			header('HTTP/1.1 500 Internal Server Error');
-			print("failed to connect to database in store_helper_v2\n");
+			print("failed to connect to database in store_helper\n");
 			log_message("failed to connect to database", __FILE__,__LINE__);
 			die();
 		}
@@ -176,7 +176,7 @@ class StoreHelper {
 		$query = $mysqli->prepare($sql);
 		if(!$query){
 			header('HTTP/1.1 500 Internal Server Error');
-			print("Failed to prepare query in store_helper_v2\n");
+			print("Failed to prepare query in store_helper\n");
 			log_message("Failed to prepare query", __FILE__,__LINE__);
 			die();
 		}
@@ -184,7 +184,7 @@ class StoreHelper {
 		$query->bind_param("s", $intentId);
 		if(!$query){
 			header('HTTP/1.1 500 Internal Server Error');
-			print("Failed to bind params in store_helper_v2\n");
+			print("Failed to bind params in store_helper\n");
 			log_message("Failed to bind params", __FILE__,__LINE__);
 			die();
 		}
@@ -192,7 +192,7 @@ class StoreHelper {
 		$query->execute();
 		if(!$query){
 			header('HTTP/1.1 500 Internal Server Error');
-			print("Failed to execute query in store_helper_v2\n");
+			print("Failed to execute query in store_helper\n");
 			log_message("Failed to execute query", __FILE__,__LINE__);
 			die();
 		}
@@ -200,7 +200,7 @@ class StoreHelper {
 		$query->bind_result($id, $api_id, $email);
 		if(!$query){
 			header('HTTP/1.1 500 Internal Server Error');
-			print("Failed to bind results in store_order_v2\n");
+			print("Failed to bind results in store_order\n");
 			log_message("Failed to bind results", __FILE__,__LINE__);
 			die();
 		}

@@ -94,9 +94,9 @@ if (isset($_REQUEST["error"])) { ?>
 	</div>
 </template>
 
-<script type="text/javascript" src="<?php print "$base_url/js/store_v2.js" ?>"></script>
+<script type="text/javascript" src="<?php print "$base_url/js/store.js" ?>"></script>
 <script type="text/javascript">
-	var url = "<?php print "$base_url/api/storelist_v2?lang=$language" ?>";
+	var url = "<?php print "$base_url/api/storelist?lang=$language" ?>";
 	var orderUrl = "<?php print "$base_url/api/order" ?>";
 	var returnUrl = "<?php print "$base_url/checkout" ?>";
 	//Offset from server time
@@ -105,7 +105,7 @@ if (isset($_REQUEST["error"])) { ?>
 	var lang = "<?php print $language ?>";
 	//Hent ting fra server
 	<?php if (isset($_REQUEST["item_id"])) {
-		include_once("library/util/store_helper_v2.php");
+		include_once("library/util/store_helper.php");
 		$store = new StoreHelper($language);
 		$item = $store->get_item($_REQUEST["item_id"]);
 		if ($item === false) {
