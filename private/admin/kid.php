@@ -98,12 +98,10 @@ TODO:
 			node.querySelector(".phone-number").innerText = member.phone;
 			node.querySelector(".name").innerText = member.name;
 			node.querySelector(".save").onclick = function(e) {
-				console.log(member.id);
-				var kid_number = e.originalTarget.parentElement.previousElementSibling.children[0].value;
-				console.log(kid_number);
+				var kid_number = e.srcElement.parentNode.previousElementSibling.children[0].value;
 				if (valid_kid(kid_number)) {
 					save_kid_number(member.id, kid_number);
-					e.originalTarget.parentElement.parentElement.remove();
+					e.srcElement.parentNode.parentElement.remove();
 					return;
 				}
 				console.log("that input is not a valid KID number");
