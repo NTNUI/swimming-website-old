@@ -4,11 +4,10 @@ function menu_item($url, $name = "")
 	global $t, $frm_side;
 	if ($name == "") $name = $url;
 	$link = $t->get_url($url);
-	if (isset($_GET["newstyle"])) $link .= "?newstyle";
-	$text = $t->get_translation($name, "menu");
+	$title = $t->get_translation($name, "menu");
 	$style = "";
 	if ($frm_side == $url) $style = " class='selected'";
-	print "<li><a href=\"$link\"$style>$text</a></li>\n";
+	print "<li><a href=\"$link\"$style>$title</a></li>\n";
 }
 ?>
 <ul>
@@ -20,7 +19,7 @@ function menu_item($url, $name = "")
 	menu_item("isMember");
 	menu_item("board");
 	menu_item("FAQ");
-	// menu_item("store");
+	menu_item("store");
 	?>
 	<li id="lang_switch">
 		<a href="<?php print($base_url . ($language != "no" ? "" : "/en") . "/$frm_side"); ?>">

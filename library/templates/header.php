@@ -29,8 +29,8 @@ if ($title == "") $title = ucwords($frm_side);
 			<a href="<?php print $t->get_url(""); ?>"><img src="<?php print $base_url ?>/img/icons/logo.jpg"?>"></a>
 		</div>
 		<div id="menu_show">Menu</span><span class="right"><a href="<?php ($language != "no" ? "" : "/en") . "/$frm_side"  ?>"><?php print ($language != "no" ? "Norsk" : "English"); ?></a></span></div>
-		<div id="meny_container">
-			<div id="meny" class="meny">
+		<div id="menu_container">
+			<div id="menu" class="menu">
 				<?php include("library/templates/menu.php"); ?>
 			</div>
 		</div>

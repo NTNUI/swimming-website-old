@@ -5,7 +5,7 @@
 	<meta name="title" content="NTNUI Svømming"/>
 </head>
 
-<link rel="stylesheet" type="text/css" href="<?php print $settings["hosting"]["baseurl"]."/css/slideshow.css" ?>"></link>
+<link rel="stylesheet" type="text/css" href="<?php print $settings["baseurl"]."/css/slideshow.css" ?>"></link>
 <div class="box green backdrop">
 
 	<h1 padding="10px" border="0px" margin="0px" offset="10px">
@@ -25,7 +25,7 @@
 		for ($i = 1; $i <= $image_count; $i++) { ?>
 		<div class="mySlides fade">
 			<div class="numbertext"><?php print "$i / $image_count" ?></div>
-			<img src="<?php print $settings["hosting"]["baseurl"]."/img/slideshow/bilde_$i.jpg"; ?>" style="width:100%">
+			<img src="<?php print $settings["baseurl"]."/img/slideshow/bilde_$i.jpg"; ?>" style="width:100%">
 			<div class="text"><?php print $t->get_translation("caption_$i"); ?></div>
 		</div>
 <?php		}

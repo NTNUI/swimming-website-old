@@ -27,7 +27,7 @@ $action = argsURL("REQUEST", "action");
 $user = argsURL("SESSION", "user");
 
 // Defaults
-$base_url = $settings["hosting"]["baseurl"];
+$base_url = $settings["baseurl"];
 if ($language == "") $language = $settings["defaults"]["language"];
 if ($frm_side == "") $frm_side = $settings["defaults"]["landing-page"];
 $side = "$frm_side.php";
