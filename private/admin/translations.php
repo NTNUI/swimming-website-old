@@ -22,7 +22,7 @@ if ($page != "" and file_exists("$dir/$page.json")) {
 		<tr class="translation">
 			<td><input class="key" type="text" value="<?php print $key ?>" /></td>
 			<td><textarea class="noValue"><?php print $value ?></textarea></td>
-			<td><textarea class="enValue"><?php if (array_key_exists($key, $text->en)) print $text->en->$key; ?></textarea></td>
+			<td><textarea class="enValue"><?php if (property_exists($text->en, $key)) print $text->en->$key; ?></textarea></td>
 			<td>
 				<button class="delete">Slett</button>
 				<button class="edit">Rediger</button>

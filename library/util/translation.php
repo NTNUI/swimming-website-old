@@ -18,6 +18,10 @@ class Translator
 	{
 		$file = "$this->directory/$page.json";
 
+		if($page == "api"){
+			return;
+		}
+
 		if (!file_exists($file)) {
 			log_message("Warning: Requesting a non existing page: $page", __FILE__, __LINE__);
 			return;
@@ -25,7 +29,7 @@ class Translator
 
 		$decoded = json_decode(file_get_contents($file));
 		if ($decoded === NULL) {
-			log_message("Warning: Could not decode json file: " . $file, __FILE__, __LINE__);
+			log_message("Warning: Could not decode json file: $file, for page: $page", __FILE__, __LINE__);
 			return;
 		}
 		$this->translations[$page] = $decoded;
