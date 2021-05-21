@@ -14,7 +14,6 @@ function printMessage($type){ // NOT FINNISHED YET #PAVEL
 	}
 }
 
-
 if (isset($_POST["button"])) {
 	$cat = $_POST["kategori"];
 	$kom = $_POST["kommentar"];
@@ -33,8 +32,6 @@ if (isset($_POST["button"])) {
 }
 
  ?>
-
-
 
  <div class="box">
 
