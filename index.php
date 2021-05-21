@@ -15,7 +15,7 @@ $settings = load_settings("./settings/settings.json");
 // Libraries
 include_once("vendor/autoload.php");
 include_once("library/util/db.php");
-include_once("library/util/translation.php");
+include_once("library/util/translator.php");
 include_once("library/util/access_control.php");
 include_once("library/util/request.php");
 include_once("library/util/log.php");
