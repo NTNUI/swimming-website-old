@@ -47,9 +47,8 @@ class Translator
 
 		// if translatons for this page is still not loaded return.
 		if (!isset($this->translations[$page])) {
-			// loading translation failed and we are still trying to access the page. Some permission erors?
-			log_message("Fatal Error: requesting a translation for a page: " . $page . " that has not been loaded yet", __FILE__, __LINE__);
-			die("Fatal error occoured. Check logs.");
+			// loading translation for a file that does not exist
+			return "";
 		}
 
 		$translations_this_page = $this->translations[$page];
