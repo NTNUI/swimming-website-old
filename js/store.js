@@ -148,6 +148,7 @@ function formatTime(time) {
 	return r;
 }
 
+// prints store items to the screen and returns number of items printed
 function getItems() {
 	fetch(url, {})
 	.then((data) => data.json())
@@ -159,6 +160,7 @@ function getItems() {
 			let item = json[i];
 			appendItem(item);
 		}
+		return json.length;
 	});
 }
 

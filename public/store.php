@@ -4,6 +4,15 @@
 	</h2>
 </div>
 
+<div class="box hidden" id="storeEmpty">
+	<h3>
+		<?php print $t->get_translation("store_empty_header"); ?>
+	</h3>
+	<p>
+	<?php print $t->get_translation("store_empty_content"); ?>
+	</p>
+</div>
+
 
 <?php
 //$t->page = "store";
@@ -18,19 +27,23 @@ if (isset($_REQUEST["error"])) { ?>
 		alert("<?php print $t->get_translation("error_header") ?> Stripe: <?php print $_REQUEST["error"]; ?>");
 	</script>
 <?php } ?>
-<div id="store_container"></div>
+
+<div id="store_container">
+
+</div>
+
 <div id="loading_box" class="modal">
 	<div>
-		<h1 id="waitingHeader" class="hidden"><?php print $t->get_translation("waiting_message"); ?></h1>
-		<h1 id="completedHeader" class="t hidden"><?php print $t->get_translation("payment_complete"); ?></h1>
-		<h1 id="failedHeader" class="hidden t">error found:<span id="failedContent"></span></h1>
+		<h2 id="waitingHeader" class="hidden"><?php print $t->get_translation("waiting_message"); ?></h2>
+		<h2 id="completedHeader" class="t hidden"><?php print $t->get_translation("payment_complete"); ?></h2>
+		<h2 id="failedHeader" class="hidden t">error found:<span id="failedContent"></span></h2>
 		<div id="waitingGlass" class="lds-hourglass hidden"></div>
 		<span id="paymentComplete" class="hidden">&#x2713;
 	</div>
 	<span id="failedCross" class="hidden">&times;</span>
 	<span class="close" onclick="hide_load()">&times;</span>
 </div>
-</div>
+
 <div id="checkout_overlay" class="modal">
 	<div>
 		<div style="width:100%;">
@@ -70,6 +83,7 @@ if (isset($_REQUEST["error"])) { ?>
 		<span class="close" onclick="hide_store()">&times;</span>
 	</div>
 </div>
+
 <template id="store_dummy">
 	<div class="store_item">
 		<h1 class="store_header"></h1>
@@ -95,6 +109,7 @@ if (isset($_REQUEST["error"])) { ?>
 </template>
 
 <script type="text/javascript" src="<?php print "$base_url/js/store.js" ?>"></script>
+
 <script type="text/javascript">
 	var url = "<?php print "$base_url/api/storelist?lang=$language" ?>";
 	var orderUrl = "<?php print "$base_url/api/order" ?>";
@@ -104,7 +119,8 @@ if (isset($_REQUEST["error"])) { ?>
 	var serverOffset = new Date().getTime() - <?php print time() ?> * 1000;
 	var lang = "<?php print $language ?>";
 	//Hent ting fra server
-	<?php if (isset($_REQUEST["item_id"])) {
+	<?php
+	if (isset($_REQUEST["item_id"])) {
 		include_once("library/util/store_helper.php");
 		$store = new StoreHelper($language);
 		$item = $store->get_item($_REQUEST["item_id"]);
@@ -117,6 +133,12 @@ if (isset($_REQUEST["error"])) { ?>
 			print "appendItem(" . json_encode($item) . ")";
 		}
 	} else {
-		print "getItems();";
-	} ?>
+		?>
+		if(!getItems()){
+			// no available items in store
+			document.getElementById("storeEmpty").classList.remove("hidden");
+		};
+		<?php
+	}
+	?>
 </script>
