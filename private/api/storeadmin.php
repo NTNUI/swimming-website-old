@@ -50,31 +50,4 @@ default:
 		"error" => "type '" . $_GET["type"] . "' is not a type",
 	]);
 }
-	/*
-case "get_item":
-	$item = $store->get_item($_POST["item_id"], true);
-	$res = array();
-	if ($item) {
-		$res = $item;
-	        $res["orders"] = array();	
-		$sql = "SELECT name, email, phone FROM store_orders WHERE item_id=? AND order_status='FINALIZED'";
-		$conn = connect("web");
-		$query = $conn->prepare($sql);
-		$query->bind_param("i", $item["id"]);
-		$query->execute();
-		$query->bind_result($name, $email, $phone);
-		while ($query->fetch()) {
-			$res["orders"][] = array(
-				"name" => $name,
-				"email" => $email,
-				"phone" => $phone
-			);
-		}
-	}
-	print json_encode($res);
-	break;
-case "list_items":
-	$items = $store->get_items();
-	print json_encode($items);
-	break;
-}
+
