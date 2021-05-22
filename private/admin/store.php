@@ -172,6 +172,35 @@ if (isset($_GET["item_id"])) {
 			color: rgba(0, 0, 0, 0.4);
 		}
 	</style>
+	<?php /*
+<div class="box">
+<table style="width: 100%;">
+	<tr>
+		<th>Tittel</th>
+		<th>Antall kjøpt</th>
+		<th>Antall tilgjengelig</th>
+		<th>Pris</th>
+		<th>Tiltak</th>
+	<tr>
+	<?php foreach ($items as $item) { 
+		$class = "";
+		$visibility = $item["visibility"];
+		if (!$visibility) $class = "weak";
+		print "<tr id='item-" . $item["api_id"] . "' class='$class'>";
+		print "<td>" . $item["name"] . "</td>";
+		print "<td><a href='?item_id=" . $item["api_id"] . "'>" . $item["amount_bought"] . "</a></td>";
+		print "<td>" . ($item["amount_available"] == NULL ? "uendelig" : $item["amount_available"]) . "</td>";
+		print "<td>" . $item["price"] . "</td>"; 
+		print "<td>";
+		print "<button id='vistoggle-" . $item["api_id"] . "' onclick='set_visibility(\"" . $item["api_id"] . "\", " . !$visibility . ")'>" . ($visibility ? "Gjem" : "Vis" ) . "</button>";
+?>
+		<button>slett</button>
+<?php
+		print "</td>";
+}?>
+</table>
+</div>
+ */ ?>
 	<div class="box">
 		<h2>
 			Salgsvarer
@@ -356,8 +385,21 @@ if (isset($_GET["item_id"])) {
 			fetch("https://org.ntnu.no/svommer/api/storeadmin?type=set_visibility&item_id=" + id + "&visibility=" + visibility)
 				.then((data) => data.json())
 				.then((json) => {
-					if (!json.success {
+					if (json.error) {
 						alert("Noe gikk galt: " + json.error);
+					} else if (json.success) {
+						document.getElementById("vistoggle-" + id).innerText = visibility ? "Gjem" : "Vis";
+						document.getElementById("vistoggle-" + id).onclick = function() {
+							set_visibility(id, !visibility);
+						}
+						const row = document.getElementById("item-" + id);
+						if (visibility) {
+							row.classList.remove("weak");
+						} else {
+							row.classList.add("weak");
+						}
+					} else {
+						alert("Rart svar fra server, se konsoll");
 						console.log(json);
 					}
 				})
