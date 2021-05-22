@@ -16,9 +16,9 @@
 
 <?php include_once("library/util/store_helper.php");
 $store = new StoreHelper($language);
-log_message("item_id: " . $_GET["item_id"], __FILE__, __LINE__);
-
 $item_id = isset($_GET["item_id"]);
+log_message("item_id: $item_id", __FILE__, __LINE__);
+
 $add = isset($_POST["add"]); 
 
 if (isset($_GET["item_id"])) {

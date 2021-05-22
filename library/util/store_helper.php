@@ -52,12 +52,12 @@ class StoreHelper {
 		while ($query->fetch()) {
 			if (!$rawData) {
 				$name = json_decode($name);
-				if (array_key_exists($language, $name)) $name = $name->$language;
+				if (property_exists($name, $language)) $name = $name->$language;
 				else if (array_key_exists("no", $name)) $name = $name->no;
 				else $name = "";
 
 				$description = json_decode($description);
-				if (array_key_exists($language, $description)) $description = $description->$language;
+				if (property_exists($description, $language)) $description = $description->$language;
 				else if (array_key_exists("no", $description)) $description = $description->no;
 				else $description = "";
 			}
