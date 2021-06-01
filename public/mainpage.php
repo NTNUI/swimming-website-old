@@ -6,7 +6,7 @@
 </head>
 
 <link rel="stylesheet" type="text/css" href="<?php print $settings["baseurl"]."/css/slideshow.css" ?>"></link>
-<div class="box green backdrop">
+<div class="box green">
 
 	<h1 padding="10px" border="0px" margin="0px" offset="10px">
 		<?php print $t->get_translation("mainHeader"); ?>
