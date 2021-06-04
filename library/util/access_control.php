@@ -1,9 +1,11 @@
 <?php
 
-class AccessControl {
+class AccessControl
+{
 	private $user, $rolerules;
-	
-	function __construct($username, &$mysqli = NULL) {
+
+	function __construct($username, &$mysqli = NULL)
+	{
 		$this->user = $username;
 		if ($mysqli == NULL) {
 			include_once("library/util/db.php");
@@ -11,48 +13,57 @@ class AccessControl {
 		}
 		
 		$this->get_rolerules($mysqli);
-
 	}
 
-	public function get_rolerules(&$mysqli) {
+	public function get_rolerules(&$mysqli)
+	{
 		$query = NULL;
 		if ($this->user != "") {
 			$sql = "SELECT role.type, role.page FROM role_access AS role JOIN users ON role.role = users.role WHERE users.username=?";
 			$query = $mysqli->prepare($sql);
+			if (!$query) {
+				log_exception("Could not prepare statement", __FILE__, __LINE__);
+			}
 			$query->bind_param("s", $this->user);
+			if (!$query) {
+				log_exception("Could not bind params", __FILE__, __LINE__);
+			}
 		} else {
 			//not logged in
 			$sql = "SELECT role.type, role.page FROM role_access AS role JOIN roles ON role.role = roles.id WHERE roles.name=?";
 			$query = $mysqli->prepare($sql);
-			
+			if (!$query) {
+				log_exception("Could not prepare statement", __FILE__, __LINE__);
+			}
 			//Role for users without account
 			$unregistered = "unregistered";
 			$query->bind_param("s", $unregistered);
 		}
 		$query->execute();
-		if(!$query){
-			// querry failed to execure.
-			print("Failed to execute querry in access control");
-			die();
+		if (!$query) {
+			log_exception("Could not execute statement", __FILE__, __LINE__);
 		}
 
 		$type =  "";
 		$pattern = "";
 		$query->bind_result($type, $pattern);
-		if(!$query){
-			print("Failed to bind result in access control");
-			die();
+		if (!$query) {
+			log_exception("Could not bind results", __FILE__, __LINE__);
 		}
-		
+
 		while ($query->fetch()) {
 			$this->rolerules[] = array("type" => $type, "pattern" => $pattern);
 		}
 		$query->close();
 	}
 
-	public function can_access($page, $action = "") {
+	public function can_access($page, $action = "")
+	{
 		$result = false;
 		$matchlevel = 0;
+		if($this->rolerules == NULL){
+			log_exception("role rules are null", __FILE__, __LINE__);
+		}
 		foreach ($this->rolerules as $rule) {
 			$type = $rule["type"] == "ALLOW";
 			$pattern = $rule["pattern"];
@@ -80,7 +91,8 @@ class AccessControl {
 		return $result;
 	}
 
-	public function log($page, $action, $value = NULL) {
+	public function log($page, $action, $value = NULL)
+	{
 		$username = $this->user;
 		if ($this->user == "") $username = "~Unregistered User~";
 		$sql = "INSERT INTO access_log (page, user, action, value) VALUES(?, ?, ?, ?)";
@@ -88,19 +100,19 @@ class AccessControl {
 		include_once("library/util/db.php");
 		$mysqli = connect("web");
 		$query = $mysqli->prepare($sql);
-		if(!$query){
+		if (!$query) {
 			print("Failed to prepare query in access control");
 			die();
 		}
 
 		$query->bind_param("ssss", $page, $username, $action, $value);
-		if(!$query){
+		if (!$query) {
 			print("Failed to bind parameters in access control");
 			die();
 		}
 
 		$query->execute();
-		if(!$query){
+		if (!$query) {
 			print("Failed to execute query in access control");
 			die();
 		}
@@ -108,6 +120,4 @@ class AccessControl {
 		$query->close();
 		$mysqli->close();
 	}
-
 }
-
