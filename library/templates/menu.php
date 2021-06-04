@@ -12,7 +12,7 @@ function menu_item($url, $name = "")
 ?>
 <ul>
 	<?php
-	if (!isset($_GET["newstyle"])) menu_item("mainpage");
+	menu_item("mainpage");
 	menu_item("practices");
 	menu_item("activities");
 	menu_item("enrollment");
