@@ -3,7 +3,6 @@
 include_once("library/helpers/admin.php");
 include_once("library/util/authenticator.php");
 
-
 if (!Authenticator::is_logged_in()) {
 	if (!Authenticator::has_posted_login_credentials()) {
 		print_password_form();

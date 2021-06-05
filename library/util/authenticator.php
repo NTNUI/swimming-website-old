@@ -10,10 +10,12 @@ class Authenticator
             log_exception("Trying to log in even though a user is logged in", __FILE__, __LINE__);
         }
         $password_hash = (new Authenticator)->load_from_db($username);
-        $success = password_verify($password, $password_hash);
-        $_SESSION["logged_in"] = 1;
-        $_SESSION["username"] = $username;
-        return $success;
+        if (password_verify($password, $password_hash)) {
+            $_SESSION["logged_in"] = 1;
+            $_SESSION["username"] = $username;
+            return true;
+        }
+        return false;
     }
 
     // returns true if the user has POST'ed username and password
@@ -98,7 +100,7 @@ class Authenticator
 
         $password_hash = (new Authenticator)->load_from_db($username);
         $success = password_verify($password, $password_hash);
-        if ($success){
+        if ($success) {
             return "Old password and new are the same";
         }
         return "";
