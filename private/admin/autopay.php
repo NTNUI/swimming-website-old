@@ -1,4 +1,4 @@
-<script type="text/javascript" src="js/autopay.js"></script>
+<script type="text/javascript" src="../js/autopay.js"></script>
 
 <div class="box">
     <h2>Generer <a href="https://ui.vision">Kantu</a> script for betaling</h2>
