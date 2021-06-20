@@ -1,4 +1,4 @@
-<?php 
+<?php
 $last_friday = date("N") == 5 ? "today" : "last friday";
 $friday_beer = date("d-m-Y", strtotime($last_friday));
 $conn = connect("web");
@@ -9,7 +9,7 @@ $query->bind_result($username, $name, $hadbeer);
 while ($query->fetch()) {
 	$nobeer = "nobeer" . ($hadbeer ? " hidden" : "");
 	$beer = "beer" . ($hadbeer ? "" : " hidden");
-	print "<div id='$username' class='box " . ($hadbeer ? "gold" : "") ."'>";
+	print "<div id='$username' class='box " . ($hadbeer ? "gold" : "") . "'>";
 	print "<h3>$name</h3>";
 	print "<span class='$nobeer'>Har ikke vært på fredagspils $friday_beer</span><br />";
 	print "<button class='$nobeer' onclick='register(\"$username\")'>Registrer oppmøte</button>";
@@ -21,23 +21,28 @@ $query->close();
 $conn->close();
 ?>
 <style>
-.gold {
-	background-color: gold;
-}
+	.gold {
+		background-color: gold;
+	}
 </style>
 <script type="text/javascript">
-function register(username) {
-	fetch("<?php print $base_url?>/api/friday_beer?register=" + username)
-		.then((response) => response.json())
-		.then((json) => {
-		if (json.error && json.error != "Already drank beer") {
-			alert(json.error);
-			return;
-		}
-		document.querySelectorAll("#" + username + " > .nobeer").forEach((e) => { e.classList.add("hidden"); });
-		document.querySelectorAll("#" + username + " > .beer").forEach((e) => { e.classList.remove("hidden"); });
-		
+	function register(username) {
+		fetch("<?php global $settings;
+				print $settings["baseurl"]; ?>/api/friday_beer?register=" + username)
+			.then((response) => response.json())
+			.then((json) => {
+				if (json.error && json.error != "Already drank beer") {
+					alert(json.error);
+					return;
+				}
+				document.querySelectorAll("#" + username + " > .nobeer").forEach((e) => {
+					e.classList.add("hidden");
+				});
+				document.querySelectorAll("#" + username + " > .beer").forEach((e) => {
+					e.classList.remove("hidden");
+				});
 
-		});
-}
+
+			});
+	}
 </script>
