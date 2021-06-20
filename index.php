@@ -19,6 +19,7 @@ include_once("library/util/translator.php");
 include_once("library/util/access_control.php");
 include_once("library/util/request.php");
 include_once("library/util/log.php");
+include_once("library/util/authenticator.php");
 
 // Get request
 $language = argsURL("REQUEST", "lang");

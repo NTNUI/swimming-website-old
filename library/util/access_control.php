@@ -22,18 +22,18 @@ class AccessControl
 			$sql = "SELECT role.type, role.page FROM role_access AS role JOIN users ON role.role = users.role WHERE users.username=?";
 			$query = $mysqli->prepare($sql);
 			if (!$query) {
-				log_exception("Could not prepare statement", __FILE__, __LINE__);
+				log::die("Could not prepare statement", __FILE__, __LINE__);
 			}
 			$query->bind_param("s", $this->user);
 			if (!$query) {
-				log_exception("Could not bind params", __FILE__, __LINE__);
+				log::die("Could not bind params", __FILE__, __LINE__);
 			}
 		} else {
 			//not logged in
 			$sql = "SELECT role.type, role.page FROM role_access AS role JOIN roles ON role.role = roles.id WHERE roles.name=?";
 			$query = $mysqli->prepare($sql);
 			if (!$query) {
-				log_exception("Could not prepare statement", __FILE__, __LINE__);
+				log::die("Could not prepare statement", __FILE__, __LINE__);
 			}
 			//Role for users without account
 			$unregistered = "unregistered";
@@ -41,14 +41,14 @@ class AccessControl
 		}
 		$query->execute();
 		if (!$query) {
-			log_exception("Could not execute statement", __FILE__, __LINE__);
+			log::die("Could not execute statement", __FILE__, __LINE__);
 		}
 
 		$type =  "";
 		$pattern = "";
 		$query->bind_result($type, $pattern);
 		if (!$query) {
-			log_exception("Could not bind results", __FILE__, __LINE__);
+			log::die("Could not bind results", __FILE__, __LINE__);
 		}
 
 		while ($query->fetch()) {
@@ -62,7 +62,7 @@ class AccessControl
 		$result = false;
 		$matchlevel = 0;
 		if($this->rolerules == NULL){
-			log_exception("role rules are null", __FILE__, __LINE__);
+			log::die("role rules are null", __FILE__, __LINE__);
 		}
 		foreach ($this->rolerules as $rule) {
 			$type = $rule["type"] == "ALLOW";

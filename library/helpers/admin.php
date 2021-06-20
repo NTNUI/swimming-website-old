@@ -113,7 +113,7 @@ function print_section($section)
 			access_link("fredagspils", $inline);
 			break;
 		default:
-			log_exception("Wrong parameter: $section", __FILE__, __LINE__);
+			log::die("Wrong parameter: $section", __FILE__, __LINE__);
 	}
 
 	print("</div>");

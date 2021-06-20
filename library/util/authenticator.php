@@ -7,7 +7,7 @@ class Authenticator
     static public function log_in($username, $password)
     {
         if (Authenticator::is_logged_in()) {
-            log_exception("Trying to log in even though a user is logged in", __FILE__, __LINE__);
+            log::die("Trying to log in even though a user is logged in", __FILE__, __LINE__);
         }
         $password_hash = (new Authenticator)->load_from_db($username);
         if (password_verify($password, $password_hash)) {
@@ -22,7 +22,7 @@ class Authenticator
     static public function has_posted_login_credentials()
     {
         if (Authenticator::is_logged_in()) {
-            log_exception("User is POSTing credentials while being logged in", __FILE__, __LINE__);
+            log::die("User is POSTing credentials while being logged in", __FILE__, __LINE__);
         }
         return argsURL("POST", "username") && argsURL("POST", "password");
     }
@@ -33,7 +33,7 @@ class Authenticator
     static public function has_posted_updated_credentials()
     {
         if (!Authenticator::is_logged_in()) {
-            log_exception("Non logged in user tries to POST credentials", __FILE__, __LINE__);
+            log::die("Non logged in user tries to POST credentials", __FILE__, __LINE__);
         }
         return argsURL("POST", "new_pass1") && argsURL("POST", "new_pass2");
     }
@@ -48,7 +48,7 @@ class Authenticator
     static public function log_out_requested()
     {
         if (!Authenticator::is_logged_in()) {
-            log_exception("User is not logged in.", __FILE__, __LINE__);
+            log::die("User is not logged in.", __FILE__, __LINE__);
         }
         return argsURL("REQUEST", "action") == "logout";
     }
@@ -57,7 +57,7 @@ class Authenticator
     static public function log_out()
     {
         if (!Authenticator::is_logged_in()) {
-            log_exception("Cannot log out a user that is not logged in", __FILE__, __LINE__);
+            log::die("Cannot log out a user that is not logged in", __FILE__, __LINE__);
             return;
         }
         return session_unset() && session_destroy();
@@ -69,7 +69,7 @@ class Authenticator
 
         $password_date = argsURL("SESSION", "password_date");
         if (!Authenticator::is_logged_in()) {
-            log_exception("User is not logged in", __FILE__, __LINE__);
+            log::die("User is not logged in", __FILE__, __LINE__);
         }
 
         if (!$password_date) {
@@ -86,7 +86,7 @@ class Authenticator
     {
         $username = argsURL("SESSION", "username");
         if (!Authenticator::is_logged_in() || !$username) {
-            log_exception("ERROR: User is not logged in", __FILE__, __LINE__);
+            log::die("ERROR: User is not logged in", __FILE__, __LINE__);
         }
 
         if ($password !== $password2) {
@@ -112,27 +112,27 @@ class Authenticator
         $username = argsURL("SESSION", "username");
 
         if (!Authenticator::is_logged_in() || !$username) {
-            log_exception("ERROR: User is not logged in", __FILE__, __LINE__);
+            log::die("ERROR: User is not logged in", __FILE__, __LINE__);
         }
 
         $conn = connect("web");
         if (!$conn) {
-            log_exception("ERROR: Connection to db failed", __FILE__, __LINE__);
+            log::die("ERROR: Connection to db failed" , __FILE__, __LINE__);
         }
 
         $query = $conn->prepare("UPDATE users SET passwd=?, last_password=NOW() WHERE username=?");
         if (!$query) {
-            log_exception("ERROR: Could not prepare query", __FILE__, __LINE__);
+            log::die("ERROR: Could not prepare query" . mysqli_error($conn), __FILE__, __LINE__);
         }
 
         $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
         $query->bind_param("ss", $password_hash, $username);
         if (!$query) {
-            log_exception("ERROR: Could not bind params", __FILE__, __LINE__);
+            log::die("ERROR: Could not bind params " . mysqli_error($conn), __FILE__, __LINE__);
         }
 
         if (!$query->execute()) {
-            log_exception("ERROR: Could not update password", __FILE__, __LINE__);
+            log::die("ERROR: Could not update password. " . mysqli_error($conn), __FILE__, __LINE__);
         }
 
         $_SESSION["password_date"] = new DateTime("now");
@@ -140,29 +140,30 @@ class Authenticator
         mysqli_close($conn);
     }
 
+    // @return string|null
     static private function load_from_db($username)
     {
         global $access_control;
-        $sql = "SELECT name, passwd, last_password FROM users WHERE username=?";
+        $sql = "SELECT name, passwd, last_password FROM svommer_web.users WHERE username=?";
 
         $conn = connect("web");
         if (!$conn) {
-            log_exception("Connection failed: " . mysqli_connect_error(), __FILE__, __LINE__);
+            log::die("Connection failed", __FILE__, __LINE__);
         }
 
         $query = $conn->prepare($sql);
         if (!$query) {
-            log_exception("Could not prepare query " . mysqli_connect_error(), __FILE__, __LINE__);
+            log::die("Could not prepare query " . mysqli_error($conn), __FILE__, __LINE__);
         }
 
         $query->bind_param("s", $username);
         if (!$query) {
-            log_exception("Could not bind params " . mysqli_connect_error(), __FILE__, __LINE__);
+            log::die("Could not bind params " . mysqli_error($conn), __FILE__, __LINE__);
         }
 
         $query->execute();
         if (!$query) {
-            log_exception("Could not execute query " . mysqli_connect_error(), __FILE__, __LINE__);
+            log::die("Could not execute query " . mysqli_error($conn), __FILE__, __LINE__);
         }
 
         $password_hash = "";
@@ -170,12 +171,23 @@ class Authenticator
         $name = "";
 
         $query->bind_result($name, $password_hash, $password_date);
-        if (!$query->fetch()) {
-            log_exception("Could not bind results " . mysqli_connect_error(), __FILE__, __LINE__);
+        if (!$query) {
+            log::die("Could not bind results " . mysqli_error($conn), __FILE__, __LINE__);
+        }
+
+        $result = $query->fetch();
+        
+        if ($result === false){
+            log::die("Could not fetch results " . mysqli_error($conn), __FILE__, __LINE__);
         }
 
         $query->close();
         mysqli_close($conn);
+
+        if($result === null){
+            log::message("username $username is not found", __FILE__, __LINE__);
+            return null;
+        }
 
         // refresh access
         $access_control = new AccessControl($username);

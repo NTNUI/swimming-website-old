@@ -23,7 +23,7 @@ session_start();
 include_once("library/util/db.php");
 if ($_SESSION['logged_in'] != 1){
     header("HTTP/1.0 403 You need to log in first");
-    log_message("Note: blocking non authenticated requests", __FILE__, __LINE__);
+    log::message("Note: blocking non authenticated requests", __FILE__, __LINE__);
     print("access denied");
     return;
 }
@@ -31,7 +31,7 @@ if ($_SESSION['logged_in'] != 1){
 // remove peasents from styret
 if (!$access_control->can_access("api", "KID")) {
     header("HTTP/1.0 403 Forbidden");
-    log_message("Note: blocking user: " . argsURL("SESSION", "navn"), __FILE__, __LINE__);
+    log::message("Note: blocking user: " . argsURL("SESSION", "navn"), __FILE__, __LINE__);
     die("You do not have access to this page");
 }
 
@@ -39,7 +39,7 @@ if (!$access_control->can_access("api", "KID")) {
 // connect to server
 $conn = connect("medlem");
 if (!$conn) {
-    log_message("Error: Could not connect to db", __FILE__, __LINE__);
+    log::message("Error: Could not connect to db", __FILE__, __LINE__);
     die("Connection failed: " . mysqli_connect_error());
 }
 
@@ -58,12 +58,12 @@ if (isset($_GET["KID"]) && intval($_GET["KID"])){
 
 // Validate variables
 if (!valid_KID($KID)){
-    log_message("Error: invalid input kid: $KID", __FILE__, __LINE__);
+    log::message("Error: invalid input kid: $KID", __FILE__, __LINE__);
     die("Error: KID is not valid");
 }
 
 if (!valid_ID($ID)){
-    log_message("Error: invalid input id: $ID", __FILE__, __LINE__);
+    log::message("Error: invalid input id: $ID", __FILE__, __LINE__);
     die("Error: ID is not valid");
 }
 

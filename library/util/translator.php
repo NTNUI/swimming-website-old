@@ -23,13 +23,13 @@ class Translator
 		}
 
 		if (!file_exists($file)) {
-			log_message("Warning: Requesting a non existing page: $page", __FILE__, __LINE__);
+			log::message("Warning: Requesting a non existing page: $page", __FILE__, __LINE__);
 			return;
 		}
 
 		$decoded = json_decode(file_get_contents($file));
 		if ($decoded === NULL) {
-			log_message("Warning: Could not decode json file: $file, for page: $page", __FILE__, __LINE__);
+			log::message("Warning: Could not decode json file: $file, for page: $page", __FILE__, __LINE__);
 			return;
 		}
 		$this->translations[$page] = $decoded;
@@ -70,7 +70,7 @@ class Translator
 		}
 
 		if ($ret == "") {
-			log_message("Warning: page: $page does not have translations for $key", __FILE__, __LINE__);
+			log::message("Warning: page: $page does not have translations for $key", __FILE__, __LINE__);
 			$ret = "";
 		}
 

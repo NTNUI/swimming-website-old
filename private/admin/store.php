@@ -17,7 +17,7 @@
 <?php include_once("library/util/store_helper.php");
 $store = new StoreHelper($language);
 $item_id = isset($_GET["item_id"]);
-log_message("item_id: $item_id", __FILE__, __LINE__);
+log::message("item_id: $item_id", __FILE__, __LINE__);
 
 $add = isset($_POST["add"]); 
 
@@ -34,28 +34,28 @@ if (isset($_GET["item_id"])) {
 	$query = $conn->prepare($sql);
 	if (!$query) {
 		header('HTTP/1.1 500 Internal Server Error');
-		log_message("Failed to prepare query in store", __FILE__, __LINE__);
+		log::message("Failed to prepare query in store", __FILE__, __LINE__);
 		die();
 	}
 
 	$query->bind_param("i", $item["id"]);
 	if (!$query) {
 		header('HTTP/1.1 500 Internal Server Error');
-		log_message("Failed to bind parameters in store", __FILE__, __LINE__);
+		log::message("Failed to bind parameters in store", __FILE__, __LINE__);
 		die();
 	}
 
 	$query->execute();
 	if (!$query) {
 		header('HTTP/1.1 500 Internal Server Error');
-		log_message("Failed to execute query in membercheck", __FILE__, __LINE__);
+		log::message("Failed to execute query in membercheck", __FILE__, __LINE__);
 		die();
 	}
 
 	$query->bind_result($id, $name, $email, $phone, $kommentar, $status);
 	if (!$query) {
 		header('HTTP/1.1 500 Internal Server Error');
-		log_message("Failed to bind result in store", __FILE__, __LINE__);
+		log::message("Failed to bind result in store", __FILE__, __LINE__);
 		die();
 	}
 

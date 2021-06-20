@@ -17,7 +17,7 @@ class StoreHelper {
 		if(!$mysqli){
 			header('HTTP/1.1 500 Internal Server Error');
 			print("Failed to connect to database in store_helper\n");
-			log_message("Failed to connect to database", __FILE__, __LINE__);
+			log::message("Failed to connect to database", __FILE__, __LINE__);
 			die();
 		}
 		$visibility = "";
@@ -46,7 +46,7 @@ class StoreHelper {
 		if(!$query){
 			header('HTTP/1.1 500 Internal Server Error');
 			print("Failed to bind result in store_helper\n");
-			log_message("Failed to bind result", __FILE__, __LINE__);
+			log::message("Failed to bind result", __FILE__, __LINE__);
 			die();
 		}
 		while ($query->fetch()) {
@@ -168,7 +168,7 @@ class StoreHelper {
 		if(!$mysqli){
 			header('HTTP/1.1 500 Internal Server Error');
 			print("failed to connect to database in store_helper\n");
-			log_message("failed to connect to database", __FILE__,__LINE__);
+			log::message("failed to connect to database", __FILE__,__LINE__);
 			die();
 		}
 
@@ -177,7 +177,7 @@ class StoreHelper {
 		if(!$query){
 			header('HTTP/1.1 500 Internal Server Error');
 			print("Failed to prepare query in store_helper\n");
-			log_message("Failed to prepare query", __FILE__,__LINE__);
+			log::message("Failed to prepare query", __FILE__,__LINE__);
 			die();
 		}
 
@@ -185,7 +185,7 @@ class StoreHelper {
 		if(!$query){
 			header('HTTP/1.1 500 Internal Server Error');
 			print("Failed to bind params in store_helper\n");
-			log_message("Failed to bind params", __FILE__,__LINE__);
+			log::message("Failed to bind params", __FILE__,__LINE__);
 			die();
 		}
 
@@ -193,7 +193,7 @@ class StoreHelper {
 		if(!$query){
 			header('HTTP/1.1 500 Internal Server Error');
 			print("Failed to execute query in store_helper\n");
-			log_message("Failed to execute query", __FILE__,__LINE__);
+			log::message("Failed to execute query", __FILE__,__LINE__);
 			die();
 		}
 
@@ -201,7 +201,7 @@ class StoreHelper {
 		if(!$query){
 			header('HTTP/1.1 500 Internal Server Error');
 			print("Failed to bind results in store_order\n");
-			log_message("Failed to bind results", __FILE__,__LINE__);
+			log::message("Failed to bind results", __FILE__,__LINE__);
 			die();
 		}
 

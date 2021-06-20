@@ -1,7 +1,6 @@
 <?php
 
 include_once("library/helpers/admin.php");
-include_once("library/util/authenticator.php");
 
 if (!Authenticator::is_logged_in()) {
 	if (!Authenticator::has_posted_login_credentials()) {
@@ -25,7 +24,7 @@ print_admin_header($name);
 if (Authenticator::log_out_requested()) {
 	Authenticator::log_out();
 	if (Authenticator::is_logged_in()) {
-		log_exception("User is still logged in", __FILE__, __LINE__);
+		log::die("User is still logged in", __FILE__, __LINE__);
 	}
 	print_log_out_success();
 	return;
