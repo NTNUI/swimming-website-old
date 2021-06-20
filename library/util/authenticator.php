@@ -54,8 +54,9 @@ class Authenticator
     }
 
     // @returns string|null
-    static public function get_username(){
-        if (!Authenticator::is_logged_in()){
+    static public function get_username()
+    {
+        if (!Authenticator::is_logged_in()) {
             return null;
         }
         return $_SESSION["username"];
@@ -114,6 +115,14 @@ class Authenticator
         return "";
     }
 
+    static public function get_name()
+    {
+        if (!Authenticator::is_logged_in()) {
+            return null;
+        }
+        return argsURL("SESSION", "name");
+    }
+
     // Updates password for currently logged in user
     static public function update_password($new_password)
     {
@@ -125,7 +134,7 @@ class Authenticator
 
         $conn = connect("web");
         if (!$conn) {
-            log::die("ERROR: Connection to db failed" , __FILE__, __LINE__);
+            log::die("ERROR: Connection to db failed", __FILE__, __LINE__);
         }
 
         $query = $conn->prepare("UPDATE users SET passwd=?, last_password=NOW() WHERE username=?");
@@ -184,15 +193,15 @@ class Authenticator
         }
 
         $result = $query->fetch();
-        
-        if ($result === false){
+
+        if ($result === false) {
             log::die("Could not fetch results " . mysqli_error($conn), __FILE__, __LINE__);
         }
 
         $query->close();
         mysqli_close($conn);
 
-        if($result === null){
+        if ($result === null) {
             log::message("username $username is not found", __FILE__, __LINE__);
             return null;
         }

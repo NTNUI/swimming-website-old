@@ -1,20 +1,26 @@
 <?php
-$content = $_POST['content'];
-$header = $_POST['header'];
-$author = $_SESSION['navn'];
+$content = argsURL("POST", "content");
+$header = argsURL("POST", "header");
+$author = argsURL("SESSION", "name");
 
 if ($content != "" and $header != "" and $author != "") {
 
 	include_once("library/util/db.php");
 	$conn = connect("web");
-
+	if (!$conn) {
+		log::die("could not connect to database", __FILE__, __LINE__);
+	}
 	$sql = "INSERT INTO forside (overskrift, innhold, av, tid) VALUES (?, ?, ?, NOW())";
 	$query = $conn->prepare($sql);
+	if (!$query) {
+		log::die("could not prepare statement", __FILE__, __LINE__);
+	}
 	$query->bind_param("sss", $header, $content, $author);
-	if ($query->execute()) {
-		print "Innlegg postet";
-	} else {
-		print "Noe gikk til helvete";
+	if (!$query) {
+		log::die("could not bind parameters", __FILE__, __LINE__);
+	}
+	if (!$query->execute()) {
+		log::die("Could not execute query", __FILE__, __LINE__);
 	}
 
 	$query->close();
