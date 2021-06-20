@@ -99,7 +99,7 @@
 
 	function search() {
 		let query = document.querySelector("input[name=name]").value;
-		getJSON("<?php print $base_url ?>/api/dugnad?search=" + query, function(err, json) {
+		getJSON("<?php global $settings; print $settings["baseurl"] ?>/api/dugnad?search=" + query, function(err, json) {
 			if (err != null) {
 				alert("Noe gikk galt: " + err);
 				return;
@@ -121,7 +121,7 @@
 		let button_reject = document.getElementById("reject-" + id);
 		button_approve.disabled = true;
 		button_approve.innerText = "Godkjenner...";
-		getJSON("<?php print $base_url ?>/api/dugnad?approve=" + id, function(err, json) {
+		getJSON("<?php global $settings; print $settings["baseurl"]; ?>/api/dugnad?approve=" + id, function(err, json) {
 			if (err != null) {
 				alert("Noe gikk galt: " + err);
 				return;
@@ -138,7 +138,7 @@
 		let button_approve = document.getElementById("approve-" + id);
 		button_reject.disabled = true;
 		button_reject.innerText = "Melder avslag..."
-		getJSON("<?php print $base_url ?>/api/dugnad?reject=" + id, function(err, json) {
+		getJSON("<?php global $settings; print $settings["baseurl"]; ?>/api/dugnad?reject=" + id, function(err, json) {
 			if (err != null) {
 				alert("Noe gikk galt: " + err);
 				return;
@@ -152,7 +152,7 @@
 	}
 
 	function getMembers(num) {
-		getJSON("<?php print $base_url ?>/api/dugnad?getRandom=" + num, function(err, json) {
+		getJSON("<?php global $settings; print $settings["baseurl"]; ?>/api/dugnad?getRandom=" + num, function(err, json) {
 			if (err != null) {
 				alert("Noe gikk galt: " + err);
 				return;
