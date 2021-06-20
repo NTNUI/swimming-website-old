@@ -25,7 +25,7 @@ include_once("library/util/authenticator.php");
 $language = argsURL("REQUEST", "lang");
 $frm_side = argsURL("REQUEST", "side");
 $action = argsURL("REQUEST", "action");
-$user = argsURL("SESSION", "user");
+$user = argsURL("SESSION", "username");
 
 // Defaults
 $base_url = $settings["baseurl"];
