@@ -3,15 +3,15 @@
 // remove randoms from the internet
 
 session_start();
-if ($_SESSION['logged_in'] != 1){
+if (!Authenticator::is_logged_in()){
     header("HTTP/1.0 403 You need to log in first");
-    print("access denied");
-    return;
+    die("Access denied");
 }
 
 // remove peasents from styret
 if (!$access_control->can_access("api", "KID")) {
     header("HTTP/1.0 403 Forbidden");
+    log::message("Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
     die("You do not have access to this page");
 }
 
@@ -25,15 +25,17 @@ if (!$conn) {
 global $settings;
 $table = $settings["memberTable"];
 // TODO: remove unessesarry info
-$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost FROM " . $table . " WHERE `KID` = '' AND kontrolldato IS NOT NULL AND triatlon = 0";
+$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost FROM ${settings['memberTable']} WHERE `KID` = '' AND kontrolldato IS NOT NULL";
 
 $query = $conn->prepare($sql);
 if (!$query->execute()) {
-    print "error";
-    return;
+    log::die("Could not execute query",__FILE__, __LINE__);
 }
 
 $query->bind_result($id, $first, $last, $phone, $email);
+if(!$query){
+    log::die("Could not bind results", __FILE__, __LINE__);
+}
 $result = [];
 while($query->fetch()) {
     $result[] = array(
@@ -45,6 +47,7 @@ while($query->fetch()) {
 }
 $query->close();
 $conn->close();
+
 header("Content-type: application/json");
 print json_encode($result);
 return;

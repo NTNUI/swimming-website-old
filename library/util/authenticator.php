@@ -53,6 +53,14 @@ class Authenticator
         return argsURL("REQUEST", "action") == "logout";
     }
 
+    // @returns string|null
+    static public function get_username(){
+        if (!Authenticator::is_logged_in()){
+            return null;
+        }
+        return $_SESSION["username"];
+    }
+
     // Log out currently logged in user
     static public function log_out()
     {
