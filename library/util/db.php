@@ -1,5 +1,8 @@
 <?php
 // returns some sort of connection object on success and false on failure
+// TODO: look into https://github.com/ThingEngineer/PHP-MySQLi-Database-Class
+use function PHPSTORM_META\type;
+
 function connect($database)
 {
 	global $settings;
@@ -30,33 +33,27 @@ function connect($database)
 
 // TODO: test this function. If it works, refactor like crazy
 // Execute a command on a database. Value are stored in &$vars
-function exec_sqli($server, $sql, $bind_params, &...$vars)
+function exec_sqli($server, $sql, $bind_params, &...$result)
 {
-	$mysqli = connect($server);
-	if (!$mysqli) {
-		log::message("Failed to connect to database", __FILE__, __LINE__);
-		log::message(mysqli_connect_error(), __FILE__, __LINE__);
-		die();
+	$conn = connect($server);
+	if (!$conn) {
+		log::die("Failed to connect to database " . mysqli_connect_error(), __FILE__, __LINE__);
 	}
-	$query = $mysqli->prepare($sql);
+	$query = $conn->prepare($sql);
 	if (!$query) {
-		log::message("Failed to prepare querry", __FILE__, __LINE__);
-		log::message(mysqli_connect_error(), __FILE__, __LINE__);
-		die();
+		log::die("Failed to prepare query " . mysqli_error($conn), __FILE__, __LINE__);
 	}
-	$query->bind_param($bind_params, $vars); // might need unwrapping
+	$type = (gettype($bind_params))[0];
+	$query->bind_param($type, $bind_params); // might need unwrapping
 	if (!$query) {
-		log::message("Failed to prepare querry", __FILE__, __LINE__);
-		log::message(mysqli_connect_error(), __FILE__, __LINE__);
-		die();
+		log::die("Failed to bind_params query " . mysqli_error($conn), __FILE__, __LINE__);
 	}
 	$query->execute();
 	if (!$query) {
-		log::message("Failed to prepare querry", __FILE__, __LINE__);
-		log::message(mysqli_connect_error(), __FILE__, __LINE__);
-		die();
+		log::die("Failed to execute query " . mysqli_error($conn), __FILE__, __LINE__);
 	}
+	$query->bind_result($result);
 	// TODO: add bind result and shit
 	$query->close();
-	$mysqli->close();
+	$conn->close();
 }
