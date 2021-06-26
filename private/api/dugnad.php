@@ -9,9 +9,7 @@ function setDugnad(int $id, bool $value)
 {
 	global $settings;
 	$conn = connect("medlem");
-	if (!$conn) {
-		log::die("Could not connect to database", __FILE__, __LINE__);
-	}
+
 	$sql = "UPDATE ${settings['memberTable']} SET `harUtførtFrivilligArbeid`=? WHERE ID=?";
 	$query = $conn->prepare($sql);
 	if (!$query) {

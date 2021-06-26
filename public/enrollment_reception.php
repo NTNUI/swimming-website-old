@@ -113,9 +113,6 @@ if (!($firstName != "" && $_lastName != "" && $_birthDate != "" && $_gender != "
 }
 
 $conn = connect("medlem");
-if (!$conn) {
-	die("Connection failed: " . mysqli_connect_error());
-}
 
 $query = $conn->prepare("SELECT epost FROM " . $settings["memberTable"] . " WHERE epost=?");
 $query->bind_param("s", $_email);

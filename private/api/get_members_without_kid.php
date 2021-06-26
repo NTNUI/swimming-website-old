@@ -18,9 +18,6 @@ if (!$access_control->can_access("api", "KID")) {
 // connect to server
 include_once("library/util/db.php");
 $conn = connect("medlem");
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
 
 global $settings;
 $table = $settings["memberTable"];

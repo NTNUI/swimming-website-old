@@ -38,11 +38,6 @@ if (!$access_control->can_access("api", "KID")) {
 
 // connect to server
 $conn = connect("medlem");
-if (!$conn) {
-    log::message("Error: Could not connect to db", __FILE__, __LINE__);
-    die("Connection failed: " . mysqli_connect_error());
-}
-
 
 // Get values
 $ID = 0;

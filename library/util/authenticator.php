@@ -134,9 +134,6 @@ class Authenticator
         }
 
         $conn = connect("web");
-        if (!$conn) {
-            log::die("ERROR: Connection to db failed", __FILE__, __LINE__);
-        }
 
         $query = $conn->prepare("UPDATE users SET passwd=?, last_password=NOW() WHERE username=?");
         if (!$query) {
@@ -165,9 +162,6 @@ class Authenticator
         $sql = "SELECT name, passwd, last_password FROM svommer_web.users WHERE username=?";
 
         $conn = connect("web");
-        if (!$conn) {
-            log::die("Connection failed", __FILE__, __LINE__);
-        }
 
         $query = $conn->prepare($sql);
         if (!$query) {
@@ -219,9 +213,7 @@ class Authenticator
     {
         global $access_control;
         $conn = connect("web");
-        if (!$conn) {
-            log::die("could not connect to db", __FILE__, __LINE__);
-        }
+
         if (Authenticator::username_exists($username)) {
             log::message("username: $username already exists", __FILE__, __LINE__);
             return false;
@@ -247,9 +239,7 @@ class Authenticator
     static public function username_exists(string $username)
     {
         $conn = connect("web");
-        if(!$conn){
-            log::die("Could not connect to db", __FILE__, __LINE__);
-        }
+
         $sql = "SELECT COUNT(*) FROM users WHERE username=?";
         $query = $conn->prepare($sql);
         if (!$query) {

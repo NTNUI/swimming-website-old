@@ -7,10 +7,6 @@ if (!$access_control->can_access("admin", "memberCSV")) {
 
 $conn = connect("medlem");
 
-if (!$conn) {
-	die("Connection failed: " . mysqli_connect_error());
-}
-
 $access_control->log("admin/memberCSV", "generate");
 
 $sql = "SELECT * FROM ${settings['memberTable']} WHERE triatlon=0 AND YEAR(kontrolldato) = YEAR(NOW()) AND id IN (439, 440)";

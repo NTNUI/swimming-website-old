@@ -47,11 +47,6 @@
 		global $settings;
 		$conn = connect("medlem");
 
-		// Check connection
-		if (!$conn) {
-			die("Connection failed: " . mysqli_connect_error());
-		}
-
 		$sql = "SELECT id, regdato, etternavn, fornavn, kommentar, epost, gammelKlubb, triatlon FROM ${settings['memberTable']} WHERE kontrolldato IS NULL OR YEAR(kontrolldato) <> DATE('y') ORDER BY id DESC";
 
 		$query = $conn->prepare($sql);

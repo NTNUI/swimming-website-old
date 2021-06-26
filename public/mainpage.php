@@ -51,10 +51,6 @@
 	<?php
 
 	$conn = connect("web");
-	// Check connection
-	if (!$conn) {
-	    die("Connection failed: " . mysqli_connect_error());
-	}
 
 	$month_limit = 6*30; // 6 months, has to be in days
 	$amount_limit = 5; // Maximum amount of posts

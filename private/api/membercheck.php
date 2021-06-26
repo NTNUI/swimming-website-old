@@ -3,12 +3,6 @@
 // TODO: replace error handling with log class
 
 $conn = connect("medlem");
-if(!$conn){
-	header('HTTP/1.1 500 Internal Server Error');
-	print("Failed to establish connection to database in memmbercheck\n");
-	print(mysqli_connect_error($conn));
-	die();
-}
 
 $sql = "SELECT fornavn, etternavn FROM ${settings['memberTable']} WHERE YEAR(kontrolldato)=YEAR(now()) AND etternavn=? ORDER BY fornavn, etternavn";
 

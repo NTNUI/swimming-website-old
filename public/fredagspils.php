@@ -2,25 +2,22 @@
 // Guess new board starts every 1st of february
 $genfors = strtotime("first day of february" . (date("m") < 2 ? " last year" : ""));
 $conn = connect("web");
-if (!$conn) {
-	log::die("Could not connect to database", __FILE__, __LINE__);
-}
 
 $query = $conn->prepare("SELECT users.name, beers.date FROM friday_beer as beers JOIN users ON users.id = beers.user_id WHERE (beers.date > ? AND users.role IN (2, 5, 6)) ORDER BY beers.user_id, beers.date");
-if (!$conn) {
+if (!$query) {
 	log::die("Could not prepare statement", __FILE__, __LINE__);
 }
 $query->bind_param("s", date("Y-m-d", $genfors));
-if (!$conn) {
+if (!$query) {
 	log::die("Could not bind parameters", __FILE__, __LINE__);
 }
 $query->execute();
-if (!$conn) {
+if (!$query) {
 	log::die("Could not execute query", __FILE__, __LINE__);
 }
 
 $query->bind_result($username, $date);
-if (!$conn) {
+if (!$query) {
 	log::die("Could not bind results", __FILE__, __LINE__);
 }
 $result = array();

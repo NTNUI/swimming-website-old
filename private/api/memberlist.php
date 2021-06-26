@@ -7,9 +7,6 @@ if ($_SESSION['logged_in'] != 1) {
 }
 // Connect to server
 $conn = connect("medlem");
-if (!$conn) {
-	die("Connection failed: " . mysqli_connect_error());
-}
 
 $sql = "SELECT id, regdato, etternavn, fornavn, kommentar, epost FROM " . $settings["memberTable"] . " WHERE kontrolldato IS NULL OR YEAR(kontrolldato) <> YEAR(NOW()) ORDER BY regdato";
 $query = $conn->prepare($sql);

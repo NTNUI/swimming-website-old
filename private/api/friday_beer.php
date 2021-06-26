@@ -1,25 +1,25 @@
 <?php
+// TODO: Refactor this file
+
 $result = array("error" => "Not implemented");
 if (isset($_GET["register"])) {
 	$username = $_GET["register"];
 	$conn = connect("web");
-	if (!$conn) {
-		log::die("could not connect to database", __FILE__, __LINE__);
-	}
+
 	$query = $conn->prepare("SELECT id FROM users WHERE username=?");
-	if (!$conn) {
+	if (!$query) {
 		log::die("could not prepare statement", __FILE__, __LINE__);
 	}
 	$query->bind_param("s", $username);
-	if (!$conn) {
+	if (!$query) {
 		log::die("could not bind params", __FILE__, __LINE__);
 	}
 	$query->execute();
-	if (!$conn) {
+	if (!$query) {
 		log::die("could not execute query", __FILE__, __LINE__);
 	}
 	$query->bind_result($id);
-	if (!$conn) {
+	if (!$query) {
 		log::die("could not bind results", __FILE__, __LINE__);
 	}
 	if ($query->fetch()) {

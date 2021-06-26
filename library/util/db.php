@@ -9,26 +9,21 @@ function connect($database)
 	mysqli_report(MYSQLI_REPORT_ALL ^ MYSQLI_REPORT_INDEX); // TODO: remove MYSQLI_REPORT_INDEX. right now it is crashing some parts in access_control. They need to be fixed first.
 
 	$database = $settings["SQL_server"]["databases"][$database];
-	$servername = $settings["SQL_server"]["servername"];
+	$server_name = $settings["SQL_server"]["servername"];
 	$username = $settings["SQL_server"]["username"];
 	$password = $settings["SQL_server"]["password"];
 
 	if (!$database) {
-		log::message("Failed to retrieve database name", __FILE__, __LINE__);
-		return false;
+		log::die("Failed to retrieve database name", __FILE__, __LINE__);
 	}
-	$mysqli = mysqli_connect($servername, $username, $password, $database);
-	if (!$mysqli) {
-		log::message("Failed to connect to database", __FILE__, __LINE__);
-		log::message(mysqli_connect_error(), __FILE__, __LINE__);
-		return false;
+	$conn = mysqli_connect($server_name, $username, $password, $database);
+	if (!$conn) {
+		log::die("Failed to connect to database: " . mysqli_connect_error(), __FILE__, __LINE__);
 	}
-	if (!$mysqli->set_charset("utf8")) {
-		log::message("Failed to set utf8 charset", __FILE__, __LINE__);
-		log::message(mysqli_error($mysqli), __FILE__, __LINE__);
-		return false;
+	if (!$conn->set_charset("utf8")) {
+		log::die("Failed to set utf8 charset: " . mysqli_error($conn), __FILE__, __LINE__);
 	}
-	return $mysqli;
+	return $conn;
 }
 
 // TODO: test this function. If it works, refactor like crazy
@@ -36,9 +31,7 @@ function connect($database)
 function exec_sqli($server, $sql, $bind_params, &...$result)
 {
 	$conn = connect($server);
-	if (!$conn) {
-		log::die("Failed to connect to database " . mysqli_connect_error(), __FILE__, __LINE__);
-	}
+
 	$query = $conn->prepare($sql);
 	if (!$query) {
 		log::die("Failed to prepare query " . mysqli_error($conn), __FILE__, __LINE__);

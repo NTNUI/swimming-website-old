@@ -7,9 +7,6 @@ if ($content != "" and $header != "" and $author != "") {
 
 	include_once("library/util/db.php");
 	$conn = connect("web");
-	if (!$conn) {
-		log::die("could not connect to database", __FILE__, __LINE__);
-	}
 	$sql = "INSERT INTO forside (overskrift, innhold, av, tid) VALUES (?, ?, ?, NOW())";
 	$query = $conn->prepare($sql);
 	if (!$query) {
