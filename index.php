@@ -23,25 +23,24 @@ include_once("library/util/authenticator.php");
 
 // Get request
 $language = argsURL("REQUEST", "lang");
-$frm_side = argsURL("REQUEST", "side");
+$page = argsURL("REQUEST", "side");
 $action = argsURL("REQUEST", "action");
 $user = argsURL("SESSION", "username");
 
 // Defaults
 $base_url = $settings["baseurl"];
 if ($language == "") $language = $settings["defaults"]["language"];
-if ($frm_side == "") $frm_side = $settings["defaults"]["landing-page"];
-$side = "$frm_side.php";
+if ($page == "") $page = $settings["defaults"]["landing-page"];
 
 //Translator
-$t = new Translator($frm_side, $language);
+$t = new Translator($page, $language);
 
 //Get access rules
 $access_control = new AccessControl($user);
 
 // handle the request
-if (isValidURL($frm_side)) {
-	switch ($frm_side) {
+if (isValidURL($page)) {
+	switch ($page) {
 		case "api":
 
 			// file does not exist
@@ -53,13 +52,13 @@ if (isValidURL($frm_side)) {
 			return;
 		default:
 			// file does not exist
-			if (!file_exists("public/$side")) {
+			if (!file_exists("public/$page.php")) {
 				break;
 			}
 
 			// valid file, accept request
 			include("library/templates/header.php");
-			include("public/$side");
+			include("public/$page.php");
 			include("library/templates/footer.php");
 			return;
 	}
