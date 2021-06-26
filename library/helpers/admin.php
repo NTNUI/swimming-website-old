@@ -125,10 +125,12 @@ function access_link($page, $inline = false)
 	$link = $t->get_url("admin/$page");
 	$text = $t->get_translation("admin_$page");
 
-	print("<button onclick=window.location.href='$link'>$text</button>");
+	print("<button onclick=window.location.href='$link'>");
 	if (!$access_control->can_access("admin", $page)) {
 		print("<span>&#x1f512;</span>"); // padlock emoji
 	}
+	print("$text</button>");
+
 	if (!$inline) {
 		print("<br>");
 	}
