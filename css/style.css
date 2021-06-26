@@ -313,7 +313,7 @@ span.left {
 }
 
 .red {
-    background-color: red;
+    background-color: red !important;
 }
 
 .lds-hourglass {
