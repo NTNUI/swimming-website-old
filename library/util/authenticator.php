@@ -126,11 +126,9 @@ class Authenticator
         return argsURL("SESSION", "name");
     }
 
-    // Updates password for currently logged in user
-    static public function update_password($new_password)
+    // set new password
+    static public function change_password($username, $new_password)
     {
-        $username = argsURL("SESSION", "username");
-
         if (!Authenticator::is_logged_in() || !$username) {
             log::die("ERROR: User is not logged in", __FILE__, __LINE__);
         }
@@ -215,5 +213,61 @@ class Authenticator
         $_SESSION["password_date"] = $password_date;
         $_SESSION["name"] = $name;
         return $password_hash;
+    }
+
+    static public function create_user(string $username, string $password)
+    {
+        global $access_control;
+        $conn = connect("web");
+        if (!$conn) {
+            log::die("could not connect to db", __FILE__, __LINE__);
+        }
+        if (Authenticator::username_exists($username)) {
+            log::message("username: $username already exists", __FILE__, __LINE__);
+            return false;
+        }
+        $sql = "INSERT INTO users (username, name, passwd) VALUES(?, ?, ?)";
+        $query = $conn->prepare($sql);
+        if(!$query){
+            log::die("Failed to prepare statement", __FILE__, __LINE__);
+        }
+        $password_hash = password_hash($password, PASSWORD_DEFAULT);
+        $query->bind_param("sss", $username, $name, $password_hash);
+        if (!$query) {
+            log::die("could not bind params " . mysqli_error($conn), __FILE__, __LINE__);
+        }
+        if (!$query->execute()) {
+            log::die("Could not execute query", __FILE__, __LINE__);
+        }
+        $query->close();
+        $access_control->log("admin/users", "create user", $username);
+        return true;
+    }
+
+    static public function username_exists(string $username)
+    {
+        $conn = connect("web");
+        if(!$conn){
+            log::die("Could not connect to db", __FILE__, __LINE__);
+        }
+        $sql = "SELECT COUNT(*) FROM users WHERE username=?";
+        $query = $conn->prepare($sql);
+        if (!$query) {
+            log::die("Could not execute query", __FILE__, __LINE__);
+        }
+        $query->bind_param("s", $username);
+        if (!$query) {
+            log::die("Could not bind params", __FILE__, __LINE__);
+        }
+        $result = 0;
+        if (!$query->execute()) {
+            log::die("Could not execute query", __FILE__, __LINE__);
+        }
+        if (!$query->bind_result($result)) {
+            log::die("Could not bind results", __FILE__, __LINE__);
+        }
+        $query->fetch();
+        $query->close();
+        return (bool)$result;
     }
 };
