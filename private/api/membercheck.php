@@ -1,9 +1,12 @@
 <?php
+// TODO: Add authentication to this api
+// TODO: replace error handling with log class
+
 $conn = connect("medlem");
 if(!$conn){
 	header('HTTP/1.1 500 Internal Server Error');
 	print("Failed to establish connection to database in memmbercheck\n");
-	print(mysqli_error($conn));
+	print(mysqli_connect_error($conn));
 	die();
 }
 

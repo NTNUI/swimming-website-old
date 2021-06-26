@@ -1,4 +1,7 @@
 <?php
+// TODO: new function: Generate random password
+// TODO: new function: require password reset on user_id
+// TODO: merge with access_control class
 
 // Static class Authenticator provides object less authentication services.
 class Authenticator

@@ -1,3 +1,9 @@
+<?php
+// TODO: Move styling into css file
+// TODO: move to private/admin
+
+?>
+
 <style>
 
 input[type=button] {
