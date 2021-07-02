@@ -19,6 +19,7 @@ class log
     static function die($message, $file = __FILE__, $line = __LINE__)
     {
         global $settings;
+        header('HTTP/1.1 500 Internal Server Error');
         error_log(basename($file) . ":" . $line . " " . $message);
         error_log(print_r(debug_backtrace(), true));
         print("<script>alert('The site has crashed. The developers have now been informed and will resolve the issue as soon as possible. Sorry for the inconvenience.')</script>");

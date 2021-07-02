@@ -3,9 +3,8 @@
 
 $conn = connect("web");
 
+// get roles
 $roles = array();
-$users = array();
-
 $sql = "SELECT id, name FROM roles";
 $query = $conn->prepare($sql);
 $query->execute();
@@ -15,6 +14,8 @@ while ($query->fetch()) {
 }
 $query->close();
 
+// get users
+$users = array();
 $sql = "SELECT id, username FROM users";
 $query = $conn->prepare($sql);
 $query->execute();
@@ -30,6 +31,7 @@ $userrules = array();
 $roleId = intval($_REQUEST["role"]);
 $userId = intval($_REQUEST["user"]);
 $type = $_REQUEST["type"];
+
 if ($type != "") {
 	$table = "";
 	$id = $_REQUEST["key"];

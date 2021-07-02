@@ -9,61 +9,54 @@
 		cursor: default;
 	}
 
-	h2 {
+	h3 {
 		margin: 0;
 	}
 </style>
 
 <?php include_once("library/util/store_helper.php");
 $store = new StoreHelper($language);
-$item_id = isset($_GET["item_id"]);
-log::message("item_id: $item_id", __FILE__, __LINE__);
 
-$add = isset($_POST["add"]); 
+$item_id = argsURL("GET", "item_id");
+$add = argsURL("POST", "add");
 
-if (isset($_GET["item_id"])) {
-	$item = $store->get_item($_GET["item_id"]);
+if ($item_id) {
+	$item = $store->get_item($item_id);
 	if ($item === false) {
 		print "Den tingen er ikke i butikken";
 		return;
 	}
-	print "<h1>Liste over kjøp av " . $item["name"] . "</h1>";
+	print "<div class='box'><h2>Liste over kjøp av " . $item["name"] . "</h2>";
+
+	// Get order information for item_id
 	include_once("library/util/db.php");
 	$conn = connect("web");
 	$sql = "SELECT id, name, email, phone, kommentar, order_status FROM store_orders WHERE item_id=? AND (order_status='FINALIZED' OR order_status='DELIVERED') ORDER BY FIELD(order_status, 'FINALIZED', 'DELIVERED')";
 	$query = $conn->prepare($sql);
 	if (!$query) {
-		header('HTTP/1.1 500 Internal Server Error');
-		log::message("Failed to prepare query in store", __FILE__, __LINE__);
-		die();
+		log::die("Failed to prepare query in store", __FILE__, __LINE__);
 	}
 
 	$query->bind_param("i", $item["id"]);
 	if (!$query) {
-		header('HTTP/1.1 500 Internal Server Error');
-		log::message("Failed to bind parameters in store", __FILE__, __LINE__);
-		die();
+		log::die("Failed to bind parameters in store", __FILE__, __LINE__);
 	}
 
 	$query->execute();
 	if (!$query) {
-		header('HTTP/1.1 500 Internal Server Error');
-		log::message("Failed to execute query in membercheck", __FILE__, __LINE__);
-		die();
+		log::die("Failed to execute query", __FILE__, __LINE__);
 	}
 
 	$query->bind_result($id, $name, $email, $phone, $kommentar, $status);
 	if (!$query) {
-		header('HTTP/1.1 500 Internal Server Error');
-		log::message("Failed to bind result in store", __FILE__, __LINE__);
-		die();
+		log::die("Failed to bind results", __FILE__, __LINE__);
 	}
 
 	while ($query->fetch()) {
 		$name = htmlspecialchars($name);
 		$email = htmlspecialchars($email);
 		print "<div id='box-$id' class='box" . ($status == "DELIVERED" ? " green" : "") . "'>";
-		print "<h1>$name</h1>";
+		print "<h3>$name</h3>";
 		print "Kontakt: &lt;<a href='mailto:$email'>$email</a>&gt; (Tlf: $phone)<br>";
 		if ($kommentar != "") {
 			print "Kommentar: " . htmlspecialchars($kommentar) . "<br>";
@@ -73,12 +66,13 @@ if (isset($_GET["item_id"])) {
 
 		print "</div>";
 	}
+	print("</div>");
 	$query->close();
 	$conn->close();
 ?>
 	<script type="text/javascript">
 		function mark_delivered(item_id, id) {
-			fetch("https://org.ntnu.no/svommer/api/storeadmin?type=mark_delivered&item_id=" + item_id + "&id=" + id)
+			fetch("api/storeadmin?type=mark_delivered&item_id=" + item_id + "&id=" + id)
 				.then((data) => data.json)
 				.then((json) => {
 					if (json.error) {
@@ -202,9 +196,9 @@ if (isset($_GET["item_id"])) {
 </div>
  */ ?>
 	<div class="box">
-		<h2>
+		<h3>
 			Salgsvarer
-		</h2>
+		</h3>
 		<label for="">Dobbeltklikk for å se salg</label>
 		<div id="items"></div>
 
@@ -328,14 +322,15 @@ if (isset($_GET["item_id"])) {
 			},
 			rowDblClick: function(e, row) {
 				const data = row.getData();
-				window.location.assign("<?php print $base_url ?>/admin/store?item_id=" + data.api_id);
+				window.location.assign("<?php global $base_url;
+										print $base_url ?>/admin/store?item_id=" + data.api_id);
 			}
 		});
 	</script>
 
 	<div id="add_container">
 		<div class="box">
-			<h2>Priskalkulator</h2>
+			<h3>Priskalkulator</h3>
 			<label for="">Pris uten avgifter</label>
 			<br>
 			<input type="number" name="" value="0" id="price-input" style="width: 50%;">
@@ -346,13 +341,13 @@ if (isset($_GET["item_id"])) {
 		</div>
 
 		<div class="box">
-			<h2>Legg til ny ting i butikken</h2>
+			<h3>Legg til ny ting i butikken</h3>
 			<form method="POST" enctype="multipart/form-data">
 				<label for="name_no">Tittel (Norsk):</label>
 				<input name="name_no" type="text" required />
 				<label for="name_en">Tittel (Engelsk):</label>
 				<input name="name_en" type="text" />
-				<label for="description_no">Beskrivelse (Norsk): (<a href="https://en.wikipedia.org/wiki/Cross-site_scripting" target="_blank">HTML er støttet</a>)</label>
+				<label for="description_no">Beskrivelse (Norsk): (HTML er støttet)</label>
 				<textarea name="description_no"></textarea>
 				<label for="description_en">Beskrivelse (Engelsk):</label>
 				<textarea name="description_en"></textarea>
@@ -382,7 +377,7 @@ if (isset($_GET["item_id"])) {
 		}
 
 		function set_visibility(id, visibility) {
-			fetch("https://org.ntnu.no/svommer/api/storeadmin?type=set_visibility&item_id=" + id + "&visibility=" + visibility)
+			fetch("api/storeadmin?type=set_visibility&item_id=" + id + "&visibility=" + visibility)
 				.then((data) => data.json())
 				.then((json) => {
 					if (json.error) {
@@ -406,3 +401,7 @@ if (isset($_GET["item_id"])) {
 		}
 	</script>
 <?php }
+
+function get_order_info_for_item_id(int $item_id){
+	
+}
