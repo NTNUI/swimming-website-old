@@ -1,0 +1,35 @@
+{
+    "baseurl": "https://127.0.0.1",
+    "memberTable": "medlem",
+    "translations_dir": "translations",
+    "captcha_key": "6LdrnW8UAAAAAIDoJVmceXJ_DxkmlqHMMwF3r4I1",
+    "stripe": {
+        "secret_key": "sk_test_8NXxtSWrHXG33iGpr07ec3fo",
+        "publishable_key": "pk_test_JkjQkK0cGEWUQ0NUWh6LytP8"
+    },
+    "emails": {
+        "leader": "svomming-leder@ntnui.no",
+        "developer": "svomming-teknisk@ntnui.no",
+        "analyst": "svomming-kasserer@ntnui.no",
+        "coach": "svomming-trener@ntnui.no",
+        "bot-general": "svomming-noreply@ntnui.no"
+    },
+    "SQL_server": {
+        "servername": "127.0.0.1",
+        "username": "svommer_web",
+        "password": "testing_password",
+        "databases": {
+            "medlem": "svommer_medlem",
+            "web": "svommer_web"
+        }
+    },
+    "registration_close": {
+        "month": "december",
+        "date": 1
+    },
+    "defaults": {
+        "language": "no",
+        "landing-page": "mainpage",
+        "licence_key": "NSFLicence2021"
+    }
+}

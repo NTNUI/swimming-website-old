@@ -1,0 +1,64 @@
+version: "3.9"
+services:
+# web is the web site application
+    web:
+        build: .
+        container_name: web
+        ports:
+            - 80:80
+            - 443:443
+        depends_on:
+            - mariadb
+        networks:
+            - epstein-didnt-kill-himself
+        volumes:
+            - log:/var/log
+            - .:/srv/http/
+# MariaDB is the database
+    mariadb:
+        image: mariadb
+        container_name: mariadb
+        environment:
+            - MYSQL_ROOT_HOST=%
+            - MYSQL_RANDOM_ROOT_PASSWORD=yes
+            - MYSQL_USER=svommer_web
+            - MYSQL_PASSWORD=testing_password
+        volumes:
+            - ~/.config/docker/storage/mariabd:/var/lib/mysql
+            - log:/var/log/
+        networks:
+            - epstein-didnt-kill-himself
+# phpmyadmin can manange the database visually
+    phpmyadmin:
+        image: phpmyadmin
+        container_name: phpmyadmin
+        ports:
+            - 42069:80
+        environment:
+            - PMA_HOST=mariadb
+        depends_on:
+            - mariadb
+# Loggger logs messages from web container. Because it cannot do it by it self for some reason    
+    logger:
+        image: alpine
+        container_name: logger
+        volumes:
+            - log:/log
+        command: "tail -f /log/php.log"
+        depends_on:
+            - web
+        restart: always
+
+networks:
+    epstein-didnt-kill-himself:
+        driver: bridge
+        ipam:
+          config:
+          - subnet: 172.24.0.0/24
+
+volumes:
+    log:
+
+
+# TODO: move mariadb->volumes to env file. That is host system dependent.
+# TODO: tons of warnigs while running docker-compose up. Fix those

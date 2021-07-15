@@ -1,0 +1,7 @@
+settings/sessings.json
+sessions/*
+logs
+log
+cgi-bin/
+.vscode
+.git

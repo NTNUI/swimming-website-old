@@ -1,9 +1,10 @@
+settings/settings.json
 sessions/*
+log/
 img/
 filer/
+cgi-bin/
 *.swp
 *.save
-settings/settings.json
 .vscode
-log/
 .htaccess
