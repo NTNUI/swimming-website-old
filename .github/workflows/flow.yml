@@ -1,8 +1,9 @@
 name: General CI/CD
 
-on: [push]
-branches:
-  - master
+on:
+  push:
+    branches:
+      - master
 jobs:
   depoloy:
     runs-on: ubuntu-latest
