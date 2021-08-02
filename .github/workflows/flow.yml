@@ -1,7 +1,7 @@
 name: General CI/CD
 
 on: [push]
-branch:
+branches:
   - master
 jobs:
   depoloy:
