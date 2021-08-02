@@ -4,15 +4,15 @@ on: [push]
 branch: master
 jobs:
   depoloy:
-  - name: checkout
-    uses: actions/checkout@master
-
-  - name: deploy
-    id: funny-deploy
-    uses: BoatNg/funny-deploy@master
-    env:
-      REMOTE_HOST: "${{ secrets.REMOTE_HOST }}"
-      REMOTE_USER: "${{ secrets.REMOTE_USER }}"
-      REMOTE_PASSWORD: "${{ secrets.REMOTE_PASSWORD }}"
-      REMOTE_PATH: "{{ secrets.REMOTE_PATH }}"
-      SOURCE: "."
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Deploy
+      id: funny-deploy
+      uses: BoatNg/funny-deploy@master
+      env:
+        REMOTE_HOST: "${{ secrets.REMOTE_HOST }}"
+        REMOTE_USER: "${{ secrets.REMOTE_USER }}"
+        REMOTE_PASSWORD: "${{ secrets.REMOTE_PASSWORD }}"
+        REMOTE_PATH: "{{ secrets.REMOTE_PATH }}"
+        SOURCE: "."
