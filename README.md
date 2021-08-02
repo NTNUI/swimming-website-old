@@ -88,3 +88,5 @@ Database does not create it self. Fix that. Need a script that:
 Currently web image are running the front end and the API. If we manage to split those two then we will be able to host the front end on any web page while preserving all out functions. For we can keep just the database and the API for it on org.ntnu.no and create a new front end on ntnui.no/svomming (or any other site we want)
 
 TODO: Convert images to use Alpine Linux
+
+hei på deg kjøttdeig
