@@ -116,8 +116,7 @@
 		let button = document.querySelector("#medlem-" + id).querySelector("button");
 		button.disabled = true;
 		button.innerText = "Godkjenner....";
-		getJSON("<?php global $settings;
-					print $settings["baseurl"]; ?>/api/memberregister?id=" + id, function(err, json) {
+		getJSON("<?php global $settings; print $settings['baseurl']; ?>/api/memberregister?id=" + id, function(err, json) {
 			if (err == null && json.success) {
 				button.disabled = true;
 				button.innerText = "Godkjent";

@@ -16,15 +16,17 @@ function isTri($string)
 	return 0;
 }
 
+// SECTION: Pay in enrollment
+
 // $licence_key = "NSFLicence2019";
-$licence_key = $settings["defaults"]["licence_key"];
+// $licence_key = $settings["defaults"]["licence_key"];
 
-$t->load_translation("store");
-include_once("library/util/store_helper.php");
-$store = new StoreHelper($language);
-
-$item = $store->get_item($licence_key);
-$item["id"] = $item["api_id"];
+// $t->load_translation("store");
+// include_once("library/util/store_helper.php");
+// $store = new StoreHelper($language);
+//
+// $item = $store->get_item($licence_key);
+// $item["id"] = $item["api_id"];
 
 // Get post data
 $firstName 		= $_POST['fornavn'];
@@ -35,7 +37,7 @@ $gender 		= $_POST['gender'];
 $proficient 	= $_POST['dyktig'];
 $voluntaryWork  = $_POST['dugnad'];
 $zipCode 		= $_POST['zip'];
-$adress 		= $_POST['adresse'];
+$address 		= $_POST['adresse'];
 $email 			= $_POST['email'];
 $cardNumber		= $_POST['kortnummer'];
 $comment 		= $_POST['beskjed'];
@@ -44,7 +46,7 @@ $oldClub 		= $_POST['gammelKlubb'];
 $triatlon 		= isTri($oldClub);
 
 if ($voluntaryWork == "") {
-	$dugnaf = FALSE;
+	$voluntaryWork = FALSE;
 }
 if ($gender == "") {
 	$gender = FALSE;
@@ -72,21 +74,21 @@ if (!ctype_digit($cardNumber)) {
 	return;
 }
 
-// ikke Svømmedyktig
+// Not proficient in swimming
 if ($proficient !== "Yes") {
 	handle_error("error_dyktig");
 	return;
 }
 
 // Captia
-$secret = $settings["captia_key"];
+$secret = $settings["captcha_key"];
 
 $token = $_POST['g-recaptcha-response'];
 $url = "https://www.google.com/recaptcha/api/siteverify";
 $url .= "?secret=$secret";
 $url .= "&response=$token";
 
-//Check captcha result with google
+// Check captcha result with google
 $ch = curl_init($url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 $verify = curl_exec($ch);
@@ -105,8 +107,8 @@ if (!$decoded->success) {
 	return;
 }
 
-if (!($firstName != "" && $_lastName != "" && $_birthDate != "" && $_gender != "" && $_proficient != ""
-	&& $_voluntaryWork != "" && $_zipCode != "" && $_adress != "" && $_email != "" && $_cardNumber != "" && $_phoneNumber != "" && is_numeric($_cardNumber))) {
+if (!($firstName != "" && $lastName != "" && $birthDate != "" && $gender != "" && $proficient != ""
+	&& $voluntaryWork != "" && $zipCode != "" && $address != "" && $email != "" && $cardNumber != "" && $phoneNumber != "" && is_numeric($cardNumber))) {
 	//hvis noen fyller ut mennesketest men glemmer noen av de andre obligatoriske feltene
 	handle_error("error_empty");
 	return;
@@ -115,7 +117,7 @@ if (!($firstName != "" && $_lastName != "" && $_birthDate != "" && $_gender != "
 $conn = connect("medlem");
 
 $query = $conn->prepare("SELECT epost FROM " . $settings["memberTable"] . " WHERE epost=?");
-$query->bind_param("s", $_email);
+$query->bind_param("s", $email);
 $query->execute();
 $_emailFound = $query->fetch();
 //User found
@@ -139,7 +141,7 @@ if ($_emailFound) {
 	$sql = "INSERT INTO " . $settings["memberTable"] . "(kjonn, fodselsdato, etternavn, fornavn, phoneNumber, adresse, epost,  kommentar ,kortnr, postnr, regdato, gammelKlubb, triatlon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)";
 
 	$append = $conn->prepare($sql);
-	$append->bind_param("ssssssssiiss", $_gender, $_birthDate, $_lastName, $_firstName, $_phoneNumber, $_adress, $_email, $_comment, $_cardNumber, $_zipCode, $oldClub, $triatlon);
+	$append->bind_param("ssssssssiiss", $gender, $birthDate, $lastName, $firstName, $phoneNumber, $address, $email, $comment, $cardNumber, $zipCode, $oldClub, $triatlon);
 	if (!$append->execute()) {
 		echo "Error: " . $sql . "<br>" . mysqli_error($conn);
 		$append->close();
@@ -149,12 +151,12 @@ if ($_emailFound) {
 	}
 
 	$sendTo = $settings["emails"]["analyst"];
-	$headers .= "Ny medlem registrert, logg på adminsiden for mer info";
+	$headers = "Ny medlem registrert, logg på adminsiden for mer info";
 	$from = $settings["emails"]["bot-general"];
 
 	// Depends on the accountant, but many prefer not to get a mail for each new member
+	// TODO: export to some setting somewhere, somehow.
 	if(false){
-		// ADVARSEL: hvis Content-type: blir endret til text/html må variablene som går inn i $headers saniteres mot html injection #Pavel
 		mail($sendTo, "NTNUI-Svømming: Nytt medlem", $headers, "From: $from\r\nContent-type: text/plain; charset=utf-8");
 	}
 

@@ -11,7 +11,7 @@ function sendEmail($emailAdress){
 	$from = "svomming-kasserer@ntnui.no";
 
 	// norwegian
-	$headers .= "Dette er en automatisk e-post sendt av NTNUI-Svømmegruppas medlemssystem. <br>";
+	$headers = "Dette er en automatisk e-post sendt av NTNUI-Svømmegruppas medlemssystem. <br>";
 	$headers .= "Din innmelding er registrert og godkjent i vår database.<br>";
 	$headers .= "Du kan gå til skranken i Pirbadet og hente ut ditt adgangskort nå. Husk at resepsjonen stenger 30 min før badet stenger for publikum (20:30). Sjekk ut Pirbadet sine <a href='https://pirbadet.no'>nettsider</a>.<br>";
 	$headers .= "<strong>PGA COVID-19 MÅ ALLE REGISTRERE SEG FØR TRENING. MER INFORMASJON I FACEBOOKGRUPPEN https://www.facebook.com/groups/2250060697</strong><br>";
@@ -35,7 +35,7 @@ function sendEmail($emailAdress){
 // Create connection
 $conn = connect("medlem");
 
-//Register user
+// Get id
 if (!isset($_REQUEST['id'])) {
 	header("HTTP/1.0 400 Bad request");
 	die("You need to supply an id to register");
@@ -43,6 +43,7 @@ if (!isset($_REQUEST['id'])) {
 
 $id = $_REQUEST['id'];
 
+// Register user
 $sql = "UPDATE ${settings['memberTable']} SET kontrolldato=NOW() WHERE id=?";
 $query = $conn->prepare($sql);
 $query->bind_param("i", $id);
@@ -53,8 +54,10 @@ if (!$query->execute()) {
 }
 $query->close();
 
+// log action
 $access_control->log("api/memberregister", "approve", $id);
 
+// send confirmation email to user
 $sql = "SELECT fornavn, etternavn, epost FROM ${settings['memberTable']} WHERE id=?";
 $query = $conn->prepare($sql);
 $query->bind_param("i", $id);
@@ -67,6 +70,7 @@ if (!$query->fetch()) {
 
 sendEmail($epost);
 
+// Return success to admin client
 header("Content-Type: application/json");
 print(json_encode(array(
 	"fornavn" => $fornavn,
