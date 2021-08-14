@@ -28,9 +28,9 @@ $query->close();
 $rolerules = array();
 $userrules = array();
 
-$roleId = intval($_REQUEST["role"]);
-$userId = intval($_REQUEST["user"]);
-$type = $_REQUEST["type"];
+$roleId = intval(argsURL("REQUEST", "role"));
+$userId = intval(argsURL("REQUEST", "user"));
+$type = argsURL("REQUEST", "type");
 
 if ($type != "") {
 	$table = "";
