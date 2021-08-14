@@ -129,7 +129,7 @@ if ($page != "" and file_exists("$dir/$page.json")) {
 
 		bindInputs();
 
-		var requesturl = "<?php print $settings['baseurl'] . "/api/translations?page=$page" ?>";
+    var requesturl = "<?php print $settings['baseurl'] . "/api/translations?page=$page" ?>";
 
 		function sendJSON() {
 			fetch(requesturl, {
