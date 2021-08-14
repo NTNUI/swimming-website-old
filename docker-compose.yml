@@ -18,6 +18,8 @@ services:
     mariadb:
         image: mariadb
         container_name: mariadb
+        ports:
+            - 3306:3306
         environment:
             - MYSQL_ROOT_HOST=%
             - MYSQL_RANDOM_ROOT_PASSWORD=yes
@@ -38,6 +40,8 @@ services:
             - PMA_HOST=mariadb
         depends_on:
             - mariadb
+        networks:
+            - epstein-didnt-kill-himself
 # Loggger logs messages from web container. Because it cannot do it by it self for some reason    
     logger:
         image: alpine
