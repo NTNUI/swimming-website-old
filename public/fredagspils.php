@@ -2,8 +2,11 @@
 // Guess new board starts every 1st of february
 $genfors = strtotime("first day of february" . (date("m") < 2 ? " last year" : ""));
 $conn = connect("web");
+$role_board_member = 2;
+$role_cashier = 5;
+$role_superadmin = 6;
 
-$query = $conn->prepare("SELECT users.name, beers.date FROM friday_beer as beers JOIN users ON users.id = beers.user_id WHERE (beers.date > ? AND users.role IN (2, 5, 6)) ORDER BY beers.user_id, beers.date");
+$query = $conn->prepare("SELECT users.name, beers.date FROM friday_beer as beers JOIN users ON users.id = beers.user_id WHERE (beers.date > ? AND users.role IN ($role_board_member, $role_cashier, $role_superadmin)) ORDER BY beers.user_id, beers.date");
 if (!$query) {
 	log::die("Could not prepare statement", __FILE__, __LINE__);
 }
