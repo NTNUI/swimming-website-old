@@ -10,7 +10,7 @@ if ($page != "" and file_exists("$dir/$page.json")) {
 	$text = json_decode(file_get_contents("$dir/$page.json"));
 	
 	?>
-	<label>Redigerer side: <?php print($page);?> - <a href='<?php print($settings["base_url"]);?>/admin/translations'>Tilbake til listen</a></label>
+	<label>Redigerer side: <?php print($page);?> - <a href='<?php print($settings["baseurl"]);?>/admin/translations'>Tilbake til listen</a></label>
 	<div class="green box">
 		- For å redigere kan du skrive rett i boksene, eller trykke på rediger og bruke den større editoren nederst på siden. <br>
 		- Husk å trykke 'Lagre endringer' når du er ferdig!
@@ -129,7 +129,7 @@ if ($page != "" and file_exists("$dir/$page.json")) {
 
 		bindInputs();
 
-		var requesturl = "<?php print $settings['base_url'] . "/api/translations?page=$page" ?>";
+    var requesturl = "<?php print $settings['baseurl'] . "/api/translations?page=$page" ?>";
 
 		function sendJSON() {
 			fetch(requesturl, {
