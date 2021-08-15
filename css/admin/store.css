@@ -1,0 +1,17 @@
+.box {
+    padding: 0px;
+    margin: 0px;
+}
+
+button:disabled {
+    background-color: darkgray;
+    cursor: default;
+}
+
+h3 {
+    margin: 0;
+}
+
+.weak {
+    color: rgba(0, 0, 0, 0.4);
+}
