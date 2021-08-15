@@ -1,10 +1,8 @@
 <?php
-session_start();
-if ($_SESSION['logged_in'] != 1) {
-	header("HTTP/1.0 403 You need to log in first");
-	print("access denied");
-	die();
+if (!Authenticator::is_logged_in()) {
+	log::forbidden("Access denied", __FILE__, __LINE__);
 }
+
 // Connect to server
 $conn = connect("medlem");
 

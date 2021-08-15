@@ -1,8 +1,6 @@
 <?php
-session_start();
 if (!$access_control->can_access("api", "gavekort")) {
-	header("HTTP/1.0 403 Forbidden");
-	die("You do not have access to this page");
+	log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
 $data = json_decode(file_get_contents("php://input"));

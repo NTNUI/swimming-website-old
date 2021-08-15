@@ -1,9 +1,7 @@
 <?php
-session_start();
 include_once("library/util/db.php");
 if (!$access_control->can_access("api", "dugnad")) {
-	header("HTTP/1.0 403 Forbidden");
-	log::die("Access denied", __FILE__, __LINE__);
+	log::forbidden("Access denied", __FILE__, __LINE__);
 }
 function setDugnad(int $id, bool $value)
 {

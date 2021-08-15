@@ -19,22 +19,16 @@ function valid_ID($ID){
 }
 
 // remove randoms from the internet
-session_start();
 include_once("library/util/db.php");
-if ($_SESSION['logged_in'] != 1){
-    header("HTTP/1.0 403 You need to log in first");
-    log::message("Note: blocking non authenticated requests", __FILE__, __LINE__);
-    print("access denied");
-    return;
+if (!Authenticator::is_logged_in()){
+    log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
 // remove peasents from styret
 if (!$access_control->can_access("api", "KID")) {
-    header("HTTP/1.0 403 Forbidden");
-    log::message("Note: blocking user: " . argsURL("SESSION", "navn"), __FILE__, __LINE__);
-    die("You do not have access to this page");
+    log::message("Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
+    log::forbidden("Access denied", __FILE__, __LINE__);
 }
-
 
 // connect to server
 $conn = connect("medlem");

@@ -31,6 +31,16 @@ class log
         throw new Exception($message);
     }
 
+    // Return 403 log the request and 
+    static function forbidden($message, $file = __FILE__, $line = __LINE__)
+    {
+        header('HTTP/1.1 403 Forbidden');
+        print($message);
+        error_log(basename($file) . ":" . $line . " " . $message);
+        error_log(print_r(debug_backtrace(), true));
+        throw new Exception($message);
+    }
+
     // Log and alert the user
     static function alert($message, $file = __FILE__, $line = __LINE__)
     {

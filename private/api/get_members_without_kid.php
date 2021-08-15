@@ -1,18 +1,14 @@
 <?php
 
-// remove randoms from the internet
-
-session_start();
+// Remove randoms from the internet
 if (!Authenticator::is_logged_in()){
-    header("HTTP/1.0 403 You need to log in first");
-    die("Access denied");
+    log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
-// remove peasents from styret
+// remove peasants from styret
 if (!$access_control->can_access("api", "KID")) {
-    header("HTTP/1.0 403 Forbidden");
     log::message("Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
-    die("You do not have access to this page");
+    log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
 // connect to server

@@ -1,8 +1,7 @@
 <?php
-session_start();
 if (!$access_control->can_access("api", "memberregister")) {
-	header("HTTP/1.0 403 Forbidden");
-	die("You do not have access to this page");
+    log::message("Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
+    log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
 function sendEmail($emailAdress){
