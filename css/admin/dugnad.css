@@ -1,0 +1,17 @@
+button:disabled {
+    background-color: darkgray;
+    cursor: default;
+}
+
+#members,
+#searchResult {
+    width: 100%;
+}
+
+.flex {
+    display: flex;
+}
+
+.sameRow {
+    width: 100%;
+}
