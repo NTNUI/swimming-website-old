@@ -1,8 +1,8 @@
 <?php
 
 if (!$access_control->can_access("api/storeadmin")) {
-	header("HTTP/1.0 403 Permission denied");
-	die("You do not have permission to access this function");
+    log::message("Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
+    log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
 if (!isset($_GET["type"])) {

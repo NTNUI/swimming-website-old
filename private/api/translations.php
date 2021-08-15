@@ -1,7 +1,7 @@
 <?php
 if (!$access_control->can_access("api", "translations")) {
-	header("HTTP/1.0 403 Forbidden");
-	die("You need to log in first");
+    log::message("Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
+    log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
 $page = $_REQUEST['page'];
