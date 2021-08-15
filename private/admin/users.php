@@ -1,4 +1,5 @@
-<?php
+<?php 
+global $settings;
 // TODO: Move styling to css file
 // TODO: Add translations
 // TODO: change key 'id' in database to 'user_id' and to 'role_id'
@@ -9,6 +10,7 @@
 // TODO: move/merge this to authenticator and/or access_control.
 // TODO: Convert to REST-API and use JS for calls. (Probably after the merge mentioned above)
 // TODO: Move hard coded mail content to translator
+// TODO: Create API/users.php, split backend and frontend.
 
 // Get arguments on this request
 $action = argsURL("REQUEST", "users_action");
@@ -591,5 +593,7 @@ function print_role_entry(int $role_id)
 			<input type="submit" name="update_type" value="Delete" style="width:49%;" />
 		</td>
 	</tr>
+<link href="<?php $settings['baseurl'];?>/css/admin/users.css">
+<script type="text/javascript" src="<?php $settings['baseurl'];?>/js/admin/users.js">
 <?php
 }

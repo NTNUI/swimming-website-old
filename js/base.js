@@ -13,6 +13,21 @@ var getJSON = function(url, callback) {
     xhr.send();
 };
 
+// Needs to be tested
+var postJSON = function(url, data, callback) {
+    var xhr = new XMLHttpRequest();
+    xhr.open("POST", url, true);
+    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
+    xhr.send(JSON.stringify(data));
+    xhr.onloadend = function() {
+        if (status === 200) {
+            callback(null, xhr.response);
+        } else {
+            callback(status, xhr.response);
+        }
+    };
+}
+
 function addLoadEvent(func) {
     var oldonload = window.onload;
     if (typeof window.onload != `function`) {
