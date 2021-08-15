@@ -3,7 +3,7 @@ include_once("library/util/db.php");
 if (!$access_control->can_access("api", "dugnad")) {
 	log::forbidden("Access denied", __FILE__, __LINE__);
 }
-function setDugnad(int $id, bool $value)
+function setDugnad($id, $value)
 {
 	global $settings;
 	$conn = connect("medlem");
@@ -26,7 +26,7 @@ function setDugnad(int $id, bool $value)
 	return $result;
 }
 
-function getVolunteers(int $number)
+function getVolunteers($number)
 {
 	global $settings;
 	$conn = connect("medlem");
@@ -65,7 +65,7 @@ function getVolunteers(int $number)
 	return $result;
 }
 
-function search(string $name)
+function search($name)
 {
 	// Search(string name)
 	global $settings;
@@ -110,7 +110,7 @@ $reject_id = argsURL("GET", "reject");
 $search = argsURL("GET", "search");
 
 // @return string|null
-function getAction(int|null $getRandom = 0, int|null $approve_id = 0, int|null $reject_id = 0, string|null $search = "")
+function getAction($getRandom = 0, $approve_id = 0, $reject_id = 0, $search = "")
 {
 	if ($getRandom) {
 		return "getRandom";
