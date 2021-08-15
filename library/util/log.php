@@ -37,7 +37,6 @@ class log
         header('HTTP/1.1 403 Forbidden');
         print($message);
         error_log(basename($file) . ":" . $line . " " . $message);
-        error_log(print_r(debug_backtrace(), true));
         throw new Exception($message);
     }
 
