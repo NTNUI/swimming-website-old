@@ -37,7 +37,7 @@ class log
         header('HTTP/1.1 403 Forbidden');
         print($message);
         error_log(basename($file) . ":" . $line . " " . $message);
-        throw new Exception($message);
+        die();
     }
 
     // Log and alert the user
