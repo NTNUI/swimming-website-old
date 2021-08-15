@@ -3,7 +3,7 @@ global $settings;
 ?>
 
 <link rel="stylesheet" type="text/css" href="<?php print $settings['baseurl'];?>/css/admin/dugnad.css">
-<script src="<?php print $settings['baseurl'] ?>/js/admin/dugnad.js"></script>
+<script src="<?php print $settings['baseurl']; ?>/js/admin/dugnad.js"></script>
 
 <div class="box">
 	<h2>Dugnadsliste</h2>

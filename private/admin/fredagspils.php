@@ -1,4 +1,5 @@
 <?php
+global $settings;
 $last_friday = date("N") == 5 ? "today" : "last friday";
 $friday_beer = date("d-m-Y", strtotime($last_friday));
 $conn = connect("web");
@@ -27,8 +28,7 @@ $conn->close();
 </style>
 <script type="text/javascript">
 	function register(username) {
-		fetch("<?php global $settings;
-				print $settings["baseurl"]; ?>/api/friday_beer?register=" + username)
+		fetch(BASEURL + "/api/friday_beer?register=" + username)
 			.then((response) => response.json())
 			.then((json) => {
 				if (json.error && json.error != "Already drank beer") {

@@ -13,11 +13,25 @@ var getJSON = function(url, callback) {
     xhr.send();
 };
 
-window.onload = () => {
+function addLoadEvent(func) {
+    var oldonload = window.onload;
+    if (typeof window.onload != `function`) {
+        window.onload = func;
+    } else {
+        window.onload = function() {
+            if (oldonload) {
+                oldonload();
+            }
+            func();
+        }
+    }
+}
+
+addLoadEvent(() => {
     document.getElementById("menu_show").addEventListener("click", function(e) {
         document.getElementById("menu_container").classList.add("visible");
     });
     document.getElementById("menu_container").addEventListener("click", function(e) {
         document.getElementById("menu_container").classList.remove("visible");
     });
-}
+});
