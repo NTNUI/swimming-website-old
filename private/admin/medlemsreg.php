@@ -1,19 +1,6 @@
-<style>
-	.box {
-		padding: 0px;
-		margin: 0px;
-	}
-
-	button:disabled {
-		background-color: darkgray;
-		cursor: default;
-	}
-
-	h2 {
-		margin: 0;
-	}
-</style>
-
+<?php 
+global $settings;
+?>
 <div class="box">
 
 	<h2>Nye medlemmer NTNUI Svømming <?php print date("Y") ?></h2>
@@ -95,35 +82,5 @@
 
 	?>
 </div>
-
-<script type="text/javascript">
-	var getJSON = function(url, callback) {
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', url, true);
-		xhr.responseType = 'json';
-		xhr.onload = function() {
-			var status = xhr.status;
-			if (status === 200) {
-				callback(null, xhr.response);
-			} else {
-				callback(status, xhr.response);
-			}
-		};
-		xhr.send();
-	};
-
-	function godkjenn(id) {
-		let button = document.querySelector("#medlem-" + id).querySelector("button");
-		button.disabled = true;
-		button.innerText = "Godkjenner....";
-		getJSON("<?php global $settings; print $settings['baseurl']; ?>/api/memberregister?id=" + id, function(err, json) {
-			if (err == null && json.success) {
-				button.disabled = true;
-				button.innerText = "Godkjent";
-			} else {
-				alert("Noe gikk galt: " + err);
-				button.innerText = "Feil!";
-			}
-		});
-	}
-</script>
+<link href="<?php $settings['baseurl'];?>/css/admin/medlemsreg.css">
+<script type="text/javascript" src="<?php $settings['baseurl'];?>/js/admin/medlemsreg.js">
