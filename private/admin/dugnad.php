@@ -1,3 +1,6 @@
+<?php
+global $settings;
+?>
 <style>
 	button:disabled {
 		background-color: darkgray;
@@ -75,21 +78,6 @@
 	const rejected = "Avslått";
 	const notAsked = "Ikke spurt";
 
-	var getJSON = function(url, callback) {
-		var xhr = new XMLHttpRequest();
-		xhr.open('GET', url, true);
-		xhr.responseType = 'json';
-		xhr.onload = function() {
-			var status = xhr.status;
-			if (status === 200) {
-				callback(null, xhr.response);
-			} else {
-				callback(status, xhr.response);
-			}
-		};
-		xhr.send();
-	};
-
 	function removeElementsByClass(className) {
 		var elements = document.getElementsByClassName(className);
 		while (elements.length > 0) {
@@ -99,7 +87,7 @@
 
 	function search() {
 		let query = document.querySelector("input[name=name]").value;
-		getJSON("<?php global $settings; print $settings["baseurl"] ?>/api/dugnad?search=" + query, function(err, json) {
+		getJSON(BASEURL + "/api/dugnad?search=" + query, function(err, json) {
 			if (err != null) {
 				alert("Noe gikk galt: " + err);
 				return;
@@ -121,7 +109,7 @@
 		let button_reject = document.getElementById("reject-" + id);
 		button_approve.disabled = true;
 		button_approve.innerText = "Godkjenner...";
-		getJSON("<?php global $settings; print $settings["baseurl"]; ?>/api/dugnad?approve=" + id, function(err, json) {
+		getJSON(BASEURL + "/api/dugnad?approve=" + id, function(err, json) {
 			if (err != null) {
 				alert("Noe gikk galt: " + err);
 				return;
@@ -138,7 +126,7 @@
 		let button_approve = document.getElementById("approve-" + id);
 		button_reject.disabled = true;
 		button_reject.innerText = "Melder avslag..."
-		getJSON("<?php global $settings; print $settings["baseurl"]; ?>/api/dugnad?reject=" + id, function(err, json) {
+		getJSON(BASEURL + "/api/dugnad?reject=" + id, function(err, json) {
 			if (err != null) {
 				alert("Noe gikk galt: " + err);
 				return;
@@ -147,12 +135,11 @@
 			button_approve.innerText = "Godkjenn";
 			button_approve.disabled = false;
 			document.getElementById("status-" + id).innerText = rejected;
-
 		});
 	}
 
 	function getMembers(num) {
-		getJSON("<?php global $settings; print $settings["baseurl"]; ?>/api/dugnad?getRandom=" + num, function(err, json) {
+		getJSON(BASEURL + "/api/dugnad?getRandom=" + num, function(err, json) {
 			if (err != null) {
 				alert("Noe gikk galt: " + err);
 				return;
@@ -181,10 +168,9 @@
 				reject(member.id);
 			}
 			node.querySelector(".reject").id = "reject-" + member.id;
-
 			node.querySelector(".status").id = "status-" + member.id;
 
-			//Godkjent
+			// Approved
 			if (member.dugnad == 1) {
 				node.querySelector(".approve").disabled = true;
 				node.querySelector(".status").innerText = accepted;
