@@ -1,4 +1,5 @@
-<?php
+<?php 
+global $settings;
 $content = argsURL("POST", "content");
 $header = argsURL("POST", "header");
 $author = argsURL("SESSION", "name");
@@ -45,20 +46,4 @@ if ($content != "" and $header != "" and $author != "") {
 		<small>Av: <span id="author"><?php print $author ?></span> Tid <span id="time"></span>
 	</div>
 </div>
-
-<script type="text/javascript">
-	var header = document.getElementById("header");
-	var content = document.getElementById("content");
-	var time = document.getElementById("time");
-
-	setInterval(function() {
-		var str = new Date().toISOString().replace("T", " ");
-		time.innerHTML = str.substr(0, str.lastIndexOf("."));
-	}, 250);
-	document.getElementById("inputHeader").onkeyup = function(e) {
-		header.innerHTML = document.getElementById("inputHeader").value;
-	}
-	document.getElementById("inputContent").onkeyup = function(e) {
-		content.innerHTML = document.getElementById("inputContent").value;
-	}
-</script>
+<script type="text/javascript" src="<?php $settings['baseurl'];?>/js/admin/nyhet.js">
