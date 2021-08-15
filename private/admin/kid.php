@@ -134,8 +134,7 @@ TODO:
 	}
 
 	function save_kid_number(id, kid) {
-		var url = "<?php global $settings;
-					print $settings["baseurl"]; ?>/api/update_kid?";
+		var url = "<?php global $settings; print $settings["baseurl"]; ?>/api/update_kid?";
 		url += "ID=" + id;
 		url += "&";
 		url += "KID=" + kid;
