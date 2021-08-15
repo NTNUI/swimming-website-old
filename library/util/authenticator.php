@@ -260,4 +260,17 @@ class Authenticator
         $query->close();
         return (bool)$result;
     }
+
+    // need testing
+    static public function auth_API(string $page, string $action, string $FILE = __FILE__, int $LINE = __LINE__){
+        $access_control = new AccessControl(argsURL("SESSION", "username"));
+        if (!Authenticator::is_logged_in()){
+            log::forbidden("Access denied", $FILE, $LINE);
+        }
+        
+        if (!$access_control->can_access($page, $action = "")) {
+            log::message("Access denied for " . Authenticator::get_username() . "performing action: " . $action, $FILE, $LINE);
+            log::forbidden("Access denied", $FILE, $LINE);
+        }
+    }
 };

@@ -132,7 +132,10 @@ function createTableMatrix(store_data, groups) {
         ],
         rowDblClick: function(e, row) {
             const data = row.getData();
-            window.location.assign(BASEURL + "/admin/store?item_id=" + data.api_id);
+            getJSON(BASEURL + "/api/storeadmin?type=get_item&item_id=" + data.api_id, (error, data) => {
+                console.log(data);
+            });
+            // window.location.assign(BASEURL + "/api/storeadmin?type=get_item&item_id=" + data.api_id);
         }
     });
 
