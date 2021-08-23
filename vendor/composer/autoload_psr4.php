@@ -8,4 +8,5 @@ $baseDir = dirname($vendorDir);
 return array(
     'Stripe\\' => array($vendorDir . '/stripe/stripe-php/lib'),
     'Michelf\\' => array($vendorDir . '/michelf/php-markdown/Michelf'),
+    'JsonSchema\\' => array($vendorDir . '/justinrainbow/json-schema/src/JsonSchema'),
 );

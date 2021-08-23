@@ -15,6 +15,10 @@ class ComposerStaticInit92218e783e5c8587d724b336f047834f
         array (
             'Michelf\\' => 8,
         ),
+        'J' => 
+        array (
+            'JsonSchema\\' => 11,
+        ),
     );
 
     public static $prefixDirsPsr4 = array (
@@ -26,6 +30,14 @@ class ComposerStaticInit92218e783e5c8587d724b336f047834f
         array (
             0 => __DIR__ . '/..' . '/michelf/php-markdown/Michelf',
         ),
+        'JsonSchema\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/justinrainbow/json-schema/src/JsonSchema',
+        ),
+    );
+
+    public static $classMap = array (
+        'Composer\\InstalledVersions' => __DIR__ . '/..' . '/composer/InstalledVersions.php',
     );
 
     public static function getInitializer(ClassLoader $loader)
@@ -33,6 +45,7 @@ class ComposerStaticInit92218e783e5c8587d724b336f047834f
         return \Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit92218e783e5c8587d724b336f047834f::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit92218e783e5c8587d724b336f047834f::$prefixDirsPsr4;
+            $loader->classMap = ComposerStaticInit92218e783e5c8587d724b336f047834f::$classMap;
 
         }, null, ClassLoader::class);
     }
