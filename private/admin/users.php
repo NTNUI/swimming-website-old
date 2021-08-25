@@ -593,7 +593,7 @@ function print_role_entry(int $role_id)
 			<input type="submit" name="update_type" value="Delete" style="width:49%;" />
 		</td>
 	</tr>
-<link href="<?php $settings['baseurl'];?>/css/admin/users.css">
-<script type="text/javascript" src="<?php $settings['baseurl'];?>/js/admin/users.js">
+<link href="<?php global $settings; $settings['baseurl'];?>/css/admin/users.css">
+<script type="text/javascript" src="<?php global $settings; $settings['baseurl'];?>/js/admin/users.js">
 <?php
 }
