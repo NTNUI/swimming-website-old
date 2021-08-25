@@ -21,6 +21,9 @@ include_once("library/util/request.php");
 include_once("library/util/log.php");
 include_once("library/util/authenticator.php");
 
+// Check write permissions
+test_settings();
+
 // Get request
 $language = argsURL("REQUEST", "lang");
 $page = argsURL("REQUEST", "side");

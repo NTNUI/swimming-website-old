@@ -1,6 +1,10 @@
 version: "3.9"
 services:
 # web is the web site application
+# TODO: split web into apache and php
+# TODO: make image directory writable and put it in gitignore
+# TODO: move mariadb->volumes to env file. That is host system dependent.
+# TODO: tons of warnigs while running docker-compose up. Fix those
     web:
         build: .
         container_name: web
@@ -62,7 +66,3 @@ networks:
 
 volumes:
     log:
-
-
-# TODO: move mariadb->volumes to env file. That is host system dependent.
-# TODO: tons of warnigs while running docker-compose up. Fix those

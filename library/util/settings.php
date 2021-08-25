@@ -17,4 +17,19 @@ function load_settings($path){
     return $settings;
 }
 
+function test_settings(){
+    // test access
+    foreach(["img/store", "/tmp", "sessions", "translations"] as $dir){
+        if (!is_writable($dir)){
+            log::die("$dir is not writable", __FILE__, __LINE__);
+        }
+    }
+    foreach(["css", "js", "library", "private", "public", "vendor"] as $dir){
+        if (!is_readable($dir)){
+            log::die("$dir is not readable", __FILE__, __LINE__);
+        }
+    }
+    // 
+}
+
 ?>
