@@ -15,3 +15,12 @@ h3 {
 .weak {
     color: rgba(0, 0, 0, 0.4);
 }
+
+.purchase-row-name,
+.purchase-row-email,
+.purchase-row-phone,
+.purchase-row-comment,
+.purchase-row-button-deliver {
+    display: block;
+    width: 100%;
+}

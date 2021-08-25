@@ -1,3 +1,4 @@
+// Deprecated: Use fetch()
 var getJSON = function(url, callback) {
     var xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
@@ -13,29 +14,15 @@ var getJSON = function(url, callback) {
     xhr.send();
 };
 
-// Needs to be tested
-var postJSON = function(url, data, callback) {
-    var xhr = new XMLHttpRequest();
-    xhr.open("POST", url, true);
-    xhr.setRequestHeader('Content-Type', 'application/json; charset=UTF-8');
-    xhr.send(JSON.stringify(data));
-    xhr.onloadend = function() {
-        if (status === 200) {
-            callback(null, xhr.response);
-        } else {
-            callback(status, xhr.response);
-        }
-    };
-}
-
+// Add onLoad handlers to queue
 function addLoadEvent(func) {
-    var oldonload = window.onload;
+    var old_onload = window.onload;
     if (typeof window.onload != `function`) {
         window.onload = func;
     } else {
         window.onload = function() {
-            if (oldonload) {
-                oldonload();
+            if (old_onload) {
+                old_onload();
             }
             func();
         }

@@ -5,7 +5,7 @@
 // remember to pass __FILE__ and __LINE__ arguments
 // Don't rely on log messages to be ordered in log! They will be from different users.
 // Recommend putting it inside conditionals that will crash the site.
-
+// TODO: add api friendly crasher. Return error and error message in json format (if logged in i guess)
 class log
 {
 
