@@ -1,10 +1,9 @@
 <?php
 include_once("library/util/store_helper.php");
 function handle_error($id, $error) {
-	global $t;
-	if (array_key_exists("message", $error)) $error = $error["message"];
-	print(json_encode(["error" => $error]));
-	exit();
+	http_response_code(500);
+	print(json_encode(["error"=> true, "message" => $error]));
+	die();
 }
 $store = new StoreHelper("en");
 
@@ -13,13 +12,13 @@ $data = json_decode(file_get_contents("php://input"));
 try {
 	$src = "error";
 
-	if (array_key_exists("payment_intent_id", $data)) {
+	if( isset($data->{"payment_intent_id"})){
 
 		$intentId = $data->payment_intent_id;
 		$intent = $store->get_intent_by_id($intentId);
 		$intent->confirm();
 		$src = $store->update_order($intent);
-	} elseif (array_key_exists("payment_method_id", $data)) {
+	} elseif (isset($data->{"payment_method_id"})) {
 		$source = $data->payment_method_id;
 		$api_id = $data->item_id;
 		$owner = $data->owner;
@@ -48,7 +47,7 @@ try {
 	handle_error($api_id, $e);
 	exit();
 } catch (Exception $e) {
-	handle_error($api_id, $t->get_translation($e->getMessage(), "store"));
+	handle_error($api_id, $e->getMessage());
 	exit();
 }
 
