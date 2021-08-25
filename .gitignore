@@ -1,3 +1,4 @@
+vendor
 settings/settings.json
 sessions/*
 log/
