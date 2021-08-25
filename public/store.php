@@ -9,10 +9,9 @@
 		<?php print $t->get_translation("store_empty_header"); ?>
 	</h3>
 	<p>
-	<?php print $t->get_translation("store_empty_content"); ?>
+		<?php print $t->get_translation("store_empty_content"); ?>
 	</p>
 </div>
-
 
 <?php
 //$t->page = "store";
@@ -133,12 +132,11 @@ if (isset($_REQUEST["error"])) { ?>
 			print "appendItem(" . json_encode($item) . ")";
 		}
 	} else {
-		?>
-		if(!getItems()){
-			// no available items in store
+	?>
+		if (getItems()) {
 			document.getElementById("storeEmpty").classList.remove("hidden");
 		};
-		<?php
+	<?php
 	}
 	?>
 </script>
