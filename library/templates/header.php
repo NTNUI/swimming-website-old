@@ -28,6 +28,7 @@ if ($title == "") $title = ucwords($page);
 		<script>
 			const BASEURL = "<?php print $settings['baseurl']; ?>";
 			const STRIPE_PUBLISHABLE_KEY = "<?php print $settings['stripe']['publishable_key']; ?>";
+			const NAME_USER = "<?php print $_SESSION['name']; ?>";
 		</script>
 		<script src="<?php print $base_url; ?>/js/base.js"></script>
 	</head>

@@ -594,6 +594,6 @@ function print_role_entry(int $role_id)
 		</td>
 	</tr>
 <link href="<?php global $settings; $settings['baseurl'];?>/css/admin/users.css">
-<script type="text/javascript" src="<?php global $settings; $settings['baseurl'];?>/js/admin/users.js">
+<script type="text/javascript" src="<?php global $settings; $settings['baseurl'];?>/js/admin/users.js"></script>
 <?php
 }

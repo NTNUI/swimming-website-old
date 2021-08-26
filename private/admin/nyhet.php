@@ -43,7 +43,7 @@ if ($content != "" and $header != "" and $author != "") {
 	<div id="preview" class="box">
 		<h3 id="header"></h3>
 		<p id="content"></p>
-		<small>Av: <span id="author"><?php print $author ?></span> Tid <span id="time"></span>
+		<small>Av: </small><span id="author"><?php print $author ?></span> Tid <span id="time"></span>
 	</div>
 </div>
-<script type="text/javascript" src="<?php $settings['baseurl'];?>/js/admin/nyhet.js">
+<script type="text/javascript" src="<?php print $settings['baseurl']; ?>/js/admin/nyhet.js"></script>
