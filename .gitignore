@@ -1,4 +1,5 @@
 vendor
+translations/*
 settings/settings.json
 sessions/*
 log/
