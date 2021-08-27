@@ -46,4 +46,4 @@ if ($content != "" and $header != "" and $author != "") {
 		<small>Av: <span id="author"><?php print $author ?></span> Tid <span id="time"></span>
 	</div>
 </div>
-<script type="text/javascript" src="<?php $settings['baseurl'];?>/js/admin/nyhet.js">
+<script type="text/javascript" src="<?php print $settings['baseurl'];?>/js/admin/nyhet.js"></script>

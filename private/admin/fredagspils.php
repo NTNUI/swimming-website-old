@@ -22,5 +22,5 @@ while ($query->fetch()) {
 $query->close();
 $conn->close();
 ?>
-<link href="<?php $settings['baseurl'];?>/css/admin/fredagspils.css">
-<script type="text/javascript" src="<?php $settings['baseurl'];?>/js/admin/fredagspils.js">
+<link href="<?php print $settings['baseurl'];?>/css/admin/fredagspils.css">
+<script type="text/javascript" src="<?php print $settings['baseurl'];?>/js/admin/fredagspils.js"></script>
