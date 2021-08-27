@@ -21,5 +21,5 @@ global $settings;
 
 </form>
 
-<link href="<?php $settings['baseurl'];?>/css/admin/gavekort.css">
-<script type="text/javascript" src="<?php $settings['baseurl'];?>/js/admin/gavekort.js">
+<link href="<?php print $settings['baseurl'];?>/css/admin/gavekort.css">
+<script type="text/javascript" src="<?php print $settings['baseurl'];?>/js/admin/gavekort.js"><script>

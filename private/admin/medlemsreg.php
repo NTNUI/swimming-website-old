@@ -83,4 +83,4 @@ global $settings;
 	?>
 </div>
 <link href="<?php print $settings['baseurl'];?>/css/admin/medlemsreg.css">
-<script type="text/javascript" src="<?php print $settings['baseurl'];?>/js/admin/medlemsreg.js">
+<script type="text/javascript" src="<?php print $settings['baseurl'];?>/js/admin/medlemsreg.js"></script>
