@@ -1,3 +1,4 @@
+"use strict";
 var header = document.getElementById("header");
 var content = document.getElementById("content");
 var time = document.getElementById("time");
