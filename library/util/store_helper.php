@@ -195,8 +195,8 @@ class StoreHelper
 
 		if (!$query->fetch()) throw new Exception("no_such_order");
 
-		$this->update_status($id, "FINALIZED", $mysqli);
 		$query->close();
+		$this->update_status($id, "FINALIZED", $mysqli);
 		$mysqli->close();
 
 		// Member registration hook
