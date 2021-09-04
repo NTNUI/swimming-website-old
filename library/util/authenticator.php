@@ -159,7 +159,7 @@ class Authenticator
     static private function load_from_db($username)
     {
         global $access_control;
-        $sql = "SELECT name, passwd, last_password FROM svommer_web.users WHERE username=?";
+        $sql = "SELECT name, passwd, last_password FROM users WHERE username=?";
 
         $conn = connect("web");
 
