@@ -147,8 +147,9 @@ function handle_post(mysqli $conn, Response &$response)
 				break;
 		}
 	}
+
 	// check required parameters have value
-	foreach (['name_no', 'name_en', 'amount', 'price'] as $entry) {
+	foreach (['name_no', 'name_en', 'price'] as $entry) {
 		if (!isset($args[$entry])) {
 			log::message("received invalid request key: $entry, value: " . $args[$entry], __FILE__, __LINE__);
 			$response->code = HTTP_INVALID_REQUEST;
