@@ -127,7 +127,7 @@ if (isset($_REQUEST["error"])) { ?>
 			print "alert('Item id not found');";
 			print "window.location.href = 'store';";
 		} else {
-			$item["id"] = $item["api_id"];
+			$item["id"] = $item["item_hash"];
 			$item["image"] = "$base_url/img/store/" . $item["image"];
 			print "appendItem(" . json_encode($item) . ")";
 		}

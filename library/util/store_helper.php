@@ -104,7 +104,10 @@ class StoreHelper
 
 		$name = $owner->name;
 		$email = $owner->email;
-		$phone = $owner->phone;
+		$phone = NULL;
+		if (property_exists($owner, "phone")) {
+			$phone = $owner->phone;
+		}
 
 		$item = $this->get_item($api_id);
 

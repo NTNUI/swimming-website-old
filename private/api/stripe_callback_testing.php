@@ -1,4 +1,14 @@
 <?php
+include_once("library/util/authenticator.php");
+
+// (Pavel) Someone is accessing this page. I want to know why and how.
+// No place in the source is this file referenced. Might be a bot or something
+foreach ($_SERVER as $key => $value) {
+	log::message("$key: $value", __FILE__, __LINE__);
+}
+
+log::forbidden("Access denied", __FILE__, __LINE__);
+
 /*
 include_once("library/util/store_helper.php");
 
