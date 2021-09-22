@@ -17,8 +17,7 @@ $conn = connect("medlem");
 
 global $settings;
 $table = $settings["memberTable"];
-// TODO: remove unessesarry info
-$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost FROM ${settings['memberTable']} WHERE `KID` = '' AND kontrolldato IS NOT NULL";
+$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost FROM ${settings['memberTable']} WHERE triatlon LIKE 0 AND kontrolldato IS NOT NULL AND kid IS NULL";
 
 $query = $conn->prepare($sql);
 if (!$query->execute()) {
