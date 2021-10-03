@@ -11,7 +11,7 @@ class StoreHelper
 		global $settings;
 		\Stripe\Stripe::setApiKey($settings["stripe"]["secret_key"]);
 		$this->language = $lang;
-		$this->licence_key = $settings["defaults"]["licence_key"];
+		$this->licence_key = $settings["defaults"]["licence_key"]; // deprecated
 	}
 
 	// id means really store_item_id
@@ -119,7 +119,7 @@ class StoreHelper
 		if ($email == "") throw new Exception("missing_email");
 		if ($phone == NULL && $item["require_phone"]) throw new Exception("missing_phone");
 
-		//Perform a 3D secure checkout	
+		//Perform a 3D secure checkout
 		$intent = \Stripe\PaymentIntent::create([
 			"payment_method" => $paymentId,
 			"amount" => $item["price"],
@@ -209,6 +209,10 @@ class StoreHelper
 	// TODO: When members don't provide the same email this will fail. Consider making fields read only after registration
 	function approve_member(string $email)
 	{
+		if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+			log::message("[Warning] Dropping invalid email " . $email, __FILE__, __LINE__);
+			return;
+		}
 		$mysqli = connect("member");
 		$sql = "UPDATE medlem SET kontrolldato=NOW() WHERE epost=?";
 		$query = $mysqli->prepare($sql);
@@ -220,7 +224,7 @@ class StoreHelper
 		$mysqli->close();
 	}
 
-	// TODO: delete rows instead of modifying 
+	// TODO: delete rows instead of modifying
 	function fail_order($charge)
 	{
 		$mysqli = connect("web");
