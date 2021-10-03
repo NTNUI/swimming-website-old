@@ -104,7 +104,6 @@ function print_section($section)
 			access_link("kid", $inline);
 			break;
 		case "web":
-			access_link("nyhet", $inline);
 			access_link("users", $inline);
 			access_link("access", $inline);
 			access_link("translations", $inline);
