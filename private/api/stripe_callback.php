@@ -38,14 +38,17 @@ try {
 			break;
 		case "charge.succeeded":
 			log::message("Charge succeeded", __FILE__, __LINE__);
-			$store->finalize_order($event["data"]["object"]);
+			$store->finalize_order($event["data"]["object"]["payment_intent"]);
 			break;
 		default:
 			log::message("[Warning]: Unhandled Stripe callback: " . $event["type"] , __FILE__, __LINE__);
 			break;
 	}
 } catch (Exception $e) {
-	log::die($e, __FILE__, __LINE__);
+	log::message($e, __FILE__, __LINE__);
+	print($e);
+	http_response_code(500);
+	return;
 }
 
 http_response_code(200);
