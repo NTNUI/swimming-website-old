@@ -31,8 +31,11 @@ function print_textBox($title, $type, $name, $extra = "")
 ?>
 	<div class="enrollment">
 		<div>
-			<label><?php print $t->get_translation("name_label"); ?></label>
-			<input name="name" required type="text" placeholder='<?php $t->get_translation("name_placeHolder") ?>' />
+			<label><?php print $t->get_translation("${title}_label"); ?></label>
+			<?php
+			print("<input type='${type}' name='${name}' placeholder='" . $t->get_translation("${title}_placeHolder") . "'");
+			++$tabindex;
+			print(" ${extra} " . " tabindex='${tabindex}' " . " />"); ?>
 		</div>
 	</div>
 <?php
@@ -47,24 +50,18 @@ function print_radio($title, $input_name, $opt1_value, $opt2_value, $required = 
 	++$tabindex;
 ?>
 	<div class="enrollment">
-		<label> <?php print $t->get_translation("gender_label"); ?></label>
-
-		<label class="container"> <?php print $t->get_translation("gender_opt1"); ?>
-			<input name="gender" type="radio" required value="male" />
+		<label> <?php print $t->get_translation("${title}_label"); ?></label>
+		<label class="container"> <?php print $t->get_translation("${title}_opt1"); ?>
+			<input type="radio" <?php print($required . " tabindex=' " . $tabindex . " ' " . "name='" . "${input_name}" . "' " . "value= '" . "${opt1_value}" . "' ") ?>>
 			<span class="checkmark"></span>
 		</label>
 
-		<label class="container"> <?php print $t->get_translation("gender_opt2"); ?>
-			<input name="gender" type="radio" required value="female" />
+		<?php ++$tabindex ?>
+		<label class="container"> <?php print $t->get_translation("${title}_opt2"); ?>
+			<input type="radio" <?php print($required . "tabindex=' " . $tabindex . " ' " . "name='" . "${input_name}" . "' " . "value= '" . "${opt2_value}" . "'") ?>>
 			<span class="checkmark"></span>
 		</label>
 
-	<!-- Phone number -->
-	<div class="enrollment">
-		<div>
-			<label><?php print $t->get_translation("phoneNumber_label"); ?></label>
-			<input name="phoneNumber" required type="tel" placeholder='<?php $t->get_translation("phoneNumber_placeHolder") ?>' />
-		</div>
 	</div>
 <?php
 }
@@ -75,57 +72,9 @@ function print_checkBox($title, $input_name, $required = "")
 	++$tabindex;
 ?>
 	<div class="enrollment">
-		<div>
-			<label><?php print $t->get_translation("birthDate_label"); ?></label>
-			<input name="birthDate" required pattern="([12]\d|0?\d|3[01])-(1[0-2]|0?\d)-\d{4}" type="text" placeholder='<?php $t->get_translation("birthDate_placeHolder") ?>' />
-		</div>
-	</div>
-
-	<!-- Zip code -->
-	<div class="enrollment">
-		<div>
-			<label><?php print $t->get_translation("zip_label"); ?></label>
-			<input name="zip" required type="number" min="1000" max="9999" placeholder='<?php $t->get_translation("zip_placeHolder") ?>' />
-		</div>
-	</div>
-
-	<!-- Address -->
-	<div class="enrollment">
-		<div>
-			<label><?php print $t->get_translation("address_label"); ?></label>
-			<input name="address" required type="text" placeholder='<?php $t->get_translation("address_placeHolder") ?>' />
-		</div>
-	</div>
-
-	<!-- Email address -->
-	<div class="enrollment">
-		<div>
-			<label><?php print $t->get_translation("email_label"); ?></label>
-			<input name="email" required type="email" placeholder='<?php $t->get_translation("email_placeHolder") ?>' />
-		</div>
-	</div>
-
-	<!-- NTNUI membership number -->
-	<div class="enrollment">
-		<div>
-			<label><?php print $t->get_translation("memberNumber_label"); ?></label>
-			<input name="memberNumber" required min="100000" max="999999" type="number" placeholder='<?php $t->get_translation("memberNumber_placeHolder") ?>' />
-		</div>
-	</div>
-
-	<!-- Membership in other clubs -->
-	<div class="enrollment">
-		<div>
-			<label><?php print $t->get_translation("memberNumber_label"); ?></label>
-			<input name="existingLicence" required min="100000" max="999999" type="number" placeholder='<?php $t->get_translation("memberNumber_placeHolder") ?>' />
-		</div>
-	</div>
-
-	<!-- Terms and services -->
-	<div class="enrollment">
-		<label> <?php print($t->get_translation("terms_label")) ?> </label>
-		<label class="container"> <?php print($t->get_translation("terms_answer")) ?>
-			<input name="terms_input" type="checkbox" value="Yes" />
+		<label> <?php print($t->get_translation("{$title}_label")) ?> </label>
+		<label class="container"> <?php print($t->get_translation("{$title}_answer")) ?>
+			<input type="checkbox" value="Yes" <?php print($required . " tabindex=' " . $tabindex . " ' " . "name='" . $input_name . "' ") ?>>
 			<span class="checkmark_box tickkmark"></span>
 		</label>
 	</div>
@@ -181,9 +130,12 @@ function print_infoBox($key = "")
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/css/intlTelInput.css" />
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/js/intlTelInput.js"></script>
 
-	<!-- Submit -->
-	<input name="submit" style="float: right;" type="submit" value="<?php $t->get_translation("submit") ?> " />
-	<input type="reset" value="<?php $t->get_translation("clear"); ?>" />
+<div class="box green">
+	<h1 class="center">
+		<?php print $t->get_translation("mainHeader"); ?>
+	</h1>
+	<p><?php print $t->get_translation("mainBody"); ?></p>
+</div>
 
 <?php
 
