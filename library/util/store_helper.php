@@ -230,7 +230,7 @@ class StoreHelper
 		$mysqli = connect("web");
 		$sql = "UPDATE store_orders SET order_status='FAILED' WHERE source_id=? OR charge_id=?";
 		$query = $mysqli->prepare($sql);
-		$query->bind_param("ss", $charge["source"]["id"], $charge["id"]);
+		$query->bind_param("ss", $charge["payment_intent"], $charge["id"]);
 		$query->execute();
 		$query->close();
 		$mysqli->close();
