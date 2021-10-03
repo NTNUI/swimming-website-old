@@ -5,7 +5,8 @@
     "captcha_key": "6LdrnW8UAAAAAIDoJVmceXJ_DxkmlqHMMwF3r4I1",
     "stripe": {
         "secret_key": "sk_test_8NXxtSWrHXG33iGpr07ec3fo",
-        "publishable_key": "pk_test_JkjQkK0cGEWUQ0NUWh6LytP8"
+        "publishable_key": "pk_test_JkjQkK0cGEWUQ0NUWh6LytP8",
+        "signing_key": "whsec_jUR7fQidnoJzFyRs6pd7jlHzKR5B6gGm"
     },
     "emails": {
         "leader": "svomming-leder@ntnui.no",
