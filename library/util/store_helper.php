@@ -209,16 +209,17 @@ class StoreHelper
 	// TODO: When members don't provide the same email this will fail. Consider making fields read only after registration
 	function approve_member(string $email)
 	{
+		// TODO: ignore not found errors
 		if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
 			log::message("[Warning] Dropping invalid email " . $email, __FILE__, __LINE__);
 			return;
 		}
-		$mysqli = connect("member");
+		$mysqli = connect("medlem");
 		$sql = "UPDATE medlem SET kontrolldato=NOW() WHERE epost=?";
 		$query = $mysqli->prepare($sql);
 		$query->bind_param("s", $email);
 		if (!$query->execute()) {
-			log::message("Could not execute query", __FILE__, __LINE__);
+			log::message("[Warning]: Could not execute query", __FILE__, __LINE__);
 		}
 		$query->close();
 		$mysqli->close();

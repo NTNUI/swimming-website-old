@@ -34,6 +34,11 @@ try {
 		case "charge.succeeded":
 			log::message("[INFO]: Charge succeeded", __FILE__, __LINE__);
 			$store->finalize_order($event["data"]["object"]["payment_intent"]);
+			if ($event["data"]["object"]["amount"] == 76500 && $event["data"]["object"]["description"] == "Licence in the NSF") {
+				// temporary hardcoded member approval
+				log::message("Approving member with email:" . $event["data"]["object"]["receipt_email"]);
+				$store->approve_member($event["data"]["object"]["receipt_email"]);
+			}
 			break;
 		default:
 			log::message("[Warning]: Unhandled Stripe callback: " . $event["type"] , __FILE__, __LINE__);
