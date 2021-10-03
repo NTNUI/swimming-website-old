@@ -26,18 +26,13 @@ try {
 }
 try {
 	switch ($event["type"]) {
-		case "source.chargeable":
-			log::message("[Stripe]: Charge created", __FILE__, __LINE__);
-			// $store->charge($event["data"]["object"]);
-			$store->update_order($event["data"]["object"]);
-			break;
 		case "source.canceled":
 		case "charge.failed":
-			log::message("[Stripe]: Charge failed", __FILE__, __LINE__);
+			log::message("[INFO]: Charge failed", __FILE__, __LINE__);
 			$store->fail_order($event["data"]["object"]);
 			break;
 		case "charge.succeeded":
-			log::message("Charge succeeded", __FILE__, __LINE__);
+			log::message("[INFO]: Charge succeeded", __FILE__, __LINE__);
 			$store->finalize_order($event["data"]["object"]["payment_intent"]);
 			break;
 		default:
