@@ -39,7 +39,6 @@ $voluntaryWork  = $_POST['dugnad'];
 $zipCode 		= $_POST['zip'];
 $address 		= $_POST['adresse'];
 $email 			= $_POST['email'];
-$cardNumber		= $_POST['kortnummer'];
 $comment 		= $_POST['beskjed'];
 $filledOut 		= $_REQUEST['utfylt'];
 $oldClub 		= $_POST['gammelKlubb'];
@@ -63,14 +62,6 @@ $birthDate = date("Y-m-d", strtotime($birthDate));
 
 if ($voluntaryWork !== "Yes") {
 	handle_error("error_dugnad");
-	return;
-}
-
-if (!ctype_digit($cardNumber)) {
-	handle_error("cardnumber_not_number");
-	return;
-} elseif (strlen($cardNumber) > 9) {
-	handle_error("cardnumber_too_long");
 	return;
 }
 
@@ -108,7 +99,7 @@ if (!$decoded->success) {
 }
 
 if (!($firstName != "" && $lastName != "" && $birthDate != "" && $gender != "" && $proficient != ""
-	&& $voluntaryWork != "" && $zipCode != "" && $address != "" && $email != "" && $cardNumber != "" && $phoneNumber != "" && is_numeric($cardNumber))) {
+	&& $voluntaryWork != "" && $zipCode != "" && $address != "" && $email != "" && $phoneNumber != "")) {
 	//hvis noen fyller ut mennesketest men glemmer noen av de andre obligatoriske feltene
 	handle_error("error_empty");
 	return;
@@ -141,7 +132,7 @@ if ($_emailFound) {
 	$sql = "INSERT INTO " . $settings["memberTable"] . "(kjonn, fodselsdato, etternavn, fornavn, phoneNumber, adresse, epost,  kommentar ,kortnr, postnr, regdato, gammelKlubb, triatlon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)";
 
 	$append = $conn->prepare($sql);
-	$append->bind_param("ssssssssiiss", $gender, $birthDate, $lastName, $firstName, $phoneNumber, $address, $email, $comment, $cardNumber, $zipCode, $oldClub, $triatlon);
+	$append->bind_param("ssssssssiiss", $gender, $birthDate, $lastName, $firstName, $phoneNumber, $address, $email, $comment, 0, $zipCode, $oldClub, $triatlon);
 	if (!$append->execute()) {
 		echo "Error: " . $sql . "<br>" . mysqli_error($conn);
 		$append->close();
