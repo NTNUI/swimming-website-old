@@ -44,36 +44,4 @@
 
 </div>
 
-<div class="news-box">
-	<h1><?php print $t->get_translation("news_header");?></h1>
-	<h2><?php print $t->get_translation("news_content");?></h2>
-
-	<?php
-
-	$conn = connect("web");
-
-	$month_limit = 6*30; // 6 months, has to be in days
-	$amount_limit = 5; // Maximum amount of posts
-	$sql = "SELECT overskrift, innhold, av, tid FROM forside WHERE datediff(now(), tid) < $month_limit ORDER BY nokkel DESC LIMIT $amount_limit";
-	$query = $conn->prepare($sql);
-	$query->execute();
-	$query->store_result();
-	if ($query->num_rows > 0) {
-		$query->bind_result($header, $content, $author, $time);
-		// output data of each row
-		while($query->fetch()) {
-
-			$content_html = Markdown::defaultTransform($content); // does not work
-				echo "<div class='box'><h2>$header</h2><br><p>" . $content_html . "</p><br><small><small> Av: " . $author. " Tid ". $time ."<br> </small></small></div><br>";
-			}
-	} else {
-	    echo "<div class='box'><h2>Ingen nyheter funnet</h2><br><p>Send mail til teknisk leder!</p></div>";
-	}
-
-	$query->close();
-	mysqli_close($conn);
-
-	?>
-</div>
-
 <script type="text/javascript" src="<?php print "$base_url/js/slideshow.js" ?>"></script>
