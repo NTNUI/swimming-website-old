@@ -1,55 +1,15 @@
 # NTNUI Swimming web page
+![image](https://user-images.githubusercontent.com/38912521/137648694-a6dc977e-5652-4da1-a54d-afaf97e26732.png)
 
 This repository contains source files for NTNUI Swimming web site. This repository contains a docker-compose file witch allows local development on any major OS.
 
-## First time setup
-> You need docker and docker-compose installed on your system first
+## Installation
+Check the wiki for instructions.
 
-For Unix-like operating systems:
-```bash
-mkdir -p ~/.config/docker/storage/ # create a directory for persistent storage
-docker-compose up --build # Build the project
-# Look for output like GENERATED ROOT PASSWORD: A&Vuj<N,({QwZ+x&FKGBe1@afTOr`;|_
-```
+## Usage
+Check the wiki for instructions.
 
-1. Navigate to https://mysqladmin.it.ntnu.no/ and export the database to a file.
-2. Navigate to http://127.0.0.1:42069 then the tab "User accounts" with username `root` and that was printed when running `docker-compose up`
-3. Change permissions on `svommer_web` user. Give the user all access. (TODO: find the minimum permissions required)
-4. Go to tab Import and import the file from step 1.
-
-Now the website should be hosted on http://127.0.0.1 (with a working redirect to https) and https://127.0.0.1 with self signed certificate. You'll probably get a warning from web browser client about that this is not safe, but as any professional developers we will ignore that message and carry on by skipping that warning. Now you should have a fully working replica of the swimming web site that you can fuck with as much as you want without it having any consequences at all.
-
-If you still get a connection error to database then there is probably an error with the ip-address in settings.json file. Update the ip-address in the default.json file given by this command: `docker exec mariadb /bin/hostname -I`. Then do a `docker-compose up --build --remove-orphans`. Why `default.json` and not `settings.json`? Because dockerfile doesn't get `settings.json` file and creates it's own from `default.json`.
-
-## Starting and stopping local server
-
-To start the server:
-```bash
-docker-compose up
-# or
-docker-compose up -d # to release the terminal
-```
-
-to stop the server:
-```
-docker-compose down
-```
-
-## Tips
-
-### Remove docker files and start over
-If something is wrong with the development environment and you want to start over, do this:
-```bash
-docker-compose down
-docker system prune -a
-sudo rm -rf  ~/.config/docker/storage/* # doing this requires reconfiguring MariaDB
-```
-Now you should be able to restart the installation described above. Note that this will remove all other images you have cached on your computer.
-
-### Connecting to the containers
-You have full access to the docker containers as if they were virtual machines. You can connect to the using `docker exec IMAGE_NAME /bin/bash` and navigate the file system. useful if you want to adjust the server settings or something like that.
-
-## How this project is built up
+## Project overview
 This project contains three four images:
 - web
 - mariadb
@@ -74,7 +34,15 @@ Honestly, this image is here just because I didn't manage to make web image prin
 Check the installation instructions in slab for local development.
 
 ## Warning in regards to safety
-When this docker-compose is running the website and it's database are accessible to anyone on your local network unless you have a firewall rule that blocks out that traffic. Make sure if you sit at a public place (NTNU, work ei everywhere except at home) that you enable a firewall that blocks incoming TCP connections to port (at least) 80 and 443. Database is not properly secured and thus personal data might get easily leaked.
+When this docker-compose is running the website and it's database are accessible to anyone on your local network unless you have a firewall rule that blocks out that traffic. Make sure if you sit at a public place (NTNU, work ei everywhere except at home) that you enable a firewall that blocks incoming TCP connections to port (at least) 80, 443 and 3306. Database is not properly secured and thus personal data might get easily leaked.
+
+## Long term goals
+- Finish API and move to other front ends
+- Add sentralized logging server image and Xdebug to images
+- Generate random user data for testing
+- CI: linting and validating css, js, php etc...
+- CD: add a callback hook that `git pull`s in the api
+- Dark mode
 
 ## TODO
 
@@ -87,4 +55,5 @@ Database does not create it self. Fix that. Need a script that:
 ### Split web image
 Currently web image are running the front end and the API. If we manage to split those two then we will be able to host the front end on any web page while preserving all out functions. For we can keep just the database and the API for it on org.ntnu.no and create a new front end on ntnui.no/svomming (or any other site we want)
 
-TODO: Convert images to use Alpine Linux
+### Move to Alpine Linux for images
+Convert images to use Alpine Linux
