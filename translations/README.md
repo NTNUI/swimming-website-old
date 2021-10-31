@@ -1,0 +1,2 @@
+# Translations
+For some reason translations are not loaded from database but from json files in stead. Those translation json files lives in this directory. This is not desired because the docker images needs write access to the source code. Anyway, git should track this directory however not it's content because it is not source code but dynamic data.

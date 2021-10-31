@@ -10,3 +10,4 @@ cgi-bin/
 *.save
 .vscode
 .htaccess
+storage/
