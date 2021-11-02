@@ -99,6 +99,9 @@ button.locked {
     margin-top: 10px;
 }
 
+#SponsorImg{
+    max-width: 150px;
+}
 
 /* STRIPE STUFF */
 

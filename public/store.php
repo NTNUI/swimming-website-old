@@ -2,6 +2,10 @@
 	<h2>
 		<?php print $t->get_translation("header"); ?>
 	</h2>
+	<img id="SponsorImg" alt="Fastswim logo" src="<?php print "$base_url/img/icons/" . $t->get_translation("sponsor_img"); ?>">
+	<p>
+		<?php print $t->get_translation("sponsor-information"); ?>
+	</p>
 </div>
 
 <div class="box hidden" id="storeEmpty">
