@@ -1,4 +1,5 @@
 # NTNUI Swimming web page
+![image](https://user-images.githubusercontent.com/38912521/137648694-a6dc977e-5652-4da1-a54d-afaf97e26732.png)
 
 This repository contains source files for NTNUI Swimming web site. This repository contains a docker-compose file witch allows local development on any major OS.
 
@@ -95,4 +96,5 @@ When this docker-compose is running the website and it's database are accessible
 ### Split web image
 Currently web image are running the front end and the API. If we manage to split those two then we will be able to host the front end on any web page while preserving all out functions. For we can keep just the database and the API for it on org.ntnu.no and create a new front end on ntnui.no/svomming (or any other site we want)
 
-TODO: Convert images to use Alpine Linux
+### Move to Alpine Linux for images
+Convert images to use Alpine Linux
