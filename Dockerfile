@@ -1,18 +1,27 @@
 FROM archlinux
 
-RUN pacman -Syu --noconfirm php php-apache php-dblib
+RUN pacman -Syu --noconfirm php php-apache php-dblib composer
 
 WORKDIR /srv/http/
 
 # Copy source over
 COPY settings settings/
 COPY index.php .
-COPY vendor/ vendor
-COPY translations/ translations
+
 RUN mkdir sessions
-RUN chmod 777 -R sessions
-RUN chmod 777 -R vendor
-RUN chmod 777 -R translations
+RUN mkdir vendor
+RUN mkdir translations
+RUN mkdir -p img/store
+
+COPY translations/ translations
+COPY composer.json .
+COPY composer.lock .
+RUN composer install --no-plugins --no-scripts
+
+RUN chmod -R 777 sessions
+RUN chmod -R 777 vendor
+RUN chmod -R 777 translations
+RUN chmod -R 777 img
 
 # Configure server
 COPY docker /app
