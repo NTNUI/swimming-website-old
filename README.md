@@ -7,7 +7,7 @@ This repository contains source files for NTNUI Swimming web site. This reposito
 git clone git@github.com:pavelskipenes/org.ntnu.svommer.git
 cd org.ntnu.svommer
 scp -r username@server:path_to_translations translations/..
-docker-compose up --build
+docker-compose up -d --build
 chmod -R 777 {img,translations}
 ```
 You should now be able to go to [https://127.0.0.1](https://127.0.0.1) and see the web page.
