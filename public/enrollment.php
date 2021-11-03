@@ -141,38 +141,40 @@ function print_infoBox($key = "")
 
 // Start Content
 
-if (!$registatin_open) {?>
+if (!$registatin_open) { ?>
 	<div class="box">
-			<h1><?php print $t->get_translation("registration_closed_header"); ?></h1>
-			<p><?php print $t->get_translation("registration_closed_content"); ?></p>
-		</div>
-	<?php
+		<h1><?php print $t->get_translation("registration_closed_header"); ?></h1>
+		<p><?php print $t->get_translation("registration_closed_content"); ?></p>
+	</div>
+<?php
 	return;
 }
 ?>
-	
-	<form action="enrollment_reception" method="post">
-		<?php
-		print_textBox("firstName", "text", "fornavn", "required");
-		print_textBox("lastName", "text", "etternavn", "required");
-		print_radio("gender", "gender", "Male", "Female", "required");
-		print_textBox("phoneNumber", "tel", "phoneNumber", "required");
-		print_textBox("birthDate", "date", "fodselsdato", "required pattern='([12]\d|0?\d|3[01])-(1[0-2]|0?\d)-\d{4}'");
-		print_infoBox("birthDate_not_supported");
-		print_textBox("zip", "nuber", "zip", "required min='1000' max='9999' ");
-		print_textBox("adress", "text", "adresse", "required");
-		print_textBox("email", "email", "email", "required");
-		print_textBox("NTNUImemberNumber", "number", "kortnummer", "required");
-		print_checkBox("canSwim", "dyktig", "required");
-		print_checkBox("acceptVoulentaryWork", "dugnad", "required");
-		print_textBox("oldClub", "text", "gammelKlubb");
-		print_textArea();
-		print_recaptia();
-		print "<div class='box'>" . $t->get_translation("gdpr_notice") . "</div>";
-		print_reset_and_submit_buttons();
-		?>
 
-	</form>
+<form action="enrollment_reception" method="post">
+	<?php
+	print_textBox("firstName", "text", "fornavn", "required");
+	print_textBox("lastName", "text", "etternavn", "required");
+	print_radio("gender", "gender", "Male", "Female", "required");
+	print_textBox("phoneNumber", "tel", "phoneNumber", "required");
+	print_textBox("birthDate", "date", "fodselsdato", "required pattern='([12]\d|0?\d|3[01])-(1[0-2]|0?\d)-\d{4}'");
+	print_infoBox("birthDate_not_supported");
+	print_textBox("zip", "nuber", "zip", "required min='1000' max='9999' ");
+	print_textBox("adress", "text", "adresse", "required");
+	print_textBox("email", "email", "email", "required");
+	print_textBox("NTNUImemberNumber", "number", "kortnummer", "required");
+	print_checkBox("canSwim", "dyktig", "required");
+	print_checkBox("acceptVoulentaryWork", "dugnad", "required");
+	print_textBox("oldClub", "text", "gammelKlubb");
+	print_textArea();
+	if ($settings["baseurl"] !== "https://127.0.0.1") {
+		print_recaptia();
+	}
+	print "<div class='box'>" . $t->get_translation("gdpr_notice") . "</div>";
+	print_reset_and_submit_buttons();
+	?>
+
+</form>
 <script type="text/javascript">
 	var input = document.querySelector("input[name=phoneNumber]");
 	var itl = window.intlTelInput(input, {

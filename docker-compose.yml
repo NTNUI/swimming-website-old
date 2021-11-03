@@ -17,7 +17,13 @@ services:
             - epstein-didnt-kill-himself
         volumes:
             - log:/var/log
-            - .:/srv/http/
+            - ./private:/srv/http/private
+            - ./public:/srv/http/public
+            - ./js:/srv/http/js
+            - ./translations:/srv/http/translations
+            - ./css:/srv/http/css
+            - ./img:/srv/http/img
+            - ./library:/srv/http/library
 # MariaDB is the database
     mariadb:
         image: mariadb
@@ -26,12 +32,14 @@ services:
             - 3306:3306
         environment:
             - MYSQL_ROOT_HOST=%
-            - MYSQL_RANDOM_ROOT_PASSWORD=yes
+            - MARIADB_RANDOM_ROOT_PASSWORD=yes
             - MYSQL_USER=svommer_web
             - MYSQL_PASSWORD=testing_password
         volumes:
-            - ~/.config/docker/storage/mariabd:/var/lib/mysql
             - log:/var/log/
+            - ./storage/mariadb:/var/lib/mysql
+            - ./docker/mariadb:/docker-entrypoint-initdb.d
+            - ./docker/mariadb/conf.d/:/etc/mysql/
         networks:
             - epstein-didnt-kill-himself
 # phpmyadmin can manange the database visually
@@ -46,16 +54,6 @@ services:
             - mariadb
         networks:
             - epstein-didnt-kill-himself
-# Loggger logs messages from web container. Because it cannot do it by it self for some reason    
-    logger:
-        image: alpine
-        container_name: logger
-        volumes:
-            - log:/log
-        command: "tail -f /log/php.log"
-        depends_on:
-            - web
-        restart: always
 
 networks:
     epstein-didnt-kill-himself:
@@ -66,3 +64,5 @@ networks:
 
 volumes:
     log:
+    sessions:
+    storage:

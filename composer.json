@@ -1,10 +1,11 @@
 {
     "name": "ntnuisvomming/webpage",
-    "description" : "Professional swimming beer relay team",
+    "description": "Professional swimming beer relay team",
     "type": "project",
     "require": {
         "stripe/stripe-php": "^7.97",
         "michelf/php-markdown": "^1.9",
-        "justinrainbow/json-schema": "^5.2"
+        "justinrainbow/json-schema": "^5.2",
+        "slim/slim": "^4.9"
     }
 }
