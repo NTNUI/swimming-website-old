@@ -14,7 +14,8 @@ You should now be able to go to [https://127.0.0.1](https://127.0.0.1) and see t
 > Note that the text content is missing unless you download it from a live server. Here is an example on how to download the files:
 > ```bash
 > scp -r pavelgs@login.stud.ntnu.no:svommer/translations/ translations/..
-> ``` 
+> ```
+
 
 ## Starting and stopping local server
 
@@ -29,6 +30,16 @@ to stop the server:
 ```
 docker-compose down
 ```
+## Phpmyadmin
+phpmyadmin is available on [http://127.0.0.1:42069](http://127.0.0.1:42069)
+
+## admin pages
+to access admin pages go to [https://127.0.0.1/admin](https://127.0.0.1/admin).
+
+**Credentials:**
+|username|password|
+|--------|--------|
+|admin|testing_password|
 
 ## Start over again
 Some times you just say fuck it. And you want to restart the development. Here are the steps:
