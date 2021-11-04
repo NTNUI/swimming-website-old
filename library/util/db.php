@@ -6,6 +6,7 @@
 class DB
 {
 	private mysqli $conn;
+	private mysqli_stmt $stmt;
 	/**
 	 * Connect to a database. Credentials are automatically retrieved from global $settings.
 	 * Create a new instance like so
@@ -40,11 +41,39 @@ class DB
 			throw new mysqli_sql_exception("Failed to set charset");
 		}
 	}
+
+	public function prepare(string $sql)
+	{
+		$this->stmt = $this->conn->prepare($sql);
+		if (!$this->stmt) {
+			throw new mysqli_sql_exception("Could not prepare statement");
+		}
+	}
+	public function bind_param(string $types, &$var1, &...$_)
+	{
+		$this->stmt->bind_param($types, $var1, ...$_);
+		if (!$this->stmt) {
+			throw new mysqli_sql_exception("Could not bind params");
+		}
+	}
+	public function execute(){
+		if (!$this->stmt->execute()){
+			throw new mysqli_sql_exception("Could not execute statement");
+		}
+
+	}
+
 	/**
 	 * Disconnect from the database when DB class gets out of scope.
 	 */
 	public function  __destruct()
 	{
+		// close statement if present
+		if($this->stmt){
+			if(!$this->stmt->close()){
+				throw new mysqli_sql_exception("Could not close prepared statement");
+			}
+		}
 		if (!$this->conn->close()) {
 			throw new mysqli_sql_exception("Could not close connection to db");
 		}
