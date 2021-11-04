@@ -31,8 +31,15 @@ class log
         throw new Exception($message);
     }
 
-    // Return 403 log the request and 
-    static function forbidden($message, $file = __FILE__, $line = __LINE__)
+    // return 400 Bad request to client and log the event
+    static function client_error($message = "Bad request", $file = __FILE__, $line= __LINE__){
+        header("HTTP/1.1 400 Bad Request");
+        print($message);
+        error_log(basename($file) . ":" , $line, $message);
+    }
+
+    // Return 403 Forbidden to client and log the event
+    static function forbidden($message = "Forbidden", $file = __FILE__, $line = __LINE__)
     {
         header('HTTP/1.1 403 Forbidden');
         print($message);
@@ -40,7 +47,7 @@ class log
         die();
     }
 
-    // Log and alert the user
+    // Log $message and javascript.alert($message) to the client
     static function alert($message, $file = __FILE__, $line = __LINE__)
     {
         $message = htmlspecialchars($message);

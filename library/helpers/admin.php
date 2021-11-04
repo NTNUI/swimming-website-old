@@ -101,7 +101,6 @@ function print_section($section)
 			access_link("medlemsreg", $inline);
 			access_link("autopay", $inline);
 			access_link("dugnad", $inline);
-			access_link("alumni", $inline);
 			access_link("kid", $inline);
 			break;
 		case "web":

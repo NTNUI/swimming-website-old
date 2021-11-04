@@ -11,7 +11,7 @@ class StoreHelper
 		global $settings;
 		\Stripe\Stripe::setApiKey($settings["stripe"]["secret_key"]);
 		$this->language = $lang;
-		$this->licence_key = $settings["defaults"]["licence_key"];
+		$this->licence_key = $settings["defaults"]["licence_key"]; // deprecated
 	}
 
 	// id means really store_item_id
@@ -119,7 +119,7 @@ class StoreHelper
 		if ($email == "") throw new Exception("missing_email");
 		if ($phone == NULL && $item["require_phone"]) throw new Exception("missing_phone");
 
-		//Perform a 3D secure checkout	
+		//Perform a 3D secure checkout
 		$intent = \Stripe\PaymentIntent::create([
 			"payment_method" => $paymentId,
 			"amount" => $item["price"],
@@ -209,24 +209,29 @@ class StoreHelper
 	// TODO: When members don't provide the same email this will fail. Consider making fields read only after registration
 	function approve_member(string $email)
 	{
-		$mysqli = connect("member");
+		// TODO: ignore not found errors
+		if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+			log::message("[Warning] Dropping invalid email " . $email, __FILE__, __LINE__);
+			return;
+		}
+		$mysqli = connect("medlem");
 		$sql = "UPDATE medlem SET kontrolldato=NOW() WHERE epost=?";
 		$query = $mysqli->prepare($sql);
 		$query->bind_param("s", $email);
 		if (!$query->execute()) {
-			log::message("Could not execute query", __FILE__, __LINE__);
+			log::message("[Warning]: Could not execute query", __FILE__, __LINE__);
 		}
 		$query->close();
 		$mysqli->close();
 	}
 
-	// TODO: delete rows instead of modifying 
+	// TODO: delete rows instead of modifying
 	function fail_order($charge)
 	{
 		$mysqli = connect("web");
 		$sql = "UPDATE store_orders SET order_status='FAILED' WHERE source_id=? OR charge_id=?";
 		$query = $mysqli->prepare($sql);
-		$query->bind_param("ss", $charge["source"]["id"], $charge["id"]);
+		$query->bind_param("ss", $charge["payment_intent"], $charge["id"]);
 		$query->execute();
 		$query->close();
 		$mysqli->close();
