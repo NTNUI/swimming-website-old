@@ -132,7 +132,8 @@ if ($_emailFound) {
 	$sql = "INSERT INTO " . $settings["memberTable"] . "(kjonn, fodselsdato, etternavn, fornavn, phoneNumber, adresse, epost,  kommentar ,kortnr, postnr, regdato, gammelKlubb, triatlon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)";
 
 	$append = $conn->prepare($sql);
-	$append->bind_param("ssssssssiiss", $gender, $birthDate, $lastName, $firstName, $phoneNumber, $address, $email, $comment, 0, $zipCode, $oldClub, $triatlon);
+	const $null = 0;
+	$append->bind_param("ssssssssiiss", $gender, $birthDate, $lastName, $firstName, $phoneNumber, $address, $email, $comment, $null, $zipCode, $oldClub, $triatlon);
 	if (!$append->execute()) {
 		echo "Error: " . $sql . "<br>" . mysqli_error($conn);
 		$append->close();
