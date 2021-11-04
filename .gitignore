@@ -10,3 +10,5 @@ cgi-bin/
 *.save
 .vscode
 .htaccess
+storage/
+composer.pahr

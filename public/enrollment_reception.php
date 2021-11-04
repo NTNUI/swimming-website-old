@@ -72,30 +72,33 @@ if ($proficient !== "Yes") {
 }
 
 // Captia
-$secret = $settings["captcha_key"];
+if ($settings["baseurl"] !== "https://127.0.0.1") {
 
-$token = $_POST['g-recaptcha-response'];
-$url = "https://www.google.com/recaptcha/api/siteverify";
-$url .= "?secret=$secret";
-$url .= "&response=$token";
+	$secret = $settings["captcha_key"];
 
-// Check captcha result with google
-$ch = curl_init($url);
-curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-$verify = curl_exec($ch);
-$decoded = json_decode($verify);
+	$token = $_POST['g-recaptcha-response'];
+	$url = "https://www.google.com/recaptcha/api/siteverify";
+	$url .= "?secret=$secret";
+	$url .= "&response=$token";
 
-if (!$decoded->success) {
-	print("
-	<div class='box green'>
+	// Check captcha result with google
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	$verify = curl_exec($ch);
+	$decoded = json_decode($verify);
+
+	if (!$decoded->success) {
+		print("
+		<div class='box green'>
 		<h1>Recaptia feilet.</h1>
-			<p>
-				Prøv å fylle ut skjemaet på nytt.
-				Hvis problemet vedvarer kontakt teknisk leder.
-			</p>
-	</div>
-	");
-	return;
+		<p>
+		Prøv å fylle ut skjemaet på nytt.
+		Hvis problemet vedvarer kontakt teknisk leder.
+		</p>
+		</div>
+		");
+		return;
+	}
 }
 
 if (!($firstName != "" && $lastName != "" && $birthDate != "" && $gender != "" && $proficient != ""
@@ -128,9 +131,7 @@ if ($_emailFound) {
 	return;
 } else { // email is not found in DB, user is getting registered
 
-
 	$sql = "INSERT INTO " . $settings["memberTable"] . "(kjonn, fodselsdato, etternavn, fornavn, phoneNumber, adresse, epost,  kommentar ,kortnr, postnr, regdato, gammelKlubb, triatlon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)";
-
 	$append = $conn->prepare($sql);
 	const $null = 0;
 	$append->bind_param("ssssssssiiss", $gender, $birthDate, $lastName, $firstName, $phoneNumber, $address, $email, $comment, $null, $zipCode, $oldClub, $triatlon);
@@ -142,24 +143,22 @@ if ($_emailFound) {
 		return;
 	}
 
-	$sendTo = $settings["emails"]["analyst"];
-	$headers = "Ny medlem registrert, logg på adminsiden for mer info";
-	$from = $settings["emails"]["bot-general"];
+$sendTo = $settings["emails"]["analyst"];
+$headers = "Ny medlem registrert, logg på adminsiden for mer info";
+$from = $settings["emails"]["bot-general"];
 
-	// Depends on the accountant, but many prefer not to get a mail for each new member
-	// TODO: export to some setting somewhere, somehow.
-	if(false){
-		mail($sendTo, "NTNUI-Svømming: Nytt medlem", $headers, "From: $from\r\nContent-type: text/plain; charset=utf-8");
-	}
+// Depends on the accountant, but many prefer not to get a mail for each new member
+// TODO: export to some setting somewhere, somehow.
+if (false) {
+	mail($sendTo, "NTNUI-Svømming: Nytt medlem", $headers, "From: $from\r\nContent-type: text/plain; charset=utf-8");
+}
 
 ?>
-	<div class="green box">
-		<h1><?php print $t->get_translation("header"); ?></h1>
-		<p><?php print $t->get_translation("body"); ?></p>
-	</div>
+<div class="green box">
+	<h1><?php print $t->get_translation("header"); ?></h1>
+	<p><?php print $t->get_translation("body"); ?></p>
+</div>
 <?php
-
-}
 
 $append->close();
 $query->close();
