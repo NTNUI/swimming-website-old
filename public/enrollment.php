@@ -162,7 +162,6 @@ if (!$registatin_open) { ?>
 	print_textBox("zip", "nuber", "zip", "required min='1000' max='9999' ");
 	print_textBox("adress", "text", "adresse", "required");
 	print_textBox("email", "email", "email", "required");
-	print_textBox("NTNUImemberNumber", "number", "kortnummer", "required");
 	print_checkBox("canSwim", "dyktig", "required");
 	print_checkBox("acceptVoulentaryWork", "dugnad", "required");
 	print_textBox("oldClub", "text", "gammelKlubb");

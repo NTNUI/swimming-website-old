@@ -42,7 +42,7 @@ $email 			= $_POST['email'];
 $comment 		= $_POST['beskjed'];
 $filledOut 		= $_REQUEST['utfylt'];
 $oldClub 		= $_POST['gammelKlubb'];
-$triatlon 		= isTri($oldClub);
+$triathlon 		= isTri($oldClub);
 
 if ($voluntaryWork == "") {
 	$voluntaryWork = FALSE;
@@ -129,27 +129,25 @@ if ($_emailFound) {
 	$query->close();
 	mysqli_close($conn);
 	return;
-} else { // email is not found in DB, user is getting registered
+}
 
-	$sql = "INSERT INTO " . $settings["memberTable"] . "(kjonn, fodselsdato, etternavn, fornavn, phoneNumber, adresse, epost,  kommentar ,kortnr, postnr, regdato, gammelKlubb, triatlon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)";
-	$append = $conn->prepare($sql);
-	const $null = 0;
-	$append->bind_param("ssssssssiiss", $gender, $birthDate, $lastName, $firstName, $phoneNumber, $address, $email, $comment, $null, $zipCode, $oldClub, $triatlon);
-	if (!$append->execute()) {
-		echo "Error: " . $sql . "<br>" . mysqli_error($conn);
-		$append->close();
-		$query->close();
-		mysqli_close($conn);
-		return;
-	}
-
-$sendTo = $settings["emails"]["analyst"];
-$headers = "Ny medlem registrert, logg på adminsiden for mer info";
-$from = $settings["emails"]["bot-general"];
+$sql = "INSERT INTO " . $settings["memberTable"] . "(kjonn, fodselsdato, etternavn, fornavn, phoneNumber, adresse, epost, kommentar, postnr, regdato, gammelKlubb, triatlon) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), ?, ?)";
+$append = $conn->prepare($sql);
+$append->bind_param("ssssssssiiss", $gender, $birthDate, $lastName, $firstName, $phoneNumber, $address, $email, $comment, $zipCode, $oldClub, $triathlon);
+if (!$append->execute()) {
+	echo "Error: " . $sql . "<br>" . mysqli_error($conn);
+	$append->close();
+	$query->close();
+	mysqli_close($conn);
+	return;
+}
 
 // Depends on the accountant, but many prefer not to get a mail for each new member
 // TODO: export to some setting somewhere, somehow.
 if (false) {
+	$sendTo = $settings["emails"]["analyst"];
+	$headers = "Ny medlem registrert, logg på adminsiden for mer info";
+	$from = $settings["emails"]["bot-general"];
 	mail($sendTo, "NTNUI-Svømming: Nytt medlem", $headers, "From: $from\r\nContent-type: text/plain; charset=utf-8");
 }
 
