@@ -7,8 +7,6 @@ const searchingBox = document.getElementById("searchingBox");
 const names = document.getElementById("names");
 
 function check_member(err, json) {
-	console.log(err);
-	console.log(json);
 	if (err != "null" && json.length > 0) {
 		successBox.style.display = "block";
 		let text = "";
