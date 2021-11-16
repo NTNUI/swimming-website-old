@@ -18,7 +18,7 @@ class DB
 	public function __construct(string $database)
 	{
 		global $settings;
-		mysqli_report(MYSQLI_REPORT_ALL);
+		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 		/**
 		 * temporary workaround to allow use of english table name.
@@ -49,6 +49,7 @@ class DB
 			throw new mysqli_sql_exception("Could not prepare statement");
 		}
 	}
+
 	public function bind_param(string $types, &$var1, &...$_)
 	{
 		$this->stmt->bind_param($types, $var1, ...$_);
@@ -56,11 +57,35 @@ class DB
 			throw new mysqli_sql_exception("Could not bind params");
 		}
 	}
-	public function execute(){
-		if (!$this->stmt->execute()){
+
+	public function execute()
+	{
+		if (!$this->stmt->execute()) {
 			throw new mysqli_sql_exception("Could not execute statement");
 		}
+	}
 
+	public function store_result()
+	{
+		if (!$this->stmt->store_result()) {
+			throw new mysqli_sql_exception("Could not store result");
+		}
+	}
+
+	public function num_rows(): int
+	{
+		return $this->stmt->num_rows();
+	}
+
+	public function bind_result(&$var1, &...$_)
+	{
+		if (!$this->stmt->bind_result($var1, $_)) {
+			throw new mysqli_sql_exception("Could not bind result");
+		}
+	}
+	public function fetch()
+	{
+		return $this->stmt->fetch();
 	}
 
 	/**
@@ -69,8 +94,8 @@ class DB
 	public function  __destruct()
 	{
 		// close statement if present
-		if($this->stmt){
-			if(!$this->stmt->close()){
+		if ($this->stmt) {
+			if (!$this->stmt->close()) {
 				throw new mysqli_sql_exception("Could not close prepared statement");
 			}
 		}
