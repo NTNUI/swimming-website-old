@@ -1,62 +1,29 @@
-.menu {
-    position: fixed;
-    background-color: #fff;
-    overflow: hidden;
-    padding: 10px;
-    box-shadow: 0px 1px 10px 1px #000;
-    width: 100%;
-    left: 0;
-    top: 0;
-    z-index: 50;
-    font-size: 1.0625rem;
-    font-weight: 600;
-}
-
-#menu ul {
-    list-style-type: none;
-    margin: auto;
-    padding: 0px;
-    max-width: 1080px;
-}
-
-#menu ul li {
-    padding: 0px;
-    margin: 0px;
-    color: black;
-}
-
-#menu ul li a {
-    float: left;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-left: 0.75%;
-    padding-right: 0.75%;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    margin-left: auto;
-    margin-right: auto;
-    offset: 0px;
-    border: 0px;
-    color: #000;
-    display: inline;
-    text-decoration: none;
-    font-size: 14px;
-    width: calc(900px/10.3);
-    text-align: center;
-    line-height: 1.0;
-}
-
-#menu ul li a.selected {
-    border-bottom: 2px solid rgb(0, 0, 0);
-}
-
-#menu ul li a:hover {
-    color: #000000;
-    background: #00000033;
-    border-radius: 3px;
-    transition: 1s;
-}
-
 #menu_show {
     display: none;
+}
+.menu{
+    position: -webkit-sticky; /* Safari */
+    position: sticky;
+    z-index: 1;
+    text-align: center;
+    opacity: 0.9;
+}
+.menu > ul {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background-color: white;
+    margin: auto;
+    padding: 0.3vw;
+}
+.menu > ul > li {
+    display: inline;
+    margin: 30px;
+}
+.menu > ul > li > a {
+    color: black;
+    font-family: Cantarell;
+    text-decoration: none;
+    font-size: 1.5vw;
 }
