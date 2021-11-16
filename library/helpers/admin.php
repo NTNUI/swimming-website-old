@@ -102,6 +102,7 @@ function print_section($section)
 			access_link("autopay", $inline);
 			access_link("dugnad", $inline);
 			access_link("kid", $inline);
+			access_link("isMember", $inline);
 			break;
 		case "web":
 			access_link("users", $inline);

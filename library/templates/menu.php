@@ -16,7 +16,6 @@ function menu_item($url, $name = "")
 	menu_item("practices");
 	menu_item("activities");
 	menu_item("enrollment");
-	menu_item("isMember");
 	menu_item("board");
 	menu_item("FAQ");
 	menu_item("store");
