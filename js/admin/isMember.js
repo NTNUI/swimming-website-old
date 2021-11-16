@@ -7,15 +7,15 @@ const searchingBox = document.getElementById("searchingBox");
 const names = document.getElementById("names");
 
 function check_member(err, json) {
-	if (err != "null" && json.length > 0) {
+	if (err || json.length < 1) {
+		failureBox.style.display = "block";
+	} else {
 		successBox.style.display = "block";
 		let text = "";
 		for (let i = 0; i < json.length; i++) {
 			text += "<li>" + json[i].first_name + ", " + json[i].surname + "</li>";
 		}
 		names.innerHTML = text;
-	} else {
-		failureBox.style.display = "block";
 	}
 	searchingBox.style.display = "none";
 }
