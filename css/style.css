@@ -14,20 +14,6 @@ h1 {
     font-size: 55px;
 }
 
-hr {
-    color: #ccc;
-    margin-top: 15px;
-    margin-bottom: 15px;
-}
-
-.instagram {
-    position: fixed;
-    width: 0px;
-    height: 0px;
-    top: 102px;
-    left: 1200px;
-}
-
 .maintable {
     margin-left: auto;
     margin-right: auto;
@@ -36,7 +22,7 @@ hr {
     padding-top: 15px;
 }
 
-.textboks {
+.text_box {
     font-family: "heebo", serif;
     text-align: left;
     padding-left: 10px;
@@ -44,52 +30,6 @@ hr {
     margin-top: 0px;
     color: #000000;
     position: relative;
-}
-
-.banner {
-    display: none;
-    border-style: solid;
-    border-top-width: 0px;
-    border-left-width: 0px;
-    border-right-width: 0px;
-    border-bottom-width: 0px;
-    background-color: #333;
-}
-
-.banner>a img {
-    width: 100%;
-}
-
-.banner:hover {
-    opacity: 0.9;
-}
-
-.resbox {
-    margin-top: 15px;
-    margin-bottom: 15px;
-    margin-left: 5%;
-    margin-right: 5%;
-    border-style: solid;
-    border-top-width: 0px;
-    border-left-width: 0px;
-    border-right-width: 0px;
-    border-bottom-width: 0px;
-}
-
-.kurs {
-    margin-top: 15px;
-    margin-bottom: 15px;
-    margin-left: 15%;
-    margin-right: 15%;
-    border-style: solid;
-    border-top-width: 0px;
-    border-left-width: 0px;
-    border-right-width: 0px;
-    border-bottom-width: 0px;
-}
-
-.member-answer {
-    font-family: 'M PLUS Rounded 1c', sans-serif;
 }
 
 .box {
@@ -133,65 +73,6 @@ hr {
 .error {
     background-color: #960000 !important;
     color: #fff !important;
-}
-
-.menu {
-    position: fixed;
-    background-color: #fff;
-    overflow: hidden;
-    padding: 10px;
-    box-shadow: 0px 1px 10px 1px #000;
-    width: 100%;
-    left: 0;
-    top: 0;
-    z-index: 50;
-    font-size: 1.0625rem;
-    font-weight: 600;
-}
-
-#menu ul {
-    list-style-type: none;
-    margin: auto;
-    padding: 0px;
-    max-width: 1080px;
-}
-
-#menu ul li {
-    padding: 0px;
-    margin: 0px;
-    color: black;
-}
-
-#menu ul li a {
-    float: left;
-    padding-top: 10px;
-    padding-bottom: 10px;
-    padding-left: 0.75%;
-    padding-right: 0.75%;
-    margin-top: 0px;
-    margin-bottom: 0px;
-    margin-left: auto;
-    margin-right: auto;
-    offset: 0px;
-    border: 0px;
-    color: #000;
-    display: inline;
-    text-decoration: none;
-    font-size: 14px;
-    width: calc(900px/10.3);
-    text-align: center;
-    line-height: 1.0;
-}
-
-#menu ul li a.selected {
-    border-bottom: 2px solid rgb(0, 0, 0);
-}
-
-#menu ul li a:hover {
-    color: #000000;
-    background: #00000033;
-    border-radius: 3px;
-    transition: 1s;
 }
 
 .board div {
@@ -296,9 +177,6 @@ span.left {
     color: black;
 }
 
-#menu_show {
-    display: none;
-}
 
 .red {
     background-color: red !important;

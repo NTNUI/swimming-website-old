@@ -15,6 +15,7 @@ if ($title == "") $title = ucwords($page);
 	<title>NTNUI Svømming - <?php print $title; ?></title>
 	<link rel="shortcut icon" href="<?php print($settings['baseurl']); ?>/img/icons/logo.ico">
 	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/style.css" type="text/css" />
+	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/menu.css" type="text/css" />
 	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/forms.css" type="text/css" />
 	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/store.css" type="text/css" />
 	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/smallscreen.css" type="text/css" media="screen and (max-width: 1080px)" />
@@ -42,13 +43,10 @@ if ($title == "") $title = ucwords($page);
 
 <body class="body_style">
 	<div class="maintable">
-		<div class="banner">
-			<a href="<?php print $t->get_url(""); ?>"><img src="<?php print($settings['baseurl']); ?>/img/icons/logo.jpg" ?>"></a>
-		</div>
 		<div id="menu_show">Menu</span><span class="right"><a href="<?php ($language != "no" ? "" : "/en") . "/$page"  ?>"><?php print($language != "no" ? "Norsk" : "English"); ?></a></span></div>
 		<div id="menu_container">
 			<div id="menu" class="menu">
 				<?php include("library/templates/menu.php"); ?>
 			</div>
 		</div>
-		<div class="textboks">
+		<div class="text_box">
