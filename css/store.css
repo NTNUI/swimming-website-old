@@ -1,18 +1,16 @@
 .store_item {
     padding: 20px;
-    background-color: #eee;
+    background-color: var(--container-background-color);
     margin: 10px auto;
     min-width: 300px;
     text-align: center;
-    max-width: 80%;
     position: relative;
     min-height: 135px;
     overflow-y: auto;
-    border: 2px solid #006629;
-    border-radius: 15px;
-    -moz-border-radius: 15px;
-    -webkit-border-radius: 15px;
-    -o-border-radius: 15px;
+    border-radius: var(--border-radius);
+    -moz-border-radius: var(--border-radius);
+    -webkit-border-radius: var(--border-radius);
+    -o-border-radius: var(--border-radius);
 }
 
 .store_availability {
@@ -59,8 +57,7 @@
     font-weight: bold;
 }
 
-.close:hover,
-.close:focus {
+.close:hover, .close:focus {
     color: #000;
     text-decoration: none;
     cursor: pointer;
@@ -99,14 +96,13 @@ button.locked {
     margin-top: 10px;
 }
 
-
 /* STRIPE STUFF */
 
 .StripeElement {
     background-color: white;
     height: 40px;
     padding: 10px 12px;
-    border-radius: 4px;
+    border-radius: var(--border-radius);
     border: 1px solid transparent;
     box-shadow: 0 1px 3px 0 #e6ebf1;
     -webkit-transition: box-shadow 150ms ease;
@@ -125,7 +121,54 @@ button.locked {
     background-color: #fefde5 !important;
 }
 
-.charge,
-.source {
+.charge, .source {
     display: none;
+}
+
+.lds-hourglass {
+    display: inline-block;
+    position: relative;
+    width: 256px;
+    height: 256px;
+}
+
+.lds-hourglass:after {
+    content: " ";
+    display: block;
+    border-radius: 50%;
+    width: 0;
+    height: 0;
+    margin: 6px;
+    box-sizing: border-box;
+    border: 104px solid #7f8;
+    border-color: #7f8 transparent #7f8 transparent;
+    animation: lds-hourglass 1.2s infinite;
+}
+
+@keyframes lds-hourglass {
+    0% {
+        transform: rotate(0);
+        animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+    }
+    50% {
+        transform: rotate(900deg);
+        animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+    100% {
+        transform: rotate(1800deg);
+    }
+}
+
+#paymentComplete {
+    color: #7f8;
+    font-size: 104px;
+}
+
+#failedCross {
+    color: #f33;
+    font-size: 104px;
+}
+
+#loading_box {
+    z-index: 100;
 }

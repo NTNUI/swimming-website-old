@@ -1,4 +1,3 @@
-<?php use Michelf\Markdown; ?>
 <head>
 	<meta property="og:title" content="NTNUI Svømming"/>
 	<meta name="description" content="NTNUI Svømming er en svømmeklubb for studenter ved universitetet NTNU i Trondheim."/>
@@ -6,14 +5,14 @@
 </head>
 
 <link rel="stylesheet" type="text/css" href="<?php print $settings["baseurl"]."/css/slideshow.css" ?>"></link>
-<div class="box green">
+<div class="box">
 
 	<h1 padding="10px" border="0px" margin="0px" offset="10px">
 		<?php print $t->get_translation("mainHeader"); ?>
 	</h1>
-	<h3 padding="10px" border="0px" margin="0px" offset="10px">
+	<h2 padding="10px" border="0px" margin="0px" offset="10px">
 		<?php print $t->get_translation("subHeader"); ?>
-	</h3>
+	</h2>
 </div>
 
 <div class="box">

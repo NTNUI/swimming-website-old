@@ -1,29 +1,31 @@
 #menu_show {
     display: none;
 }
-.menu{
-    position: -webkit-sticky; /* Safari */
+
+.menu {
+    position: -webkit-sticky;
+    /* Safari */
     position: sticky;
     z-index: 1;
     text-align: center;
-    opacity: 0.9;
 }
-.menu > ul {
+
+.menu>ul {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    background-color: white;
+    background-color: var(--container-background-color);
     margin: auto;
     padding: 0.3vw;
 }
-.menu > ul > li {
+
+.menu>ul>li {
     display: inline;
     margin: 30px;
 }
-.menu > ul > li > a {
-    color: black;
-    font-family: Cantarell;
+
+.menu>ul>li>a {
     text-decoration: none;
     font-size: 1.5vw;
 }

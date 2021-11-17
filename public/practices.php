@@ -13,7 +13,7 @@ function practices_entry($title, $extra = "") {
 }
 ?>
 
-<div class="box green">
+<div class="box">
   <h1 class="center"><?php print $t->get_translation("mainHeader"); ?></h1>
     <p class="center">
       <?php print $t->get_translation("subHeader"); ?>

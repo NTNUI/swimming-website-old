@@ -17,7 +17,6 @@
 #menu ul li a {
     width: 100%;
     font-size: 2em;
-    border-bottom: 1px solid #fff;
 }
 
 #menu_show {
@@ -66,9 +65,6 @@
     overflow-wrap: break-word;
 }
 
-.box.green h1 {
-    font-size: 36px;
-}
 
 .board>.card {
     margin-top: 10px;

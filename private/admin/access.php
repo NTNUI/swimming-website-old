@@ -45,7 +45,7 @@ if ($type != "") {
 		$query = $conn->prepare($sql);
 		$query->bind_param("iss", $roleId, $ruleType, $page);
 		if ($query->execute()) { ?>
-			<h1 class="box green">Record created</h1>
+			<h1 class="box">Record created</h1>
 		<?php		} else { ?>
 			<h1 class="box error">Something went wrong...</h1>
 		<?php
@@ -67,7 +67,7 @@ if ($type != "") {
 			$access_control->log("admin/access", "change " . $page . " rule for g[" . $roleId . "]", $ruleType);
 		}
 		if ($query->execute()) { ?>
-			<h1 class="box green">Record updated</h1>
+			<h1 class="box">Record updated</h1>
 		<?php		} else { ?>
 			<h1 class="box error">Something went wrong...</h1>
 <?php

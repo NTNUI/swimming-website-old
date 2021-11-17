@@ -34,8 +34,8 @@ function redirect($action)
 function print_admin_header($name)
 {
 	global $t;
-	print("<div class='box green' style='position: relative'>");
-	print("<h1><a href=" . $t->get_url("admin") . " class='admin_header'>" . $t->get_translation("admin_header") . "</a></h1>");
+	print("<div class='box' style='position: relative'>");
+	print("<a href=" . $t->get_url("admin") . " class='admin_header'><h1>" . $t->get_translation("admin_header") . "</h1></a>");
 	print($t->get_translation("logged_in_as") . "<b class='admin_username'> $name </b><br>");
 	access_link("logout", true);
 	print(" - ");
@@ -57,7 +57,7 @@ function print_password_form($change_password = false, $message = "")
 {
 	if (!$change_password) {
 
-		print("<div class='box green'>");
+		print("<div class='box'>");
 		print("<h1>Admin</h1>");
 		print("</div>");
 	}
@@ -138,7 +138,7 @@ function access_link($page, $inline = false)
 function print_log_out_success()
 {
 	print("
-	<div class='box green'>
+	<div class='box'>
 		<h2>You have been logged out</h2>
 	</div>
 	");

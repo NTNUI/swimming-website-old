@@ -1,4 +1,4 @@
-<div class="box green">
+<div class="box">
 
 <h1><?php print $t->get_translation("mainHeader"); ?></h1>
 	<p><?php print $t->get_translation("subHeader"); ?></p>
@@ -10,7 +10,7 @@ function question_box($question, $extra = "") {
 ?>
 	<div class="box">
 		<a name="<?php print $question?>"></a>
-		<h1><?php print $t->get_translation("${question}_question"); ?></h1>
+		<h2><?php print $t->get_translation("${question}_question"); ?></h2>
 		<?php print $extra; ?>
 		<p><?php print $t->get_translation("${question}_answer"); ?></p>
 	</div>

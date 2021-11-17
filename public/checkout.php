@@ -19,7 +19,7 @@ $client_secret = $_REQUEST["client_secret"];
 		<h1>Din ordre er motatt, vennligst vent mens vi behandler betalingen</h1>
 	</div>
 	<div id="charge_succeeded">
-		<div class="green box charge">
+		<div class="box charge">
 			<h1>Ditt kjøp ble gjennomført, en bekreftelse vil snart bli sendt via epost</h1>
 
 		</div>

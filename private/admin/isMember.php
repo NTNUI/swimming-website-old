@@ -3,7 +3,7 @@ global $t, $settings;
 $base_url = $settings['baseurl'];
 ?>
 
-<div class='box green'>
+<div class='box'>
 	<h2>Member search</h2>
 </div>
 
