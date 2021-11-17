@@ -87,24 +87,6 @@ span.left {
     width: 55%;
 }
 
-/* card */
-
-.card {
-    box-shadow: 0 4px 8px 0 var(--card-shadow-color) !important;
-    transition: 0.3s;
-    width: 30%;
-    float: left;
-    background-color: var(--card-background-color);
-}
-
-.card img {
-    width: 100%;
-}
-
-.card:hover {
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
-}
-
 /* TABLES */
 
 .center_table tr td {
@@ -131,4 +113,8 @@ span.left {
 .error {
     background-color: #960000 !important;
     color: #fff !important;
+}
+
+.contents {
+    display: contents;
 }

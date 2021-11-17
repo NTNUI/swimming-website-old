@@ -3,7 +3,7 @@
 		global $t, $base_url;
 ?>
 	<div class="board box">
-		<div>
+		<div class="contents">
 			<h2><?php print $t->get_translation($title) ?></h2>
 			<p><?php print $t->get_translation("${title}_description"); ?></p>
 		</div>
@@ -17,8 +17,8 @@
 }
 ?>
 	<div class="box">
-		<h1 class="center"> <?php print $t->get_translation("mainHeader") ?> </h1>
-			<p class="center"><?php print $t->get_translation("subHeader"); ?></p>
+		<h1> <?php print $t->get_translation("mainHeader") ?> </h1>
+			<p><?php print $t->get_translation("subHeader"); ?></p>
 	</div>
 
 <?php

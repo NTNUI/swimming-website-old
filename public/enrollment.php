@@ -131,7 +131,7 @@ function print_infoBox($key = "")
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/js/intlTelInput.js"></script>
 
 <div class="box">
-	<h1 class="center">
+	<h1>
 		<?php print $t->get_translation("mainHeader"); ?>
 	</h1>
 	<p><?php print $t->get_translation("mainBody"); ?></p>
