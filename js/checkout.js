@@ -1,3 +1,4 @@
+// TODO: use strict, replace var with let / const. 
 var stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
 
 // After some amount of time, we should stop trying to resolve the order synchronously:

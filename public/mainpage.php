@@ -23,7 +23,6 @@
 		$image_count = 9;
 		for ($i = 1; $i <= $image_count; $i++) { ?>
 		<div class="mySlides fade">
-			<div class="numbertext"><?php print "$i / $image_count" ?></div>
 			<img src="<?php print $settings["baseurl"]."/img/slideshow/bilde_$i.jpg"; ?>" style="width:100%">
 			<div class="text"><?php print $t->get_translation("caption_$i"); ?></div>
 		</div>
@@ -31,12 +30,6 @@
 		?>
 		<a class="prev" onclick="plusSlides(-1)">&#10094;</a>
 		<a class="next" onclick="plusSlides(1)">&#10095;</a>
-	</div>
-
-	<div style="margin-top: 5px;">
-		<?php for ($i = 1; $i <= $image_count; $i++) {?>
-			<span class="dot" onclick="currentSlide(<?php print $i ?>)"></span>
-<?php		} ?>
 	</div>
 
 	<p><?php print $t->get_translation("group_description"); ?></p>

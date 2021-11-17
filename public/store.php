@@ -88,7 +88,7 @@ if (isset($_REQUEST["error"])) { ?>
 		<h1 class="store_header"></h1>
 		<div class="card">
 			<img alt="Some image">
-			<?php print $t->get_translation("pris") ?>: <b class="store_price"></b>
+			<p class="store_price"><?php print $t->get_translation("pris") ?></p>
 		</div>
 		<div>
 			<p class="store_description"></p>
