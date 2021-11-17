@@ -1,0 +1,21 @@
+
+.board div {
+    display: inline-block;
+    width: 55%;
+    margin: auto;
+}
+
+.board:nth-child(odd) div {
+    float: left;
+}
+
+.board>.card {
+    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
+    transition: 0.3s;
+    width: 30%;
+    float: left;
+}
+
+.board:nth-of-type(odd)>.card {
+    float: right;
+}

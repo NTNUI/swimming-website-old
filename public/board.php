@@ -4,19 +4,19 @@
 ?>
 	<div class="board box">
 		<div>
-			<h1><?php print $t->get_translation($title) ?></h1>
-			<span><?php print $t->get_translation("${title}_description"); ?></span>
+			<h2><?php print $t->get_translation($title) ?></h2>
+			<p><?php print $t->get_translation("${title}_description"); ?></p>
 		</div>
-		<div class="card img-text" style="margin: 0px;">
+		<div class="card">
 			<img class="img-<?php print $title?>" src="<?php print "$base_url/img/styret/" . $t->get_translation("${title}_img"); ?>" alt="Avatar">
-			<h4 class="black"><?php print $t->get_translation("${title}_name") ?></h4>
-			<p><a href="mailto:<?php print $t->get_translation("${title}_email") ?>"><?php print $t->get_translation("${title}_email"); ?></a></p>
+			<h4><?php print $t->get_translation("${title}_name") ?></h4>
+			<a class="email" href="mailto:<?php print $t->get_translation("${title}_email") ?>"><?php print $t->get_translation("${title}_email"); ?></a>
 		</div>
 	</div>
 <?php
 }
 ?>
-	<div class="box green">
+	<div class="box">
 		<h1 class="center"> <?php print $t->get_translation("mainHeader") ?> </h1>
 			<p class="center"><?php print $t->get_translation("subHeader"); ?></p>
 	</div>

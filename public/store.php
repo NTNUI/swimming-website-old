@@ -1,13 +1,13 @@
 <div class="box">
-	<h2>
+	<h1>
 		<?php print $t->get_translation("header"); ?>
-	</h2>
+	</h1>
 </div>
 
 <div class="box hidden" id="storeEmpty">
-	<h3>
+	<h2>
 		<?php print $t->get_translation("store_empty_header"); ?>
-	</h3>
+	</h2>
 	<p>
 		<?php print $t->get_translation("store_empty_content"); ?>
 	</p>
@@ -17,7 +17,7 @@
 //$t->page = "store";
 if (isset($_REQUEST["error"])) { ?>
 	<div class="error box">
-		<h1><?php print $t->get_translation("error_header"); ?></h1>
+		<h2><?php print $t->get_translation("error_header"); ?></h2>
 		<p><strong><?php print $_REQUEST["error"]; ?></strong><br>
 			<a href="mailto:svomming-styret@ntnui.no"><?php print $t->get_translation("contact"); ?></a>
 		</p>
@@ -33,9 +33,9 @@ if (isset($_REQUEST["error"])) { ?>
 
 <div id="loading_box" class="modal">
 	<div>
-		<h2 id="waitingHeader" class="hidden"><?php print $t->get_translation("waiting_message"); ?></h2>
-		<h2 id="completedHeader" class="t hidden"><?php print $t->get_translation("payment_complete"); ?></h2>
-		<h2 id="failedHeader" class="hidden t">error found:<span id="failedContent"></span></h2>
+		<h3 id="waitingHeader" class="hidden"><?php print $t->get_translation("waiting_message"); ?></h3>
+		<h3 id="completedHeader" class="t hidden"><?php print $t->get_translation("payment_complete"); ?></h3>
+		<h3 id="failedHeader" class="hidden t">error found:<span id="failedContent"></span></h3>
 		<div id="waitingGlass" class="lds-hourglass hidden"></div>
 		<span id="paymentComplete" class="hidden">&#x2713;
 	</div>

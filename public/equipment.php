@@ -8,7 +8,7 @@ function equipment_entry($title) {
 <?php
 }
 ?>
-<div class="box green">
+<div class="box">
 	<h1><?php print $t->get_translation("mainHeader"); ?></h1>
 	<p><?php print $t->get_translation("subHeader"); ?></p>
 	<p><?php print $t->get_translation("links"); ?></p>

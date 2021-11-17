@@ -1,133 +1,78 @@
+:root {
+    --border-radius: 5px;
+    --background: url("../img/background.jpg") no-repeat center center fixed;
+}
+
+/* Dark mode ish 
+:root {
+    --container-background-color: #111;
+    --container-foreground-color: white;
+    --card-background-color: #111;
+    --card-foreground-color: white;
+    --card-shadow-color: rgba(255,255,255,0.2);
+}
+*/
+
+/* Light theme */
+
+:root {
+    --container-background-color: white;
+    --container-foreground-color: black;
+    --card-background-color: white;
+    --card-shadow-color: black;
+}
+
 html {
-    font-family: "heebo", serif;
-    text-rendering: optimizelegibility;
+    font-family: cantarell, roboto, serif;
+    text-rendering: optimizeLegibility;
+    background: var(--background);
 }
 
-body {
-    max-width: 100vw;
+h1, h2, h3, h4, h5, h6, a, span, p, li, label {
+    color: var(--container-foreground-color);
 }
 
-h1 {
-    margin: 0px;
-    font-family: "heebo", serif;
-    font-weight: 800;
-    font-size: 55px;
+h1, h2, p {
+    margin: 20px;
+}
+
+h1, h2, h3, h4, p, .email {
+    margin-left: 20px;
+}
+
+.email {
+    text-decoration: none;
+    margin: 20px;
+    display: block;
 }
 
 .maintable {
     margin-left: auto;
     margin-right: auto;
-    max-width: 80%;
     margin-top: 54px;
     padding-top: 15px;
 }
 
-.text_box {
-    font-family: "heebo", serif;
-    text-align: left;
-    padding-left: 10px;
-    padding-right: 10px;
-    margin-top: 0px;
-    color: #000000;
-    position: relative;
-}
-
 .box {
-    background-color: #fff;
-    padding: 25px;
+    background-color: var(--container-background-color);
     overflow: auto;
-    border-radius: 3px;
-    align-content: center;
-    text-align: center;
+    padding: 25px;
     margin: 20px 0px;
-    margin-top: 10px;
-    border-radius: 10px;
+    border-radius: var(--border-radius);
 }
 
-.box a {
-    color: #00f;
-}
-
-.box.green {
-    background-color: rgba(255, 255, 255, 0.7);
-    box-shadow: none;
-    border: 0px;
+.box:first-of-type {
+    margin-top: 3.5vw;
 }
 
 .container {
     padding: 2px 16px;
-    background-color: white;
-    color: black;
-}
-
-.img-text {
-    padding: 2px 16px;
-    background-color: white;
-    margin: 0;
+    background-color: var(--container-background-color);
+    color: var(--container-foreground-color);
 }
 
 .container a {
     color: #00FFFF;
-}
-
-.error {
-    background-color: #960000 !important;
-    color: #fff !important;
-}
-
-.board div {
-    display: inline-block;
-    width: 55%;
-    margin: auto;
-    padding-top: 10px;
-}
-
-.board:nth-child(odd) div {
-    float: left;
-}
-
-.box h1 {
-    font-size: 36px;
-}
-
-.box.green h1 {
-    font-size: 56px;
-}
-
-.card-left {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    transition: 0.3s;
-    width: 45%;
-    float: left;
-    margin-top: 10px;
-}
-
-.card-right {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    transition: 0.3s;
-    width: 45%;
-    float: right;
-    margin-top: 10px;
-}
-
-.board>.card {
-    box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2);
-    transition: 0.3s;
-    width: 30%;
-    float: left;
-    margin-top: 10px;
-}
-
-.board:nth-of-type(odd)>.card {
-    float: right;
-}
-
-.card img {
-    width: 100%;
-}
-
-.card:hover {
-    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
 }
 
 span.right {
@@ -142,21 +87,23 @@ span.left {
     width: 55%;
 }
 
-.enrollment {
-    margin-top: 10px;
-    border-radius: 5px;
-    background-color: #f2f2f2;
-    padding: 10px;
+/* card */
+
+.card {
+    box-shadow: 0 4px 8px 0 var(--card-shadow-color) !important;
+    transition: 0.3s;
+    width: 30%;
+    float: left;
+    background-color: var(--card-background-color);
 }
 
-.enrollment_checkbox {
-    border: 1px solid #ccc;
-    border-radius: 4px;
+.card img {
     width: 100%;
-    background-color: white;
-    padding-top: 12px;
 }
 
+.card:hover {
+    box-shadow: 0 8px 16px 0 rgba(0, 0, 0, 0.2);
+}
 
 /* TABLES */
 
@@ -173,71 +120,15 @@ span.left {
     font-weight: bold;
 }
 
-.black {
-    color: black;
-}
-
-
 .red {
     background-color: red !important;
-}
-
-.lds-hourglass {
-    display: inline-block;
-    position: relative;
-    width: 256px;
-    height: 256px;
-}
-
-.lds-hourglass:after {
-    content: " ";
-    display: block;
-    border-radius: 50%;
-    width: 0;
-    height: 0;
-    margin: 6px;
-    box-sizing: border-box;
-    border: 104px solid #7f8;
-    border-color: #7f8 transparent #7f8 transparent;
-    animation: lds-hourglass 1.2s infinite;
-}
-
-@keyframes lds-hourglass {
-    0% {
-        transform: rotate(0);
-        animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
-    }
-    50% {
-        transform: rotate(900deg);
-        animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
-    }
-    100% {
-        transform: rotate(1800deg);
-    }
-}
-
-#paymentComplete {
-    color: #7f8;
-    font-size: 104px;
-}
-
-#failedCross {
-    color: #f33;
-    font-size: 104px;
-}
-
-#loading_box {
-    z-index: 100;
 }
 
 .hidden {
     display: none;
 }
 
-.admin_header {
-    color: #000 !important;
-}
-
-.admin_username {
-    color: #000;
+.error {
+    background-color: #960000 !important;
+    color: #fff !important;
 }

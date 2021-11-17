@@ -89,7 +89,7 @@ if ($settings["baseurl"] !== "https://127.0.0.1") {
 
 	if (!$decoded->success) {
 		print("
-		<div class='box green'>
+		<div class='box'>
 		<h1>Recaptia feilet.</h1>
 		<p>
 		Prøv å fylle ut skjemaet på nytt.
@@ -152,7 +152,7 @@ if (false) {
 }
 
 ?>
-<div class="green box">
+<div class="box">
 	<h1><?php print $t->get_translation("header"); ?></h1>
 	<p><?php print $t->get_translation("body"); ?></p>
 </div>

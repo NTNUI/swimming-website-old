@@ -1,0 +1,14 @@
+.enrollment {
+    margin-top: 10px;
+    border-radius: var(--border-radius);
+    background-color: var(--container-background-color);
+    padding: 10px;
+}
+
+.enrollment_checkbox {
+    border: 1px solid #ccc;
+    border-radius: var(--border-radius);
+    width: 100%;
+    background-color: white;
+    padding-top: 12px;
+}

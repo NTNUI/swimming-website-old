@@ -130,7 +130,7 @@ function print_infoBox($key = "")
 <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/css/intlTelInput.css" />
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/js/intlTelInput.js"></script>
 
-<div class="box green">
+<div class="box">
 	<h1 class="center">
 		<?php print $t->get_translation("mainHeader"); ?>
 	</h1>
@@ -169,7 +169,7 @@ if (!$registatin_open) { ?>
 	if ($settings["baseurl"] !== "https://127.0.0.1") {
 		print_recaptia();
 	}
-	print "<div class='box'>" . $t->get_translation("gdpr_notice") . "</div>";
+	print "<div class='box'><p>" . $t->get_translation("gdpr_notice") . "</p></div>";
 	print_reset_and_submit_buttons();
 	?>
 

@@ -49,7 +49,7 @@ class Translator
 			$this->load_translation($page);
 		}
 
-		// if translatons for this page is still not loaded return.
+		// if translations for this page is still not loaded return.
 		if (!isset($this->translations[$page])) {
 			// loading translation for a file that does not exist
 			return "";
