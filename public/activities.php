@@ -2,12 +2,12 @@
 function activity_entry($title, $image) {
 	global $base_url, $t; ?>
 	<div class="board box">
-		<div>
+		<div class="contents">
 			<h1><?php print $t->get_translation("${title}_header"); ?></h1>
 			<p><?php print $t->get_translation("${title}_description"); ?></p>
 		</div>
 		
-		<div class="card" style="width: 40%">
+		<div class="card">
 			<img src="<?php print "$base_url/img/activities/$image"?>" alt="<?php print $title ?>">
 			<h4><?php print $t->get_translation("${title}_caption"); ?></h4>
 		</div>
@@ -18,8 +18,8 @@ function activity_entry($title, $image) {
 
 <div class="box">
 
-<h1 class="center"><?php print $t->get_translation("mainHeader"); ?></h1>
-  <p class="center">
+<h1><?php print $t->get_translation("mainHeader"); ?></h1>
+  <p>
     <?php print $t->get_translation("subHeader"); ?>
   </p>
 </div>

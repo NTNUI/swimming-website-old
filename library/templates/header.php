@@ -21,7 +21,7 @@ if ($title == "") $title = ucwords($page);
 	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/forms.css" type="text/css" />
 	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/store.css" type="text/css" />
 	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/admin.css" type="text/css" />
-	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/smallscreen.css" type="text/css" media="screen and (max-width: 1080px)" />
+	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/smallscreen.css" type="text/css" media="screen and (max-width: 1000px)" />
 	<!-- Stripe fraud stuff recommends this on all pages hmmm -->
 	<script src="https://js.stripe.com/v3/"></script>
 	<style>
@@ -43,8 +43,10 @@ if ($title == "") $title = ucwords($page);
 	<script src="<?php print $base_url; ?>/js/base.js"></script>
 </head>
 
-<body class="body_style">
-	<div id="menu_show">Menu</span><span class="right"><a href="<?php ($language != "no" ? "" : "/en") . "/$page"  ?>"><?php print($language != "no" ? "Norsk" : "English"); ?></a></span></div>
+<body>
+	<div id="mobile_menu_button">
+		Menu
+	</div>
 	<div id="menu_container">
 		<div id="menu" class="menu">
 			<?php include("library/templates/menu.php"); ?>

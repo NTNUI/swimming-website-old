@@ -85,14 +85,17 @@ if (isset($_REQUEST["error"])) { ?>
 
 <template id="store_dummy">
 	<div class="store_item">
-		<h1 class="store_header"></h1>
+		<h3 class="store_header"></h3>
+		<div>
+			
+			<p class="store_description"></p>
+		</div>
 		<div class="card">
 			<img alt="Some image">
 			<p class="store_price"><?php print $t->get_translation("pris") ?></p>
 		</div>
-		<div>
-			<p class="store_description"></p>
-			<div class="bottom">
+		<span class="store_availability"></span>
+		<div class="bottom">
 				<button class="store_button"><?php print $t->get_translation("kjop"); ?></button>
 				<button class="locked wait"><?php print $t->get_translation("opens"); ?> <span class="store_opensin"></span></button>
 				<button class="locked soldout"><?php print $t->get_translation("soldout");  ?></button>
@@ -102,8 +105,6 @@ if (isset($_REQUEST["error"])) { ?>
 					<span class="store_timeleft"></span>
 				</div>
 			</div>
-		</div>
-		<span class="store_availability"></span>
 	</div>
 </template>
 
