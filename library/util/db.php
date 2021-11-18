@@ -6,7 +6,7 @@
 class DB
 {
 	private mysqli $conn;
-	private mysqli_stmt $stmt;
+	public mysqli_stmt $stmt;
 	/**
 	 * Connect to a database. Credentials are automatically retrieved from global $settings.
 	 * Create a new instance like so
@@ -77,6 +77,7 @@ class DB
 		return $this->stmt->num_rows();
 	}
 
+	// Does not work. Cannot bind results to variable for some reason.
 	public function bind_result(&$var1, &...$_)
 	{
 		if (!$this->stmt->bind_result($var1, $_)) {
