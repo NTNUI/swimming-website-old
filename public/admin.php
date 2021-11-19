@@ -20,6 +20,7 @@ $username = argsURL("SESSION", "username");
 $access_control = new AccessControl($username);
 
 print_admin_header($name);
+print("<script>localStorage.setItem('admin', true);</script>");
 
 if (Authenticator::log_out_requested()) {
 	Authenticator::log_out();

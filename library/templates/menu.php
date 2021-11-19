@@ -1,7 +1,7 @@
 <?php
 global $t, $settings, $page;
 $t->load_translation('menu');
-function menu_item($url, $name = '')
+function menu_item(string $url, string $name = '')
 {
 	global $t;
 	if ($name == '') $name = $url;
@@ -24,5 +24,8 @@ function menu_item($url, $name = '')
 		<a href='<?php print($settings["baseurl"] . ($language != 'no' ? '/' : '/en/') . $page); ?>'>
 			<?php print $t->get_translation('switchLanguage', 'menu') ?>
 		</a>
+	</li>
+	<li id="admin_menu_link" style="display:none;">
+		<a href="<?php print($settings['baseurl']); ?>/Admin">admin</a>
 	</li>
 </ul>
