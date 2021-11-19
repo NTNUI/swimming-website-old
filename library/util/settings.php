@@ -24,7 +24,7 @@ function test_settings(){
             log::die("$dir is not writable", __FILE__, __LINE__);
         }
     }
-    foreach(["css", "js", "library", "private", "public", "vendor"] as $dir){
+    foreach(["css", "js", "library", "private", "public", "vendor", "assets"] as $dir){
         if (!is_readable($dir)){
             log::die("$dir is not readable", __FILE__, __LINE__);
         }

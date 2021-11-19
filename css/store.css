@@ -16,14 +16,9 @@
     top: 5px;
 }
 
-.store_item.locked {
-    background-color: #ddd;
-}
-
-.modal {
+.store_modal {
     display: none;
     position: fixed;
-    ;
     z-index: 2;
     top: 0;
     background-color: rgb(0, 0, 0);
@@ -34,7 +29,7 @@
     left: 0;
 }
 
-.modal>div {
+.store_modal>div {
     position: relative;
     width: 80%;
     margin: 20px auto;
@@ -70,6 +65,10 @@
 
 button.locked {
     background-color: #d00;
+}
+
+button.locked:hover {
+    background-color: rgb(180, 0, 0);
 }
 
 /* STRIPE STUFF */

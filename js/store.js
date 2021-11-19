@@ -1,5 +1,7 @@
+"use strict";
+
 function appendItem(item) {
-    let id = item.id;
+    let store_item_hash = item.store_item_hash;
     let header = item.name;
     let description = item.description;
     let image = item.image;
@@ -13,7 +15,7 @@ function appendItem(item) {
     let node = document.importNode(t.content, true);
     let itemContainer = node.querySelector(".store_item");
     let bottom = node.querySelector(".bottom");
-    itemContainer.id = id;
+    itemContainer.id = store_item_hash;
     node.querySelector(".store_header").textContent = header;
     node.querySelector(".store_description").innerHTML = description;
     node.querySelector(".store_price").textContent = formatCurrency(price);
@@ -53,7 +55,6 @@ function appendItem(item) {
         if (locked == lastLock) return;
         lastLock = locked;
         if (locked.startTime || locked.soldout || locked.timeout) {
-            itemContainer.classList.add("locked");
             storeButton.style.display = "none";
             bottom.querySelector(".store_countdown").style.display = "none";
             if (locked.startTime) {
@@ -71,7 +72,6 @@ function appendItem(item) {
             }
         } else {
             itemContainer.classList.remove("locked");
-            //	bottom.querySelector(".store_countdown").style.display = "none";
             bottom.querySelector(".wait").style.display = "none";
             bottom.querySelector(".soldout").style.display = "none";
             bottom.querySelector(".timeout").style.display = "none";
@@ -88,20 +88,30 @@ function appendItem(item) {
 
 var displayedItem;
 
-function display_store(item) {
-    let id = item.id;
+function display_store(item, locked_user = null) {
+    let store_item_hash = item.store_item_hash;
     let title = item.name;
     let description = item.description;
     let img = item.image;
 
     displayedItem = item;
-
-    var overlay = document.querySelector("#checkout_overlay");
+    const overlay = document.querySelector("#checkout_overlay");
     overlay.style.display = "block";
     overlay.querySelector("#checkout_title").textContent = title;
-    overlay.querySelector("#checkout_id").value = id;
+    overlay.querySelector("#store_item_hash").value = store_item_hash;
     overlay.querySelector("#checkout_description").innerHTML = description;
     overlay.querySelector("#checkout_img").src = img;
+
+    if (locked_user != null) {
+        overlay.querySelector("#checkout_name").value = locked_user.name;
+        overlay.querySelector("#checkout_email").value = locked_user.email;
+        overlay.querySelector("#checkout_phone").value = locked_user.phone;
+        overlay.querySelector("#checkout_name").disabled = true;
+        overlay.querySelector("#checkout_email").disabled = true;
+        overlay.querySelector("#checkout_phone").disabled = true;
+        overlay.querySelector("#checkout_comment").style.display = "none";
+    }
+
 }
 
 function hide_store(e) {
@@ -152,7 +162,7 @@ function formatTime(time) {
 
 // prints store items to the screen and returns number of items printed
 function getItems() {
-    fetch(url, {})
+    fetch(INVENTORY_URL, {})
         .then((data) => data.json())
         .then((json) => {
             // Clear container
@@ -224,14 +234,14 @@ form.addEventListener('submit', function(event) {
     document.querySelector("#failedCross").classList.add("hidden");
 
     var extra = {
-        /*		"amount": displayedItem.price,
-        		"currency": "nok",
-        		"owner": { 
-        			"name": document.querySelector("input[name=navn]").value,
-        			"email": document.querySelector("input[name=epost]").value
-        		},*/
+        /*"amount": displayedItem.price,
+        "currency": "nok",
+        "owner": {
+            "name": document.querySelector("input[name=navn]").value,
+            "email": document.querySelector("input[name=epost]").value
+        },*/
         "metadata": {
-            "item_id": displayedItem.id
+            "store_item_hash": displayedItem.store_item_hash
         }
     }
     const name = document.querySelector("input[name=navn]").value;
@@ -239,7 +249,7 @@ form.addEventListener('submit', function(event) {
     const phone = document.querySelector("input[name=phone]").value;
     const owner = { name: name, email: email };
     if (phone != "") owner.phone = phone;
-    const kommentar = document.querySelector("textarea[name=kommentar]").value;
+    const comment = document.querySelector("textarea[name=kommentar]").value;
     stripe.createPaymentMethod("card", card, extra).then(function(result) {
         if (result.error) {
             // Inform the user if there was an error.
@@ -254,9 +264,9 @@ form.addEventListener('submit', function(event) {
                 },
                 body: JSON.stringify({
                     payment_method_id: result.paymentMethod.id,
-                    item_id: displayedItem.id,
+                    store_item_hash: displayedItem.store_item_hash,
                     owner: owner,
-                    kommentar: kommentar,
+                    comment: comment,
                 })
             }).then(function(result) {
                 result.json().then(function(json) {
@@ -268,9 +278,11 @@ form.addEventListener('submit', function(event) {
     });
 });
 
+// charge completed callback
 function handleStripeResponse(response) {
     if (response.error) {
-        show_error(result.error);
+        console.log(response);
+        show_error(response.error);
     } else if (response.requires_action) {
         handleAction(response);
     } else {
@@ -287,7 +299,9 @@ function handleStripeResponse(response) {
     }
 }
 
+// error on failed charge
 function show_error(error) {
+    console.log(error);
     if (typeof error.message != "undefined") error = error.message;
     document.querySelector("#loading_box").style.display = "unset";
     document.querySelector("#waitingHeader").classList.add("hidden");
@@ -306,6 +320,7 @@ function hide_load() {
     document.querySelector("#loading_box").style.display = "none";
 }
 
+// charge button handler
 function handleAction(response) {
     stripe.handleCardAction(
         response.payment_intent_client_secret
@@ -318,7 +333,7 @@ function handleAction(response) {
             const phone = document.querySelector("input[name=phone]").value;
             const owner = { name: name, email: email };
             if (phone != "") owner.phone = phone;
-            const kommentar = document.querySelector("textarea[name=kommentar]").value;
+            const comment = document.querySelector("textarea[name=kommentar]").value;
             fetch("api/charge", {
                 method: "POST",
                 headers: {
@@ -326,9 +341,9 @@ function handleAction(response) {
                 },
                 body: JSON.stringify({
                     payment_intent_id: result.paymentIntent.id,
-                    item_id: displayedItem.id,
+                    store_item_hash: displayedItem.store_item_hash,
                     owner: owner,
-                    kommentar: kommentar,
+                    comment: comment,
                 }),
             }).then(function(confirmation) {
                 return confirmation.json();

@@ -1,10 +1,10 @@
 version: "3.9"
 services:
-# web is the web site application
-# TODO: split web into apache and php
-# TODO: make image directory writable and put it in gitignore
-# TODO: move mariadb->volumes to env file. That is host system dependent.
-# TODO: tons of warnigs while running docker-compose up. Fix those
+    # web is the web site application
+    # TODO: split web into apache and php
+    # TODO: make image directory writable and put it in gitignore
+    # TODO: move mariadb->volumes to env file. That is host system dependent.
+    # TODO: tons of warnigs while running docker-compose up. Fix those
     web:
         build: .
         container_name: web
@@ -23,8 +23,9 @@ services:
             - ./translations:/srv/http/translations
             - ./css:/srv/http/css
             - ./img:/srv/http/img
+            - ./assets:/srv/http/assets
             - ./library:/srv/http/library
-# MariaDB is the database
+    # MariaDB is the database
     mariadb:
         image: mariadb
         container_name: mariadb
@@ -42,7 +43,7 @@ services:
             - ./docker/mariadb/conf.d/:/etc/mysql/
         networks:
             - epstein-didnt-kill-himself
-# phpmyadmin can manange the database visually
+    # phpmyadmin can manange the database visually
     phpmyadmin:
         image: phpmyadmin
         container_name: phpmyadmin
@@ -59,10 +60,10 @@ networks:
     epstein-didnt-kill-himself:
         driver: bridge
         ipam:
-          config:
-          - subnet: 172.24.0.0/24
+            config:
+                - subnet: 172.24.0.0/24
 
 volumes:
-    log:
-    sessions:
-    storage:
+    log: null
+    sessions: null
+    storage: null

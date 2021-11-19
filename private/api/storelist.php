@@ -7,8 +7,8 @@ foreach ($res as $i => $item) {
 	if (array_key_exists("image", $item)) {
 		$res[$i]["image"] = "$base_url/img/store/" . $item["image"];
 	}
-	$res[$i]["id"] = $item["item_hash"];
-	unset($res[$i]["item_hash"]);
+	$res[$i]["store_item_hash"] = $item["store_item_hash"];
+	unset($res[$i]["id"]);
 }
 
 header("Content-Type: application/json");
