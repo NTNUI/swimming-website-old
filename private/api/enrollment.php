@@ -52,9 +52,9 @@ foreach (["name", "isMale", "phoneNumber", "birthDate", "zip", "address", "email
 }
 
 array_push($input, [
-    "dryrun" => isset($_POST["dryrun"]) ? $_POST["dryrun"] : "false",
+    "dryrun" => isset($_POST["dryrun"]) ? (bool)$_POST["dryrun"] : false,
     "name" => $_POST["name"],
-    "isMale" => $_POST["isMale"],
+    "isMale" => (bool)$_POST["isMale"],
     "phoneNumber" => $_POST["phoneNumber"], // can be string
     "birthDate" => $_POST["birthDate"],
     "zip" => filter_var($_POST["zip"], FILTER_VALIDATE_INT, ["flag" => FILTER_NULL_ON_FAILURE, "min_range" => 1000, "max_range" => 9999]),
@@ -88,7 +88,7 @@ if (filter_var($input["isMale"], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE
     return;
 }
 if (filter_var($input["dryrun"], FILTER_VALIDATE_BOOLEAN)) {
-    $input["dryrun"] = $_POST["dryrun"];
+    $input["dryrun"] = (bool)$_POST["dryrun"];
 } else {
     $input["dryrun"] = false;
 }
