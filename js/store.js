@@ -1,7 +1,6 @@
 "use strict";
 
 function appendItem(item) {
-    console.table(item);
     let store_item_hash = item.store_item_hash;
     let header = item.name;
     let description = item.description;
@@ -173,7 +172,6 @@ function getItems() {
                 let item = json[i];
                 appendItem(item);
             }
-            console.table(json);
             return json.length;
         });
 }
