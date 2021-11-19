@@ -26,6 +26,6 @@ function menu_item(string $url, string $name = '')
 		</a>
 	</li>
 	<li id="admin_menu_link" style="display:none;">
-		<a href="<?php print($settings['baseurl']); ?>/Admin">admin</a>
+		<a href="<?php print($settings['baseurl']); ?>/admin">Admin</a>
 	</li>
 </ul>
