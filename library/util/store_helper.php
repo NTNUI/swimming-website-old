@@ -16,7 +16,7 @@ class StoreHelper
 
 	// id means really store_item_id
 	// TODO: rename function to get_store_items
-	function get_items(int $start = 0, int $limit = 10, string $id = "", bool $rawData = false, bool $visibility_check = true)
+	function get_items(int $start = 0, int $limit = 10, string $store_item_hash = "", bool $rawData = false, bool $visibility_check = true)
 	{
 		$language = $this->language;
 		$mysqli = connect("web");
@@ -29,7 +29,7 @@ class StoreHelper
 		}
 
 		// wtf is going on here?
-		if ($id == "") {
+		if ($store_item_hash == "") {
 			$sql = "SELECT id, api_id, name, description, price, available_from, available_until, require_phone, visible,
 			(SELECT COUNT(*) FROM store_orders
 			WHERE store_orders.item_id = store_items.id
@@ -40,9 +40,10 @@ class StoreHelper
 			$query = $mysqli->prepare($sql);
 			$query->bind_param("ii", $limit, $start);
 		} else {
+			// Select every column from store_item, add a column called "amount" (which should really be called num_sold or something) given column api_id (which should really be called store_item_hash)
 			$sql = "SELECT id, api_id, name, description, price, available_from, available_until, require_phone, visible, (SELECT COUNT(*) FROM store_orders WHERE store_orders.item_id = store_items.id AND (store_orders.order_status='FINALIZED' OR store_orders.order_status='DELIVERED')) AS amount, amount_available, image, group_id FROM store_items AS store_items WHERE api_id=? ORDER BY id DESC LIMIT ? OFFSET ?";
 			$query = $mysqli->prepare($sql);
-			$query->bind_param("sii", $id, $limit, $start);
+			$query->bind_param("sii", $store_item_hash, $limit, $start);
 		}
 
 		if (!$query->execute()) {
@@ -50,7 +51,7 @@ class StoreHelper
 		}
 
 		$result = array();
-		$query->bind_result($id, $item_hash, $name, $description, $price, $available_from, $available_until, $require_phone, $visibility, $amount, $amount_available, $image, $group_id);
+		$query->bind_result($id, $store_item_hash, $name, $description, $price, $available_from, $available_until, $require_phone, $visibility, $amount, $amount_available, $image, $group_id);
 		if (!$query) {
 			log::die("Failed to bind result", __FILE__, __LINE__);
 		}
@@ -69,7 +70,7 @@ class StoreHelper
 
 			$result[] = array(
 				"id" => intval($id),
-				"item_hash" => $item_hash,
+				"store_item_hash" => $store_item_hash,
 				"name" => $name,
 				"description" => $description,
 				"price" => intval($price),
@@ -90,15 +91,15 @@ class StoreHelper
 		return $result;
 	}
 
-	function get_item(string $id, bool $rawData = false)
+	function get_item(string $store_item_hash, bool $rawData = false)
 	{
-		if (!$id || $id == "") return false;
-		$result = $this->get_items(0, 1, $id, $rawData);
+		if (!$store_item_hash || $store_item_hash == "") return false;
+		$result = $this->get_items(0, 1, $store_item_hash, $rawData);
 		if (sizeof($result) < 1) return false;
 		return $result[0];
 	}
 
-	function create_order($api_id, $paymentId, $owner, $comment)
+	function create_order(string $store_item_hash, $paymentId, $owner, $comment)
 	{
 		$mysqli = connect("web");
 
@@ -109,9 +110,9 @@ class StoreHelper
 			$phone = $owner->phone;
 		}
 
-		$item = $this->get_item($api_id);
+		$item = $this->get_item($store_item_hash);
 
-		if ($item === false) throw new Exception("no_such_item");
+		if ($item === false) throw new Exception(json_encode(["message" => "no_such_item", "item" => $item, "store_item_hash$store_item_hash" => $store_item_hash]));
 		if ($item["amount_available"] != null && $item["amount_bought"] >= $item["amount_available"]) throw new Exception("item_soldout");
 		if ($item["available_from"] !== false && $item["available_from"] > time()) throw new Exception("not_available_yet");
 		if ($item["available_until"] !== false && $item["available_until"] < time()) throw new Exception("no_longer_available");
