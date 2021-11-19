@@ -4,8 +4,7 @@
 	<meta name="title" content="NTNUI Svømming" />
 </head>
 
-<link rel="stylesheet" type="text/css" href="<?php print $settings["baseurl"] . "/css/slideshow.css" ?>">
-</link>
+<link rel="stylesheet" type="text/css" href="<?php print $settings["baseurl"]."/css/slideshow.css" ?>"></link>
 <div class="box">
 
 	<h1 padding="10px" border="0px" margin="0px" offset="10px">

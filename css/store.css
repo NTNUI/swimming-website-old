@@ -66,9 +66,11 @@
 button.locked {
     background-color: #d00;
 }
+
 button.locked:hover {
     background-color: rgb(180, 0, 0);
 }
+
 /* STRIPE STUFF */
 
 .StripeElement {
