@@ -1,16 +1,83 @@
-.modal_background {
+.modal_background, .store_modal_background {
+    display: none;
     position: fixed;
-    z-index: 1;
+    z-index: 2;
     left: 0;
     top: 0;
     width: 100%;
     height: 100%;
-    overflow:auto;
-    background-color: rgba(0,0,0,0.4);
+    overflow: auto;
+    background-color: rgba(0, 0, 0, 0.4);
 }
 
-.modal_content{
-    background-color: #AAA;
-    margin: 15% auto;
+.modal_content {
+    background-color: var(--secondary-background-color-no-opacity);
+    max-height: calc(100vh - 100px);
+    padding: 20px;
+    margin: 20px auto;
     width: 80%;
+}
+.modal_content>.bottom{
+    display: flow-root;
+}
+.modal_button{
+    width: unset;
+    display: none;
+    float: right;
+    margin: 20px;
+}
+
+.modal_decline_button {
+    float: left;
+    background-color: var(--cancel-color);
+}
+.modal_decline_button:hover {
+    background-color: var(--cancel-color-hover);
+}
+
+.modal_success {
+    color: #7f8;
+}
+
+.modal_failure {
+    color: #f33;
+}
+
+.status-graphic {
+    font-size: 100px;
+    text-align: center;
+    display: block;
+}
+.lds-hourglass {
+    display: inline;
+    float: none;
+}
+
+.lds-hourglass:after {
+    content: " ";
+    display: block;
+    border-radius: 50%;
+    width: 0;
+    height: 0;
+    margin: 6px auto;
+    box-sizing: border-box;
+    border: 104px solid rgb(0, 120, 20);
+    border-color: rgb(0, 120, 20) transparent rgb(0, 120, 20) transparent;
+    animation: lds-hourglass 3s infinite;
+}
+
+@keyframes lds-hourglass {
+    0% {
+        transform: rotate(0);
+        animation-timing-function: cubic-bezier(0.55, 0.055, 0.675, 0.19);
+    }
+
+    50% {
+        transform: rotate(900deg);
+        animation-timing-function: cubic-bezier(0.215, 0.61, 0.355, 1);
+    }
+
+    100% {
+        transform: rotate(1800deg);
+    }
 }
