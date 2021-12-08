@@ -1,0 +1,137 @@
+/* input fields */
+.intl-tel-input {
+    width: 100%;
+    color: var(--primary-foreground-color);
+    margin: 8px 0px;
+    /* makes spacing consistent with other inputs */
+}
+
+input, select, textarea, .StripeElement {
+    background-color: var(--primary-background-color);
+    color: var(--primary-foreground-color);
+    border-color: rgba(0, 0, 0, 0);
+    border-width: 1px;
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    margin: 8px 0;
+    border-radius: var(--border-radius);
+    box-sizing: border-box;
+}
+
+input:hover, select:hover {
+    border-color: var(--accent-color);
+    border-width: 1px;
+}
+
+input[type=radio] {
+    width: unset;
+}
+
+input[type=submit], input[type=reset] {
+    border: none;
+    cursor: default;
+}
+
+input[type=reset] {
+    background-color: var(--cancel-color);
+}
+
+button:disabled, input[type=submit]:disabled {
+    background-color: var(--disabled);
+}
+input:disabled{
+    color: var(--disabled);
+}
+input:disabled:hover{
+    border-color: #00000000;
+}
+
+input[type=submit].licensed:enabled {
+    background-color: rgb(216, 216, 0);
+    color: black;
+}
+
+input[type=submit].licensed:hover {
+
+    background-color: rgb(195, 195, 0) !important;
+    color: black;
+}
+
+/* Buttons */
+button, input[type=button], input[type=submit] {
+    background-color: var(--accent-color);
+    color: var(--primary-foreground-color);
+    padding: 14px 20px;
+    margin: 8px 0;
+    border: none;
+    border-radius: var(--border-radius);
+    cursor: pointer;
+}
+
+input[type=button]:hover {
+    background-color: #45a049;
+}
+
+.btn_disabled, .btn_disabled:hover {
+    background-color: var(--disabled);
+    cursor: default;
+}
+
+
+button.locked {
+    background-color: var(--cancel-color);
+    cursor: default;
+}
+
+button.locked:hover {
+    background-color: var(--cancel-color-hover);
+
+}
+
+/* radio button stuff */
+.radio_container {
+    padding: 2px 16px;
+    background-color: var(--primary-background-color);
+    color: var(--primary-foreground-color);
+}
+
+.radio_container {
+    display: block;
+    position: relative;
+    padding-left: 35px;
+    margin-bottom: 12px;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    background-color: rgba(0, 0, 0, 0);
+    margin-top: 10px;
+}
+
+.radio_container:hover input~.check_mark {
+    background-color: var(--accent-color-hover);
+}
+
+
+.radio_container input:checked~.check_mark {
+    background-color: var(--accent-color);
+}
+
+.radio_container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+.check_mark {
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 25px;
+    width: 25px;
+    background-color: var(--secondary-background-color);
+    border-radius: 50%;
+    margin-left: 5px;
+}
