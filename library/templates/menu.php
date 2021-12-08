@@ -7,7 +7,7 @@ function menu_item($url, $name = '')
 	if ($name == '') $name = $url;
 	$link = $t->get_url($url);
 	$title = $t->get_translation($name, 'menu');
-	print("<li class='menu-item'><a href=$link>$title</a></li>");
+	print("<li><a href=$link>$title</a></li>");
 }
 ?>
 <ul>

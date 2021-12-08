@@ -1,25 +1,65 @@
 :root {
     --border-radius: 5px;
     --background: url("../img/background.jpg") no-repeat center center fixed;
+    --disabled: #565656;
+
+    /* Todo: 80% brightness in dark mode on colors below*/
+    --cancel-color: #FC4550;
+    --cancel-color-hover: #bd343d;
+    --accent-color: #1793d1;
+    --accent-color-hover: #116f9e;
+
+    /* not used but just for reference */
+    --NTNUI-red: #ea0029;
+    --NTNUI-grey: #2d2a26;
+    --NTNUI-green: #00833e;
+    --NTNUI-yellow: #ffda00;
 }
 
-/* Dark mode ish 
 :root {
-    --container-background-color: #111;
-    --container-foreground-color: white;
-    --card-background-color: #111;
-    --card-foreground-color: white;
-    --card-shadow-color: rgba(255,255,255,0.2);
-}
+    --primary-foreground-color: #222831;
+    --primary-background-color: #ffffffe0;
+    --primary-background-color-no-opacity: #ffffff;
+
+    --secondary-foreground-color: #393E46;
+    --secondary-background-color: #caccd1e0;
+    --secondary-background-color-no-opacity: #caccd1;
+    /*
+for some reason a logical solution does not work logically correct
+https://dev.to/cadienvan/the-unsolvable-z-index-auto-increment-3l77
 */
+    --z-index-background: 0;
+    --z-index-content: 1;
+    --z-index-menu-bar: 2;
+    --z-index-menu-overlay: 3;
+    --z-index-modal-payment: 4;
+    --z-index-modal-message: 5;
 
-/* Light theme */
+}
 
-:root {
-    --container-background-color: white;
-    --container-foreground-color: black;
-    --card-background-color: white;
-    --card-shadow-color: black;
+@media (prefers-color-scheme: dark) {
+    :root {
+        --primary-foreground-color: #EDEDED;
+        --primary-background-color: #222831e0;
+        --primary-background-color-no-opacity: #222831;
+
+        --secondary-foreground-color: #EDEDED;
+        --secondary-background-color: #181c22e0;
+        --secondary-background-color-no-opacity: #181c22;
+    }
+
+    img {
+        filter: brightness(80%);
+    }
+}
+
+* {
+    transition: 0.3s;
+    transition: background 500ms ease-in-out, color 1000ms ease-in-out;
+}
+
+::-webkit-scrollbar {
+    display: none;
 }
 
 html {
@@ -29,8 +69,26 @@ html {
     background-size: cover;
 }
 
+body {
+    /* push content further down as menu bar grows */
+    padding-top: calc(2vh + 1.3vw);
+}
+
 h1, h2, h3, h4, h5, h6, a, span, p, li, label {
-    color: var(--container-foreground-color);
+    color: var(--primary-foreground-color);
+}
+
+a, span, p, li, label {
+    font-size: large;
+    font-weight: 500;
+}
+
+.visible {
+    display: block !important;
+}
+
+a:hover {
+    color: var(--accent-color);
 }
 
 h1, h2, p {
@@ -45,47 +103,6 @@ h1, h2, h3, h4, p, .email {
     text-decoration: none;
     margin: 20px;
     display: block;
-}
-
-.maintable {
-    margin-left: auto;
-    margin-right: auto;
-    margin-top: 54px;
-    padding-top: 15px;
-}
-
-.box {
-    background-color: var(--container-background-color);
-    overflow: auto;
-    padding: 25px;
-    margin: 20px 0px;
-    border-radius: var(--border-radius);
-}
-
-.box:first-of-type {
-    margin-top: 3.5vw;
-}
-
-.container {
-    padding: 2px 16px;
-    background-color: var(--container-background-color);
-    color: var(--container-foreground-color);
-}
-
-.container a {
-    color: #00FFFF;
-}
-
-span.right {
-    display: inline-block;
-    width: 55%;
-    margin-top: auto;
-    margin-bottom: auto;
-}
-
-span.left {
-    display: inline-block;
-    width: 55%;
 }
 
 /* TABLES */
@@ -103,17 +120,13 @@ span.left {
     font-weight: bold;
 }
 
-.red {
-    background-color: red !important;
-}
-
 .hidden {
-    display: none;
+    display: none !important;
 }
 
-.error {
-    background-color: #960000 !important;
-    color: #fff !important;
+.error, .red, .delete {
+    background-color: var(--cancel-color) !important;
+    color: #fff;
 }
 
 .contents {

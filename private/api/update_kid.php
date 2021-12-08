@@ -24,9 +24,9 @@ if (!Authenticator::is_logged_in()){
     log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
-// remove peasents from styret
-if (!$access_control->can_access("api", "KID")) {
-    log::message("Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
+// remove peasants from the board
+if (!$access_control->can_access("api", "CIN")) {
+    log::message("Info: Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
     log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
@@ -35,19 +35,19 @@ $conn = connect("medlem");
 
 // Get values
 $ID = 0;
-$KID = 0;
+$CIN = 0;
 if (isset($_GET["ID"]) && intval($_GET["ID"])){
     $ID = $_GET["ID"];
 }
 
 if (isset($_GET["KID"]) && intval($_GET["KID"])){
-    $KID = $_GET["KID"];
+    $CIN = $_GET["KID"];
 }
 
 
 // Validate variables
-if (!valid_KID($KID)){
-    log::message("Error: invalid input kid: $KID", __FILE__, __LINE__);
+if (!valid_KID($CIN)){
+    log::message("Error: invalid input kid: $CIN", __FILE__, __LINE__);
     die("Error: KID is not valid");
 }
 

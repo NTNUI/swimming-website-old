@@ -1,6 +1,6 @@
 <?php
 if (!$access_control->can_access("api", "translations")) {
-    log::message("Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
+    log::message("Info: Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
     log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
