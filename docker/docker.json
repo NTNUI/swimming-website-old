@@ -1,6 +1,6 @@
 {
     "baseurl": "https://127.0.0.1",
-    "memberTable": "medlem",
+    "memberTable": "member",
     "translations_dir": "translations",
     "captcha_key": "6LdrnW8UAAAAAIDoJVmceXJ_DxkmlqHMMwF3r4I1",
     "stripe": {
@@ -20,7 +20,7 @@
         "username": "svommer_web",
         "password": "testing_password",
         "databases": {
-            "medlem": "svommer_medlem",
+            "member": "svommer_member",
             "web": "svommer_web"
         }
     },
@@ -30,7 +30,7 @@
     },
     "defaults": {
         "language": "no",
-        "landing-page": "mainpage",
-        "licence_key": "NSFLicence2021"
-    }
+        "landing-page": "mainpage"
+    },
+    "license_product_hash":"31e61c8253b54cdde3b9"
 }
