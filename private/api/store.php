@@ -1,11 +1,11 @@
 <?php
 // Available services:
-// [GET] get_item(item_id)
-// [GET] get_items()
+// [GET] get_product(product_id)
+// [GET] get_products()
 // [GET] get_groups()
-// [POST] add_item(name_no, name_en, description_no, description_en, price, amount, start_date, start_time, image)
-// [PATCH] mark_delivered(item_id)
-// [PATCH] set_visibility(item_id, visibility)
+// [POST] add_product(name_no, name_en, description_no, description_en, price, amount, start_date, start_time, image)
+// [PATCH] set_order_status(order_id, status)
+// [PATCH] set_product_visibility(product_id, visibility)
 
 include_once("library/util/db.php");
 include_once("library/util/store_helper.php");
@@ -15,7 +15,7 @@ $response = new Response();
 $store = new StoreHelper($language);
 $input = file_get_contents("php://input");
 
-Authenticator::auth_API("api/storeadmin", "", __FILE__, __LINE__);
+Authenticator::auth_API("api/store", "", __FILE__, __LINE__);
 
 $conn = connect("web");
 switch ($_SERVER['REQUEST_METHOD']) {
@@ -94,7 +94,7 @@ function handle_patch(StoreHelper $store, string $input, Response &$response)
 			}
 			$order_id = $input_json->{"params"}->{"order_id"};
 			$order_status = $input_json->{"params"}->{"order_status"};
-			$store->update_status($order_id, $order_status);
+			$store->set_order_status($order_id, $order_status);
 			$response->code = HTTP_OK;
 			$response->data = [
 				"success" => true
@@ -102,23 +102,23 @@ function handle_patch(StoreHelper $store, string $input, Response &$response)
 			$access_control->log("admin/store", "order delivery status update", $order_id);
 			break;
 		case 'update_visibility':
-			$item_id = $input_json->{"params"}->{"item_id"};
-			$item = $store->get_item($item_id);
-			if ($item == false) {
+			$product_hash = $input_json->{"params"}->{"product_hash"};
+			$product = $store->get_product($product_hash);
+			if ($product == false) {
 				$response->code = HTTP_NOT_FOUND;
 				$response->data = [
 					"error" => true,
-					"message" => "Item id not found"
+					"message" => "Product not found"
 				];
 				break;
 			}
-			$visibility = filter_var($item_id = $input_json->{"params"}->{"visibility"}, FILTER_VALIDATE_BOOLEAN);
-			$store->set_visibility($item["id"], $visibility);
+			$visibility = filter_var($input_json->{"params"}->{"visibility"}, FILTER_VALIDATE_BOOLEAN);
+			$store->set_product_visibility($product["id"], $visibility);
 			$response->code = HTTP_OK;
 			$response->data = [
 				"success" => true
 			];
-			$access_control->log("admin/store", "update visibility", $item_id);
+			$access_control->log("admin/store", "update visibility", $product_hash);
 			break;
 		default:
 			$response->error("Got invalid request: '" . $input_json->{"request_type"} . "'. Valid requests are request_type and update_visibility");
@@ -151,7 +151,7 @@ function handle_post(mysqli $conn, Response &$response)
 	// check required parameters have value
 	foreach (['name_no', 'name_en', 'price'] as $entry) {
 		if (!isset($args[$entry])) {
-			log::message("received invalid request key: $entry, value: " . $args[$entry], __FILE__, __LINE__);
+			log::message("Warning: received invalid request key: $entry, value: " . $args[$entry], __FILE__, __LINE__);
 			$response->code = HTTP_INVALID_REQUEST;
 			$response->data = [
 				"error" => true,
@@ -169,6 +169,7 @@ function handle_post(mysqli $conn, Response &$response)
 	}
 
 	// Move uploaded file to img/store with a random name. On error default to default.jpg
+	// TODO: same hash for image and for product_hash
 	$image_name = "default.jpg";
 
 	if (validateUploadImage("image")) {
@@ -181,7 +182,7 @@ function handle_post(mysqli $conn, Response &$response)
 			$image_name = "default.jpg";
 		}
 	} else {
-		log::message("Note: Uploaded an item to store without image", __FILE__, __LINE__);
+		log::message("Warning: Uploaded a new product to store without image", __FILE__, __LINE__);
 	}
 	// Do some date and time packing for SQL
 	$start = $args["date_start"] . " " . $args["time_start"];
@@ -191,14 +192,14 @@ function handle_post(mysqli $conn, Response &$response)
 	if ($end != " " && strtotime($end) !== false) $end = date("Y-m-d H:i:s", strtotime($end));
 	else $end = null;
 
-	// generate a new hash / id for store item
+	// generate a random hash for new product
+	$product_hash = "";
 	do {
-		$item_id = substr(md5(time()), 0, 20);
-	} while (StoreHelper::item_id_exists($item_id));
+		$product_hash = substr(md5(time()), 0, 20);
+	} while (StoreHelper::product_exists($product_hash));
 
-	// Create new item object
-	$new_item = [
-		"item_id" => $item_id,
+	$new_product = [
+		"hash" => $product_hash,
 		"name" => json_encode(["no" => $args["name_no"], "en" => $args["name_en"]]),
 		"description" => json_encode(["no" => $args["description_no"], "en" => $args["description_en"]]),
 		"price" => $args["price"],
@@ -207,10 +208,11 @@ function handle_post(mysqli $conn, Response &$response)
 		"end" => $end,
 		"image_name" => $image_name
 	];
-	if (!StoreHelper::add_store_item($new_item)) {
-		$response->data = ["success" => false, "message" => "Could not add new item to store"];
+	// TODO: add_product returns always true
+	if (!StoreHelper::add_product($new_product)) {
+		$response->data = ["success" => false, "message" => "Could not add new product to store"];
 		$response->code = HTTP_INTERNAL_SERVER_ERROR;
-		log::message("Could not add new item to store", __FILE__, __LINE__);
+		log::message("Error: Could not add new product to store", __FILE__, __LINE__);
 		return;
 	}
 
@@ -219,15 +221,14 @@ function handle_post(mysqli $conn, Response &$response)
 	return;
 }
 
-// Works, need to add some fault checks
 function handle_get(mysqli $conn, StoreHelper $store, Response &$response)
 {
 	switch (argsURL("GET", "request_type")) {
-		case "get_store_item":
-			$item = $store->get_item($_GET["store_item_id"]);
-			$sql = "SELECT id, name, email, phone, kommentar, order_status FROM store_orders WHERE item_id=? AND (order_status='FINALIZED' OR order_status='DELIVERED') ORDER BY FIELD(order_status, 'FINALIZED', 'DELIVERED')";
+		case "get_orders":
+			$product = $store->get_product($_GET["product_hash"]);
+			$sql = "SELECT id, name, email, phone, comment, order_status FROM orders WHERE products_id=? AND (order_status='FINALIZED' OR order_status='DELIVERED') ORDER BY FIELD(order_status, 'FINALIZED', 'DELIVERED')";
 			$query = $conn->prepare($sql);
-			$query->bind_param("i", $item["id"]);
+			$query->bind_param("i", $product["id"]);
 			$query->execute();
 			$id = "";
 			$name = "";
@@ -251,13 +252,18 @@ function handle_get(mysqli $conn, StoreHelper $store, Response &$response)
 			$response->data = $result;
 			$response->code = HTTP_OK;
 			break;
-		case "get_store_items":
-			// get_items(start, limit, api_id, raw_data, visibility_check)
-			$response->data = $store->get_items(0, 100, "", false, false);
+		case "get_products":
+			log::message("Info: Requesting products", __FILE__, __LINE__);
+			$response->data = $store->get_products(0, 100, "", false, false);
 			$response->code = HTTP_OK;
 			break;
-		case "get_store_groups":
-			$sql = "SELECT id, name FROM store_groups";
+		case "get_product":
+			log::message("Info: Requesting product : " . $_GET["product_hash"], __FILE__, __LINE__);
+			$response->data = $store->get_product($_GET["product_hash"]);
+			$response->code = HTTP_OK;
+			break;
+		case "get_product_groups":
+			$sql = "SELECT id, name FROM product_groups";
 			$query = $conn->prepare($sql);
 			$query->execute();
 			$group_id = 0;
@@ -274,7 +280,7 @@ function handle_get(mysqli $conn, StoreHelper $store, Response &$response)
 			foreach ($_GET as $key => $value) {
 				print("$key: $value\n");
 			}
-			$response->error("Got invalid request: '" . argsURL("GET", "request_type") . "'. Valid requests are get_store_item, get_store_items and get_store_groups.");
+			$response->error("Got invalid request: '" . argsURL("GET", "request_type") . "'. Valid requests are get_orders, get_products and get_product_groups.");
 	}
 }
 
@@ -288,12 +294,12 @@ function validateUploadImage(string $input_name): bool
 		return false;
 	}
 	if (!is_array(getimagesize($_FILES[$input_name]["tmp_name"]))) {
-		log::message("[WARNING]: Someone uploaded a non-image file to " . $_FILES[$input_name]["tmp_name"], __FILE__, __LINE__);
+		log::message("Warning: Someone uploaded a non-image file to " . $_FILES[$input_name]["tmp_name"], __FILE__, __LINE__);
 		return false;
 	}
 	$extension = pathinfo($_FILES[$input_name]["name"], PATHINFO_EXTENSION);
 	if (!in_array($extension, ["png", "jpg", "jpeg"])) {
-		log::message("extension: $extension was rejected from being uploaded. Should it be added?", __FILE__, __LINE__);
+		log::message("Warning: extension: $extension was rejected from being uploaded. Should it be added?", __FILE__, __LINE__);
 		return false;
 	}
 	return true;

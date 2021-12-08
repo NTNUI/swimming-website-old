@@ -1,61 +1,97 @@
 <?php
 // TODO: rename class to just Store
 include_once("library/util/db.php");
+include_once("library/exceptions/store.php");
 
 class StoreHelper
 {
 	private $language;
-	private $licence_key;
+	private $license_key;
 	function __construct($lang)
 	{
 		global $settings;
 		\Stripe\Stripe::setApiKey($settings["stripe"]["secret_key"]);
 		$this->language = $lang;
-		$this->licence_key = $settings["defaults"]["licence_key"]; // deprecated
+		$this->license_key = $settings["license_product_hash"];
 	}
 
-	// id means really store_item_id
-	// TODO: rename function to get_store_items
-	function get_items(int $start = 0, int $limit = 10, string $store_item_hash = "", bool $rawData = false, bool $visibility_check = true)
+	function get_products(int $start = 0, int $limit = 10, string $product_hash = "", bool $rawData = false, bool $visibility_check = true)
 	{
 		$language = $this->language;
-		$mysqli = connect("web");
-		if (!$mysqli) {
-			log::die("Failed to connect to database", __FILE__, __LINE__);
-		}
+		$db = new DB("web");
 		$visibility = "";
 		if ($visibility_check) {
 			$visibility = "WHERE visible=TRUE";
 		}
 
 		// wtf is going on here?
-		if ($store_item_hash == "") {
-			$sql = "SELECT id, api_id, name, description, price, available_from, available_until, require_phone, visible,
-			(SELECT COUNT(*) FROM store_orders
-			WHERE store_orders.item_id = store_items.id
-			AND (store_orders.order_status='FINALIZED'
-			OR store_orders.order_status='DELIVERED'))
-			AS amount, amount_available, image, group_id FROM store_items AS store_items $visibility ORDER BY visible DESC, id DESC LIMIT ? OFFSET ?";
+		if ($product_hash == "") {
+			// get 10 variables
+			$sql = "SELECT 
+			id, 
+			hash, 
+			name, 
+			description, 
+			price, 
+			available_from, 
+			available_until, 
+			require_phone, 
+			visible,
+			(SELECT COUNT(*) FROM orders
+			WHERE orders.products_id = products.id
+			AND (orders.order_status='FINALIZED'
+			OR orders.order_status='DELIVERED'))
+			AS amount, amount_available, image, group_id FROM products AS products $visibility ORDER BY visible DESC, id DESC LIMIT ? OFFSET ?";
 
-			$query = $mysqli->prepare($sql);
-			$query->bind_param("ii", $limit, $start);
+			$db->prepare($sql);
+			$db->bind_param("ii", $limit, $start);
 		} else {
-			// Select every column from store_item, add a column called "amount" (which should really be called num_sold or something) given column api_id (which should really be called store_item_hash)
-			$sql = "SELECT id, api_id, name, description, price, available_from, available_until, require_phone, visible, (SELECT COUNT(*) FROM store_orders WHERE store_orders.item_id = store_items.id AND (store_orders.order_status='FINALIZED' OR store_orders.order_status='DELIVERED')) AS amount, amount_available, image, group_id FROM store_items AS store_items WHERE api_id=? ORDER BY id DESC LIMIT ? OFFSET ?";
-			$query = $mysqli->prepare($sql);
-			$query->bind_param("sii", $store_item_hash, $limit, $start);
+			// Select every column from products, add a column called "amount" (which should really be called num_sold or something) given column hash (which should really be called product_hash)
+			// get 13 variables
+			$sql = "SELECT
+			id, 
+			hash, 
+			name, 
+			description, 
+			price, 
+			available_from, 
+			available_until, 
+			require_phone, 
+			visible, 
+			(SELECT COUNT(*) FROM orders WHERE orders.products_id = products.id AND (orders.order_status='FINALIZED' OR orders.order_status='DELIVERED')) AS amount,
+			amount_available, 
+			image, 
+			group_id 
+			FROM products AS products WHERE hash=? ORDER BY id DESC LIMIT ? OFFSET ?";
+
+			$db->prepare($sql);
+			$db->bind_param("sii", $product_hash, $limit, $start);
 		}
 
-		if (!$query->execute()) {
+		try {
+			$db->execute();
+		} catch (\mysqli_sql_exception $ex) {
+			log::message($ex->getMessage());
 			return false;
 		}
 
 		$result = array();
-		$query->bind_result($id, $store_item_hash, $name, $description, $price, $available_from, $available_until, $require_phone, $visibility, $amount, $amount_available, $image, $group_id);
-		if (!$query) {
-			log::die("Failed to bind result", __FILE__, __LINE__);
-		}
-		while ($query->fetch()) {
+		$db->stmt->bind_result(
+			$id,
+			$product_hash,
+			$name,
+			$description,
+			$price,
+			$available_from,
+			$available_until,
+			$require_phone,
+			$visibility,
+			$amount,
+			$amount_available,
+			$image,
+			$group_id
+		);
+		while ($db->fetch()) {
 			if (!$rawData) {
 				$name = json_decode($name);
 				if (property_exists($name, $language)) $name = $name->$language;
@@ -70,7 +106,7 @@ class StoreHelper
 
 			$result[] = array(
 				"id" => intval($id),
-				"store_item_hash" => $store_item_hash,
+				"hash" => $product_hash,
 				"name" => $name,
 				"description" => $description,
 				"price" => intval($price),
@@ -84,24 +120,21 @@ class StoreHelper
 				"group_id" => $group_id
 			);
 		}
-
-		$query->close();
-		$mysqli->close();
-
 		return $result;
 	}
 
-	function get_item(string $store_item_hash, bool $rawData = false)
+	// TODO: throw on error
+	function get_product(string $product_hash, bool $rawData = false)
 	{
-		if (!$store_item_hash || $store_item_hash == "") return false;
-		$result = $this->get_items(0, 1, $store_item_hash, $rawData);
+		if (!$product_hash || $product_hash == "") return false;
+		$result = $this->get_products(0, 1, $product_hash, $rawData);
 		if (sizeof($result) < 1) return false;
 		return $result[0];
 	}
 
-	function create_order(string $store_item_hash, $paymentId, $owner, $comment)
+	// old: function create_order(string $product_hash, $paymentId, $owner, $comment)
+	function create_order(string $product_hash, $paymentId, $owner)
 	{
-		$mysqli = connect("web");
 
 		$name = $owner->name;
 		$email = $owner->email;
@@ -110,39 +143,36 @@ class StoreHelper
 			$phone = $owner->phone;
 		}
 
-		$item = $this->get_item($store_item_hash);
+		$product = $this->get_product($product_hash);
 
-		if ($item === false) throw new Exception(json_encode(["message" => "no_such_item", "item" => $item, "store_item_hash$store_item_hash" => $store_item_hash]));
-		if ($item["amount_available"] != null && $item["amount_bought"] >= $item["amount_available"]) throw new Exception("item_soldout");
-		if ($item["available_from"] !== false && $item["available_from"] > time()) throw new Exception("not_available_yet");
-		if ($item["available_until"] !== false && $item["available_until"] < time()) throw new Exception("no_longer_available");
-		if ($name == "") throw new Exception("missing_name");
-		if ($email == "") throw new Exception("missing_email");
-		if ($phone == NULL && $item["require_phone"]) throw new Exception("missing_phone");
+		if ($product === false) throw \StoreException::ProductNotFound();
+		if ($product["amount_available"] != null && $product["amount_bought"] >= $product["amount_available"]) throw \StoreException::ProductSoldOut();
+		if ($product["available_from"] !== false && $product["available_from"] > time()) throw \StoreException::ProductNotAvailable("Current product is not yet available");
+		if ($product["available_until"] !== false && $product["available_until"] < time()) throw \StoreException::ProductNotAvailable("Current product is no longer available");
+		if ($name == "") throw \StoreException::MissingCustomerDetails("Missing customer name");
+		if ($email == "") throw \StoreException::MissingCustomerDetails("Missing customer email");
+		if ($phone == NULL && $product["require_phone"]) throw \StoreException::MissingCustomerDetails("Missing customer phone");
 
 		//Perform a 3D secure checkout
 		$intent = \Stripe\PaymentIntent::create([
 			"payment_method" => $paymentId,
-			"amount" => $item["price"],
+			"amount" => $product["price"],
 			"currency" => "nok",
 			"confirmation_method" => "manual",
 			"confirm" => true,
 			"receipt_email" => $email,
-			"description" => $item["name"],
+			"description" => $product["name"],
 		]);
 
-		//Create store record
-
-		$sql = "INSERT INTO store_orders (item_id, name, email, phone, source_id, kommentar) VALUES (?, ?, ?, ?, ?, ?)";
-
-		$query = $mysqli->prepare($sql);
+		// Save payment intent. Wait for callback
+		$db = new DB("web");
+		//$sql = "INSERT INTO orders (products_id, name, email, phone, source_id, comment) VALUES (?, ?, ?, ?, ?, ?)";
+		$sql = "INSERT INTO orders (products_id, name, email, phone, source_id) VALUES (?, ?, ?, ?, ?)";
+		$db->prepare($sql);
 		$intent_id = $intent["id"];
-		$query->bind_param("isssss", $item["id"], $name, $email, $phone, $intent_id, $comment);
-
-		if (!$query->execute()) throw new Exception("sql_error");
-
-		$query->close();
-		$mysqli->close();
+		//$db->bind_param("isssss", $product["id"], $name, $email, $phone, $intent_id, $comment);
+		$db->bind_param("issss", $product["id"], $name, $email, $phone, $intent_id);
+		$db->execute();
 
 		return $this->update_order($intent);
 	}
@@ -152,7 +182,7 @@ class StoreHelper
 		return \Stripe\PaymentIntent::retrieve($id);
 	}
 
-	function update_order($intent)
+	function update_order(\Stripe\PaymentIntent $intent)
 	{
 		if ($intent->status == "requires_action" && $intent->next_action->type == "use_stripe_sdk") {
 			$src = [
@@ -163,185 +193,130 @@ class StoreHelper
 			$this->finalize_order($intent["id"]);
 			$src = ["success" => true];
 		} else {
-			throw new Exception("stripe_error");
+			throw new \Stripe\Exception\ApiErrorException("stripe_error");
 		}
 		return $src;
 	}
 
-	function finalize_order(string $intentId)
+	function get_product_hash(int &$product_id): string
 	{
-		$mysqli = connect("web");
+		$db = new DB("web");
+		$db->prepare("SELECT hash FROM products WHERE id=?");
+		$db->bind_param("i", $product_id);
+		$db->execute();
+		$res = "";
+		$db->stmt->bind_result($res);
+		$db->fetch();
+		return $res;
+	}
 
-		if (!$mysqli) {
-			log::die("failed to connect to database", __FILE__, __LINE__);
-		}
+	function finalize_order($intent_id)
+	{
+		$db = new DB("web");
+		$sql = "SELECT id, products_id, phone AS products_id FROM orders WHERE source_id=?";
+		$db->prepare($sql);
+		$db->bind_param("s", $intent_id);
+		$db->execute();
+		$db->stmt->bind_result($id, $product_id, $phone);
 
-		$sql = "SELECT id, item_id, email FROM store_orders WHERE source_id=?";
-		$query = $mysqli->prepare($sql);
-		if (!$query) {
-			log::die("Failed to prepare query", __FILE__, __LINE__);
-		}
+		if (!$db->fetch()) throw \StoreException::ProductNotFound();
 
-		$query->bind_param("s", $intentId);
-		if (!$query) {
-			log::die("Failed to bind params", __FILE__, __LINE__);
-		}
-
-		$query->execute();
-		if (!$query) {
-			log::die("Failed to execute query", __FILE__, __LINE__);
-		}
-
-		$query->bind_result($id, $api_id, $email);
-		if (!$query) {
-			log::die("Failed to bind results", __FILE__, __LINE__);
-		}
-
-		if (!$query->fetch()) throw new Exception("no_such_order");
-
-		$query->close();
-		$this->update_status($id, "FINALIZED", $mysqli);
-		$mysqli->close();
+		$this->set_order_status($id, "FINALIZED");
 
 		// Member registration hook
-		if ($api_id == $this->licence_key) $this->approve_member($email);
-	}
-
-	// TODO: When members don't provide the same email this will fail. Consider making fields read only after registration
-	function approve_member(string $email)
-	{
-		// TODO: ignore not found errors
-		if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-			log::message("[Warning] Dropping invalid email " . $email, __FILE__, __LINE__);
-			return;
+		if ($this->get_product_hash($product_id) == $this->license_key) {
+			$this->approve_member($phone);
 		}
-		$mysqli = connect("medlem");
-		$sql = "UPDATE medlem SET kontrolldato=NOW() WHERE epost=?";
-		$query = $mysqli->prepare($sql);
-		$query->bind_param("s", $email);
-		if (!$query->execute()) {
-			log::message("[Warning]: Could not execute query", __FILE__, __LINE__);
+	}
+
+	function fail_order(\Stripe\Charge $charge_event)
+	{
+		$db = new DB("web");
+		$sql = "UPDATE orders SET order_status='FAILED' WHERE source_id=? OR charge_id=?";
+		$db->prepare($sql);
+		$db->bind_param("ss", $charge_event["payment_intent"], $charge_event["id"]);
+		$db->execute();
+	}
+
+	function approve_member(string $phone)
+	{
+		log::message("Info: Approving member with phone number: " . $phone, __FILE__, __LINE__);
+		$db = new DB("member");
+		$sql = "UPDATE member SET approved_date=NOW() WHERE phone=?";
+		$db->prepare($sql);
+		$db->bind_param("s", $phone);
+		$db->execute();
+	}
+
+	function set_order_status(int $order_id, string $status)
+	{
+		if ($status !== "FINALIZED" && $status !== "DELIVERED" && $status !== "FAILED") {
+			throw new \InvalidArgumentException($status . " is not one of 'FINALIZED' | 'DELIVERED' | 'FAILED'");
 		}
-		$query->close();
-		$mysqli->close();
+		$db = new DB("web");
+		$sql = "UPDATE orders SET order_status=? WHERE id=?";
+		$db->prepare($sql);
+		$db->bind_param("si", $status, $order_id);
+		$db->execute();
 	}
 
-	// TODO: delete rows instead of modifying
-	function fail_order($charge)
+	function set_product_visibility(int $product_id, bool $visibility)
 	{
-		$mysqli = connect("web");
-		$sql = "UPDATE store_orders SET order_status='FAILED' WHERE source_id=? OR charge_id=?";
-		$query = $mysqli->prepare($sql);
-		$query->bind_param("ss", $charge["payment_intent"], $charge["id"]);
-		$query->execute();
-		$query->close();
-		$mysqli->close();
-	}
-
-	// TODO: change function signature. set_order_delivery is more descriptive
-	function update_status(int $order_id, string $status, mysqli $mysqli = NULL)
-	{
-		$close = false;
-		if ($mysqli == NULL) {
-			$mysqli = connect("web");
-			$close = true;
-		}
-		$sql = "UPDATE store_orders SET order_status=? WHERE id=?";
-		$query = $mysqli->prepare($sql);
-		$query->bind_param("si", $status, $order_id);
-		$query->execute();
-		$query->close();
-		if ($close) $mysqli->close();
-	}
-
-	// set store item visibility
-	function set_visibility(int $item_id, bool $visibility)
-	{
-		$mysqli = connect("web");
-		$sql = "UPDATE store_items SET visible=? WHERE id=?";
-		$query = $mysqli->prepare($sql);
-		$query->bind_param("ii", $visibility, $item_id);
-		$query->execute();
-		$query->close();
-		$mysqli->close();
+		$db = new DB("web");
+		$sql = "UPDATE products SET visible=? WHERE id=?";
+		$db->prepare($sql);
+		$db->bind_param("ii", $visibility, $product_id);
+		$db->execute();
 	}
 
 	// TODO: new signature: get_order_status
-	function get_status($source): string
+	function get_status(string $source): string
 	{
-		$mysqli = connect("web");
-
-		$sql = "SELECT order_status FROM store_orders WHERE source_id=?";
-		$query = $mysqli->prepare($sql);
-		$query->bind_param("s", $source);
-		if (!$query->execute()) return "";
-		$query->bind_result($charge);
-		if (!$query->fetch()) return "";
-
-		$query->close();
-		$mysqli->close();
-
+		$db = new DB("web");
+		$sql = "SELECT order_status FROM orders WHERE source_id=?";
+		$db->prepare($sql);
+		$db->bind_param("s", $source);
+		$db->execute();
+		$db->fetch();
+		$db->stmt->bind_result($charge);
 		return $charge;
 	}
 
 	static public function order_id_exists(int $order_id): bool
 	{
-		$mysqli = connect("web");
-		$sql = "SELECT COUNT(*) FROM store_orders WHERE id=?";
-		$query = $mysqli->prepare($sql);
-		$query->bind_param("i", $order_id);
-		$query->execute();
-		$query->bind_result($result);
-		$query->fetch();
-		$query->close();
-		$mysqli->close();
+		$db = new DB("web");
+		$sql = "SELECT COUNT(*) FROM orders WHERE id=?";
+		$db->prepare($sql);
+		$db->bind_param("i", $order_id);
+		$db->execute();
+		$db->stmt->bind_result($result);
+		$db->fetch();
 		return $result;
 	}
 
-	static public function item_id_exists(string $item_id): bool
+	static public function product_exists(string $product_hash): bool
 	{
-		include_once("library/util/db.php");
-
-		$mysqli = connect("web");
-		$sql = "SELECT COUNT(*) FROM store_items WHERE api_id=?";
-		$query = $mysqli->prepare($sql);
-		if (!$query) {
-			log::die("Failed to prepare query", __FILE__, __LINE__);
-		}
-		if (!$query->bind_param("s", $item_id)) {
-			log::die("Could not bind parameters", __FILE__, __LINE__);
-		}
-		if (!$query->execute()) {
-			log::die("Failed to execute query", __FILE__, __LINE__);
-		}
+		$db = new DB("web");
+		$sql = "SELECT COUNT(*) FROM products WHERE hash=?";
+		$db->prepare($sql);
+		$db->bind_param("s", $product_hash);
+		$db->execute();
 		$result = true;
-		if (!$query->bind_result($result)) {
-			log::die("Failed to bind results", __FILE__, __LINE__);
-		}
-		if (!$query->fetch()) {
-			log::die("Failed to fetch rows?", __FILE__, __LINE__);
-		}
-		$query->close();
-		$mysqli->close();
+		$db->stmt->bind_result($result);
+		$db->fetch();
 		return $result;
 	}
 
-	static public function add_store_item(array $store_item): bool
+	static public function add_product(array $product): bool
 	{
 		global $access_control;
-		$mysqli = connect("web");
-		$sql = "INSERT INTO store_items (api_id, name, description, price, amount_available, available_from, available_until, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
-		$query = $mysqli->prepare($sql);
+		$db = new DB("web");
+		$sql = "INSERT INTO products (hash, name, description, price, amount_available, available_from, available_until, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+		$db->prepare($sql);
 
-		$query->bind_param("sssiisss", $store_item["item_id"], $store_item["name"], $store_item["description"], $store_item["price"], $store_item["amount"], $store_item["start"], $store_item["end"], $store_item["image_name"]);
-		if (!$query->execute()) {
-			log::die("Failed executing query", __FILE__, __LINE__);
-			return false;
-		}
-
-		$query->close();
-		$mysqli->close();
-		$access_control->log("admin/store", "created item", $store_item["item_id"]);
+		$db->bind_param("sssiisss", $product["hash"], $product["name"], $product["description"], $product["price"], $product["amount"], $product["start"], $product["end"], $product["image_name"]);
+		$db->execute();
+		$access_control->log("admin/store", "add product", $product["hash"]);
 		return true;
 	}
 }
