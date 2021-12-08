@@ -197,7 +197,7 @@ class Authenticator
         mysqli_close($conn);
 
         if ($result === null) {
-            log::message("username $username is not found", __FILE__, __LINE__);
+            log::message("Info: username $username is not found", __FILE__, __LINE__);
             return null;
         }
 
@@ -215,7 +215,7 @@ class Authenticator
         $conn = connect("web");
 
         if (Authenticator::username_exists($username)) {
-            log::message("username: $username already exists", __FILE__, __LINE__);
+            log::message("Info: username: $username already exists", __FILE__, __LINE__);
             return false;
         }
         $sql = "INSERT INTO users (username, name, passwd) VALUES(?, ?, ?)";
@@ -269,7 +269,7 @@ class Authenticator
         }
         
         if (!$access_control->can_access($page, $action = "")) {
-            log::message("Access denied for " . Authenticator::get_username() . "performing action: " . $action, $FILE, $LINE);
+            log::message("Info: Access denied for " . Authenticator::get_username() . "performing action: " . $action, $FILE, $LINE);
             log::forbidden("Access denied", $FILE, $LINE);
         }
     }

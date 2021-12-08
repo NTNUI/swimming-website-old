@@ -7,7 +7,7 @@ if (!Authenticator::is_logged_in()) {
 
 // check permissions
 if (!$access_control->can_access("api", "isMember")) {
-	log::message("Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
+	log::message("Info: Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
 	log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
