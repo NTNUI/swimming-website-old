@@ -1,6 +1,6 @@
 FROM archlinux
 
-RUN pacman -Syu --noconfirm php php-apache php-dblib composer
+RUN pacman -Syu --noconfirm php php-apache php-dblib composer neovim bat micro
 
 WORKDIR /srv/http/
 
@@ -42,6 +42,7 @@ RUN cp httpd-ssl.conf /etc/httpd/conf/extra/httpd-ssl.conf
 RUN cp -f .htaccess /srv/http/
 RUN cp -f docker.json /srv/http/settings/settings.json
 
+WORKDIR /srv/http
 # Run
 EXPOSE 80 443
 CMD httpd -D FOREGROUND
