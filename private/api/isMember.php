@@ -22,7 +22,7 @@ if ($surname == NULL) {
 
 // get data
 $db = new DB("member");
-$sql = "SELECT fornavn, etternavn FROM ${settings['memberTable']} WHERE YEAR(kontrolldato)=YEAR(now()) AND etternavn=? ORDER BY fornavn, etternavn";
+$sql = "SELECT first_name, surname FROM member WHERE YEAR(approved_date)=YEAR(now()) AND surname=? ORDER BY first_name, surname";
 $db->prepare($sql);
 $db->bind_param("s", $surname);
 $db->execute();
