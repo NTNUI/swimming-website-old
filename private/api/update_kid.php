@@ -18,6 +18,43 @@ function valid_ID($ID){
     return false;
 }
 
+function save_CIN(int $member_id, int $CIN){
+    $hash="";
+    // calculate the hash of member_id
+    {
+        $db = new DB("member");
+        $sql = "SELECT gender, birth_date, phone FROM member WHERE member.id=?";
+        $db->prepare($sql);
+        $db->bind_param("i", $member_id);
+        $db->execute();
+        $gender = "";
+        $birthDate = 0;
+        $phone = "";
+        $db->stmt->bind_result($gender, $birthDate, $phone);
+        $hash = hash("sha256", $birthDate . $phone . $gender == "Male" ? true : false);
+    }
+    // save CIN number
+    {
+        $db = new DB("member");
+        $sql = "SELECT COUNT(*) FROM member_CIN WHERE hash=?";
+        $db->prepare($sql);
+        $db->bind_param("s", $hash);
+        $db->execute();
+        if($db->num_rows()){
+            // entry exists
+            $db->stmt->close();
+            $sql = "UPDATE member_CIN SET NSF_CIN=?, last_used=NOW() WHERE hash=?";
+        }else{
+            // entry does not exist
+            $db->stmt->close();
+            $sql = "INSERT INTO member_CIN (NSF_CIN, last_used, hash) VALUES (?,NOW(),?)";
+        }
+        $db->prepare($sql);
+        $db->bind_param("is", $CIN, $hash);
+        $db->execute();
+    }
+}
+
 // remove randoms from the internet
 include_once("library/util/db.php");
 if (!Authenticator::is_logged_in()){
@@ -31,7 +68,7 @@ if (!$access_control->can_access("api", "CIN")) {
 }
 
 // connect to server
-$conn = connect("medlem");
+$db = new DB("member");
 
 // Get values
 $ID = 0;
@@ -58,12 +95,10 @@ if (!valid_ID($ID)){
 
 // Update database
 global $settings;
-$sql = "UPDATE medlem SET `KID`=? WHERE id=?";
-$query = $conn->prepare($sql);
-$query->bind_param("si", $KID, $ID);
-$result = $query->execute();
-$query->close();
-$conn->close();
+$sql = "UPDATE member SET `CIN`=? WHERE id=?";
+$db->prepare($sql);
+$db->bind_param("si", $CIN, $ID);
+$db->execute();
+save_CIN($ID, $CIN);
 
 http_response_code(200);
-?>
