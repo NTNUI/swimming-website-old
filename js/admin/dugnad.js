@@ -1,9 +1,10 @@
-const accepted = "Godkjent";
-const rejected = "Avslått";
-const notAsked = "Ikke spurt";
+"use strict";
+const accepted = "Accepted";
+const rejected = "Rejected";
+const notAsked = "Not requested";
 
 function removeElementsByClass(className) {
-    var elements = document.getElementsByClassName(className);
+    let elements = document.getElementsByClassName(className);
     while (elements.length > 0) {
         elements[0].parentNode.removeChild(elements[0]);
     }

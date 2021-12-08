@@ -1,13 +1,13 @@
-// TODO: use strict, replace var with let / const. 
-var stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
+// TODO: use strict
+let stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
 
 // After some amount of time, we should stop trying to resolve the order synchronously:
-var MAX_POLL_COUNT = 10;
-var pollCount = 0;
+let MAX_POLL_COUNT = 10;
+let pollCount = 0;
 
 function pollForSourceStatus() {
 	stripe.retrieveSource({id: SOURCE_ID, client_secret: CLIENT_SECRET}).then(function(result) {
-		var source = result.source;
+		let source = result.source;
 		document.querySelectorAll(".source").forEach((item) => {
 			item.style.display = "none";
 		});
@@ -34,7 +34,7 @@ function pollForOrderStatus() {
 		document.querySelectorAll(".charge").forEach((item) => {
 			item.style.display = "none";
 		});
-		var disp = "pending";
+		let disp = "pending";
 		if (charge == "FINALIZED" || charge == "DELIVERED") disp="succeeded";
 		else if (charge == "FAILED") disp = "failed";
 		document.querySelector("#charge_" + disp).style.display = "block";

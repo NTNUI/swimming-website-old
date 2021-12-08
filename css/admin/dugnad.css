@@ -1,8 +1,3 @@
-button:disabled {
-    background-color: darkgray;
-    cursor: default;
-}
-
 #members,
 #searchResult {
     width: 100%;
@@ -14,4 +9,10 @@ button:disabled {
 
 .sameRow {
     width: 100%;
+}
+.member-row{
+    text-align: center;
+}
+.actions>button{
+    width:50%;
 }

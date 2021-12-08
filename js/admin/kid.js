@@ -40,14 +40,14 @@ function appendMembers(json, container) {
         node.querySelector(".phone-number").innerText = member.phone;
         node.querySelector(".name").innerText = member.name;
         node.querySelector(".save").onclick = function(e) {
-            var kid_number = e.srcElement.parentNode.previousElementSibling.children[0].value;
+            let kid_number = e.srcElement.parentNode.previousElementSibling.children[0].value;
             if (valid_kid(kid_number)) {
                 save_kid_number(member.id, kid_number);
                 e.srcElement.parentNode.parentElement.remove();
                 return;
             }
             console.log("that input is not a valid KID number");
-            e.originalTarget.parentElement.previousElementSibling.children[0].classList.add("error");
+            e.target.parentElement.previousElementSibling.children[0].classList.add("error");
         };
         container.appendChild(node);
     }
@@ -68,7 +68,7 @@ function valid_kid(kid) {
 }
 
 function save_kid_number(id, kid) {
-    var url = BASEURL + "/api/update_kid?";
+    let url = BASEURL + "/api/update_kid?";
     url += "ID=" + id;
     url += "&";
     url += "KID=" + kid;
