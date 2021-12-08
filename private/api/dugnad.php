@@ -1,106 +1,59 @@
 <?php
 include_once("library/util/db.php");
-if (!$access_control->can_access("api", "dugnad")) {
+if (!$access_control->can_access("api", "volunteer")) {
 	log::forbidden("Access denied", __FILE__, __LINE__);
 }
-function setDugnad($id, $value)
+function setVolunteer($id, $value)
 {
-	global $settings;
-	$conn = connect("medlem");
-
-	$sql = "UPDATE ${settings['memberTable']} SET `harUtførtFrivilligArbeid`=? WHERE ID=?";
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not prepare statement", __FILE__, __LINE__);
-	}
-	$query->bind_param("ii", $value, $id);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	$result = $query->execute();
-	if (!$result) {
-		log::message("Query failed to execute", __FILE__, __LINE__);
-	}
-	$query->close();
-	$conn->close();
-	return $result;
+	$db = new DB("member");
+	$sql = "UPDATE member SET `have_volunteered`=? WHERE ID=?";
+	$db->prepare($sql);
+	$db->bind_param("ii", $value, $id);
+	$db->execute();
 }
 
 function getVolunteers($number)
 {
-	global $settings;
-	$conn = connect("medlem");
-
-	$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost, `harUtførtFrivilligArbeid` FROM ${settings['memberTable']} WHERE (`harUtførtFrivilligArbeid` IS NULL OR `harUtførtFrivilligArbeid`=0) AND kontrolldato IS NOT NULL ORDER BY IFNULL(`harUtførtFrivilligArbeid`, 1) ASC, RAND() LIMIT ?";
-
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Failed to prepare query", __FILE__, __LINE__);
-	}
-
-	$query->bind_param("i", $number);
-	if (!$query) {
-		log::die("Failed to bind params", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Failed to execute query", __FILE__, __LINE__);
-	}
-
-	if (!$query->bind_result($id, $first, $last, $phone, $email, $dugnad)) {
-		log::die("failed to bind result", __FILE__, __LINE__);
-	}
+	$db = new DB("member");
+	$sql = "SELECT id, first_name, surname, phone, email, `have_volunteered` FROM member WHERE (`have_volunteered` IS NULL OR `have_volunteered`=0) AND approved_date IS NOT NULL ORDER BY IFNULL(`have_volunteered`, 1) ASC, RAND() LIMIT ?";
+	$db->prepare($sql);
+	$db->bind_param("i", $number);
+	$db->execute();
+	$db->stmt->bind_result($id, $first, $last, $phone, $email, $volunteer_status);
 	$result = [];
-	while ($query->fetch()) {
+	while ($db->fetch()) {
 		$result[] = array(
 			"id" => $id,
 			"name" => "$first $last",
 			"email" => $email,
 			"phone" => $phone,
-			"dugnad" => $dugnad
+			"volunteer_status" => $volunteer_status
 		);
 	}
 
-	$query->close();
-	$conn->close();
 	return $result;
 }
 
 function search($name)
 {
 	// Search(string name)
-	global $settings;
-	$conn = connect("medlem");
-	$sql = "SELECT id, fornavn, etternavn, phoneNumber, epost, `harUtførtFrivilligArbeid` FROM ${settings['memberTable']} WHERE CONCAT(fornavn, ' ', etternavn) LIKE CONCAT('%', ?, '%')";
+	$db = new DB("member");
+	$sql = "SELECT id, first_name, surname, phone, email, `have_volunteered` FROM member WHERE CONCAT(first_name, ' ', surname) LIKE CONCAT('%', ?, '%')";
 
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not prepare statement", __FILE__, __LINE__);
-	}
-	$query->bind_param("s", $name);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	$query->execute();
-	if (!$query) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-
-	$query->bind_result($id, $first, $last, $phone, $email, $dugnad);
-	if (!$query) {
-		log::die("Could not bind results", __FILE__, __LINE__);
-	}
+	$db->prepare($sql);
+	$db->bind_param("s", $name);
+	$db->execute();
+	$db->stmt->bind_result($id, $first, $last, $phone, $email, $volunteer_status);
 	$result = [];
-	while ($query->fetch()) {
+	while ($db->fetch()) {
 		$result[] = array(
 			"id" => $id,
 			"name" => "$first $last",
 			"email" => $email,
 			"phone" => $phone,
-			"dugnad" => $dugnad
+			"volunteer_status" => $volunteer_status
 		);
 	}
-	$query->close();
-	$conn->close();
 	return $result;
 }
 
@@ -134,12 +87,12 @@ switch ($action) {
 		$result = getVolunteers($getRandom);
 		break;
 	case 'approve':
-		$access_control->log("api/dugnad", $action, $approve_id);
-		$result = setDugnad($approve_id, true);
+		$access_control->log("api/volunteer", $action, $approve_id);
+		setVolunteer($approve_id, true);
 		break;
 	case 'reject':
-		$access_control->log("api/dugnad", $action, $reject_id);
-		$result = setDugnad($reject_id, false);
+		$access_control->log("api/volunteer", $action, $reject_id);
+		setVolunteer($reject_id, false);
 		break;
 	case 'search':
 		// don't log search queries
