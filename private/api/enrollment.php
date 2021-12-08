@@ -32,126 +32,218 @@ function value_exists(string $needle, array $haystack): bool
     return false;
 }
 
-header("Content-Type: application/json; charset=UTF-8");
-if ($_SERVER["REQUEST_METHOD"] !== "POST") {
-    http_response_code(405);
-    print(json_encode(["error" => "Method " . $_SERVER["REQUEST_METHOD"] . " is not accepted. This endpoint only accepts POST requests."]));
-    return;
+function get_age(DateTime $birthDate): int
+{
+    $now = new DateTime();
+    $interval = $now->diff($birthDate);
+    return $interval->y;
 }
 
-// Input is storing input values and modifies them during the execution by validating and sanitizing the input.
-// New information are also added to this input.
+function valid_captcha(): bool{
+    global $settings;
+    $secret = $settings["captcha_key"];
+	$token = $_POST['g-recaptcha-response'];
+	$url = "https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=$token";
+	$ch = curl_init($url);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	$verify = curl_exec($ch);
+	return json_decode($verify)->success;
+}
+
+header("Content-Type: application/json; charset=UTF-8");
 $input = array();
 
-foreach (["name", "isMale", "phoneNumber", "birthDate", "zip", "address", "email"] as $param) {
+// block non POST requests
+if ($_SERVER["REQUEST_METHOD"] !== "POST") {
+    log::message("Info: Method " . $_SERVER["REQUEST_METHOD"] . " is not accepted", __FILE__, __LINE__);
+    http_response_code(405);
+    print(json_encode(["error" => true, "message" => "Method " . $_SERVER["REQUEST_METHOD"] . " is not accepted. This endpoint only accepts POST requests."]));
+    return;
+}
+/*
+if(!valid_captcha()){
+    http_response_code(400);
+    print(json_encode(["error" => true, "message" => "captcha failed."]));
+    return;
+}
+*/
+
+// check for missing parameters
+foreach (["name", "isMale", "phone", "birthDate", "zip", "address", "email"] as $param) {
     if (!isset($_POST[$param])) {
+        log::message("Warning: missing parameter, " . $param, __FILE__, __LINE__);
         http_response_code(400);
-        print(json_encode(["error" => "missing parameter, " . $param]));
+        print(json_encode(["error" => true, "message" => "missing parameter, " . $param]));
         return;
     }
 }
 
+// save parameters to local object
 array_push($input, [
     "dryrun" => isset($_POST["dryrun"]) ? (bool)$_POST["dryrun"] : false,
     "name" => $_POST["name"],
-    "isMale" => (bool)$_POST["isMale"],
-    "phoneNumber" => $_POST["phoneNumber"], // can be string
+    "isMale" => isset($_POST["isMale"]) ? (bool)$_POST["isMale"] : false,
+    "phone" => $_POST["phone"], // can be string
     "birthDate" => $_POST["birthDate"],
     "zip" => filter_var($_POST["zip"], FILTER_VALIDATE_INT, ["flag" => FILTER_NULL_ON_FAILURE, "min_range" => 1000, "max_range" => 9999]),
     "address" => $_POST["address"],
     "email" => filter_var($_POST["email"], FILTER_VALIDATE_EMAIL,  FILTER_NULL_ON_FAILURE),
     "licensee" => isset($_POST["licensee"]) ? $_POST["licensee"] : "",
+    "error" => true,
+    "message" => ""
 ]);
+// convert from array of objects to an object. Registers only first user entry.
 $input = $input[0];
-// validate input
-if (strlen($input["name"]) < 5) {
-    http_response_code(400);
-    print(json_encode(["error" => "parameter 'name' is too small"]));
-    return;
-}
 
-$input["name"] = trim_space($input["name"]);
-if (!strpos($input["name"], " ")) {
-    http_response_code(400);
-    print(json_encode(["error" => "Space was not found in the name. Make sure that you pass inn full name. Not just first name."]));
-    return;
-}
-if (strcmp($input["isMale"], "") === 0) {
-    http_response_code(400);
-    print(json_encode(["error" => "Parameter isMale is not set."]));
-    return;
-}
-
-if (filter_var($input["isMale"], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === null) {
-    http_response_code(400);
-    print(json_encode(["error" => "Parameter isMale accepts only strings '1', 'true', 'on', 'yes', '0', 'false', 'off' and 'no'."]));
-    return;
-}
+// if dryrun is enabled no changes to db are made.
 if (filter_var($input["dryrun"], FILTER_VALIDATE_BOOLEAN)) {
     $input["dryrun"] = (bool)$_POST["dryrun"];
 } else {
     $input["dryrun"] = false;
 }
-if (strlen($input["phoneNumber"]) < 8) {
+
+// Validate name
+$input["name"] = trim_space($input["name"]);
+
+if (strlen($input["name"]) < 5) {
+    log::message("Warning: parameter 'name' is too small", __FILE__, __LINE__);
     http_response_code(400);
-    print(json_encode(["error" => "Phone number is less than 8 characters"]));
-    return;
-}
-if ($input["zip"] === null) {
-    http_response_code(400);
-    print(json_encode(["error" => "Could not decode zip"]));
-    return;
-}
-$input["address"] = trim_space($input["address"]);
-if (strlen($input["address"]) < 6) {
-    http_response_code(400);
-    print(json_encode(["error" => "Address is less than 6 characters"]));
-    return;
-}
-if ($input["email"] === null) {
-    http_response_code(400);
-    print(json_encode(["error" => "Email validation failed"]));
+    $input["message"] = "parameter 'name' is too small";
+    print(json_encode($input));
     return;
 }
 
+if (strlen($input["name"]) > 40) {
+    log::message("Warning: parameter 'name' is greater than 40 characters: ", $input["name"], __FILE__, __LINE__);
+    http_response_code(400);
+    $input["message"] = "parameter 'name' is greater than 40 characters";
+    print(json_encode($input));
+    return;
+}
+
+if (!strpos($input["name"], " ")) {
+    log::message("Warning: Space was not found in the name", __FILE__, __LINE__);
+    http_response_code(400);
+    $input["message"] = "parameter 'name' is too small";
+    print(json_encode($input));
+    return;
+}
+
+if (filter_var($input["isMale"], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === null) {
+    log::message("Warning: Parameter isMale accepts only strings", __FILE__, __LINE__);
+    http_response_code(400);
+    print(json_encode($input));
+    return;
+}
+
+// Phone and email
+$input["phone"] = str_replace(" ", "", $input["phone"]);
+
+if (strncmp($input["phone"], "+47", 3) == 0) {
+    $input["phone"] = substr($input["phone"], 3);
+}
+
+if (strlen($input["phone"]) < 8) {
+    log::message("Warning: Phone number is less than 8 characters", __FILE__, __LINE__);
+    http_response_code(400);
+    $input["message"] = "parameter 'phone' is less than 8 characters";
+    print(json_encode($input));
+    return;
+}
+
+if (strlen($input["phone"]) > 15) {
+    log::message("Warning: Phone number is greater than 15 characters", __FILE__, __LINE__);
+    http_response_code(400);
+    $input["message"] = "parameter 'phone' is greater than 15 characters";
+    print(json_encode($input));
+    return;
+}
+
+if ($input["email"] === null) {
+    log::message("Email validation failed", __FILE__, __LINE__);
+    http_response_code(400);
+    $input["message"] = "parameter 'name' is too small";
+    print(json_encode($input));
+    return;
+}
+
+// Age validation
+$input["age"] = get_age(new DateTime($input["birthDate"]));
+if ($input["age"] < 18) {
+    log::message("Warning: User too young", __FILE__, __LINE__);
+    http_response_code(400);
+    $input["message"] = "User too young. Minimum age is 18 years old";
+    print(json_encode($input));
+    return;
+}
+
+// Address and zip
+if ($input["zip"] === null) {
+    log::message("Warning: Could not decode zip", __FILE__, __LINE__);
+    http_response_code(400);
+    $input["message"] = "parameter 'name' is too small";
+    print(json_encode($input));
+    return;
+}
+
+$input["address"] = trim_space($input["address"]);
+if (strlen($input["address"]) < 6) {
+    log::message("Warning: Address is less than 6 characters", __FILE__, __LINE__);
+    http_response_code(400);
+    $input["message"] = "parameter 'name' is too small";
+    print(json_encode($input));
+    return;
+}
+
+// licensee
 $input["licensee"] = trim_space($input["licensee"]);
 $clubs = json_decode(file_get_contents("assets/clubs.json"));
 if (!value_exists($input["licensee"], $clubs) && $input["licensee"] !== "NTNUI Triatlon" && $input["licensee"] !== "") {
+    log::message("Warning: Invalid licensee club", __FILE__, __LINE__);
     http_response_code(400);
-    print(json_encode(["error" => "Invalid licensee club. If this is a mistake, register without one and contact us."]));
+    $input["message"] = "parameter 'name' is too small";
+    print(json_encode($input));
     return;
 }
+
+// sanitize against injections
 $input["name"] = filter_var($input["name"], FILTER_SANITIZE_STRING);
 $input["email"] = filter_var($input["email"], FILTER_SANITIZE_EMAIL);
-$input["phoneNumber"] = filter_var($input["phoneNumber"], FILTER_SANITIZE_STRING);
+$input["phone"] = filter_var($input["phone"], FILTER_SANITIZE_STRING);
 $input["address"] = filter_var($input["address"], FILTER_SANITIZE_STRING);
 $input["licensee"] = filter_var($input["licensee"], FILTER_SANITIZE_STRING);
 $input["first_name"] = get_first_name($input["name"]);
 $input["surname"] = get_surname($input["name"]);
 
-// check for excising entries
+// check if phone number has been registered
 {
     $db = new DB("member");
-    $sql = "SELECT id FROM ${settings['memberTable']} WHERE phoneNumber=?";
+    $sql = "SELECT count(*), approved_date FROM member WHERE phone=?";
     $db->prepare($sql);
-    $db->bind_param("s", $input["phoneNumber"]);
+    $db->bind_param("s", $input["phone"]);
     $db->execute();
     $result = 0;
-    $db->stmt->bind_result($result);
-    $db->stmt->fetch();
+    $approved_date;
+    $db->stmt->bind_result($result, $approved_date);
+    $db->fetch();
     $input["user_exists"] = (bool)$result;
+    $input["approved_date"] = isset($approval_date) ? $approved_date : null;
+    $input["membership_status"] = $approved_date ? "active" : "pending";
     if ($result) {
+        log::message("Warning: User already registered", __FILE__, __LINE__);
         http_response_code(400);
-        print(json_encode(["error" => "User already registered."]));
+        $input["message"] = "User already registered.";
+        print(json_encode($input));
         return;
     }
 }
+
 // check for excising CIN number
 {
     $db = new DB("member");
     $sql = "SELECT NSF_CIN FROM member_CIN WHERE hash=?";
     $db->prepare($sql);
-    $input["hash"] = hash("sha256", $input["birthDate"] . $input["phoneNumber"] . $input["isMale"]);
+    $input["hash"] = hash("sha256", $input["birthDate"] . $input["phone"] . $input["isMale"]);
     $db->bind_param("s", $input["hash"]);
     $db->execute();
     $CIN = 0;
@@ -166,28 +258,34 @@ $input["surname"] = get_surname($input["name"]);
         $db->execute();
     }
 }
+
 // register
 if (!$input["dryrun"]) {
     $db = new DB("member");
-    $sql = "INSERT INTO member (first_name, surname, gender, birth_date, phone_number, email, address, zip, licensee, CIN, registration_date) VALUES (?,?,?,?,?,?,?,?,?,?,NOW())";
+    $sql = "INSERT INTO member (first_name, surname, gender, birth_date, phone, email, address, zip, licensee, CIN, registration_date) VALUES (?,?,?,?,?,?,?,?,?,?,NOW())";
     $db->prepare($sql);
-
     $gender = $input["isMale"] ? "Male" : "Female";
     $first_name = get_first_name($input["name"]);
     $surname = get_surname($input["name"]);
     $birthDate = date("Y-m-d", strtotime($input["birthDate"]));
-    
-    $db->bind_param("sssssssisi", $first_name, $surname, $gender , $birthDate, $input["phoneNumber"], $input["email"], $input["address"], $input["zip"], $input["licensee"], $input["CIN"]);
+    $db->bind_param("sssssssisi", $first_name, $surname, $gender, $birthDate, $input["phone"], $input["email"], $input["address"], $input["zip"], $input["licensee"], $input["CIN"]);
     $db->execute();
 }
 
+// return success
 http_response_code(200);
-$input["status"] = "Member has been registered successfully";
+$input["error"] = false;
+$input["message"] = "Member has been registered successfully";
 
-if ($input["licensee"] == "") {
-    $input["further_action"] = "Payment";
-    $input["url"] =  $settings["baseurl"] . "/store?item_id=" . $settings['license_store_item_id'];
-} else {
-    $input["further_action"] = "manual_approval";
+if ($input["membership_status"] == "pending") {
+    if (false) {
+        // notification to cashier
+        $sendTo = $settings["emails"]["analyst"];
+        $message = "A new member needs manual approval. Log in to admin pages and approve member.";
+        $from = $settings["emails"]["bot-general"];
+        mail($sendTo, "NTNUI-Swimming: New membership request", $message, "From: $from\r\nContent-type: text/plain; charset=utf-8");
+    }
+    $input["url"] =  $settings["baseurl"] . "/store?product_hash=" . $settings['license_product_hash'];
 }
+
 print(json_encode($input));

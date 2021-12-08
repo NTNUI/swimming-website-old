@@ -1,10 +1,11 @@
 <?php
 if (!$access_control->can_access("api", "memberregister")) {
-    log::message("Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
-    log::forbidden("Access denied", __FILE__, __LINE__);
+	log::message("Info: Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
+	log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
-function sendEmail($emailAdress){
+function sendEmail($emailAdress)
+{
 
 	$subject = "NTNUI Svomming: Medlemskap godkjent / Membership approved";
 	$from = "svomming-kasserer@ntnui.no";
@@ -27,56 +28,56 @@ function sendEmail($emailAdress){
 
 	// send mail
 	mail($emailAdress, $subject, $headers, "From: $from\r\nContent-type: text/html; charset=utf-8");
-
 }
 
 
 // Create connection
-$conn = connect("medlem");
+{
+	$db = new DB("member");
+	// Get id
+	if (!isset($_REQUEST['id'])) {
+		header("HTTP/1.0 400 Bad request");
+		die("You need to supply an id to register");
+	}
 
-// Get id
-if (!isset($_REQUEST['id'])) {
-	header("HTTP/1.0 400 Bad request");
-	die("You need to supply an id to register");
+	$id = $_REQUEST['id'];
+
+	// Register user
+	$sql = "UPDATE member SET approved_date=NOW() WHERE id=?";
+	$db->prepare($sql);
+	$db->bind_param("i", $id);
+
+	$db->execute();
 }
 
-$id = $_REQUEST['id'];
+// Send approval email to member
+{
+	// log action
+	$access_control->log("api/memberregister", "approve", $id);
 
-// Register user
-$sql = "UPDATE ${settings['memberTable']} SET kontrolldato=NOW() WHERE id=?";
-$query = $conn->prepare($sql);
-$query->bind_param("i", $id);
+	// send confirmation email to user
+	$db = new DB("member");
+	$sql = "SELECT first_name, surname, email FROM member WHERE id=?";
+	$db->prepare($sql);
+	$db->bind_param("i", $id);
+	$db->execute();
+	$db->stmt->bind_result($first_name, $surname, $email);
+	if (!$db->fetch()) {
+		header("HTTP/1.0 500 Internal Server Error");
+		die("SQL Error");
+	}
 
-if (!$query->execute()) {
-	header("HTTP/1.0 500 Internal Server Error");
-	die("SQL Error");
+	sendEmail($email);
 }
-$query->close();
-
-// log action
-$access_control->log("api/memberregister", "approve", $id);
-
-// send confirmation email to user
-$sql = "SELECT fornavn, etternavn, epost FROM ${settings['memberTable']} WHERE id=?";
-$query = $conn->prepare($sql);
-$query->bind_param("i", $id);
-$query->execute();
-$query->bind_result($fornavn, $etternavn, $epost);
-if (!$query->fetch()) {
-	header("HTTP/1.0 500 Internal Server Error");
-	die("SQL Error");
-}
-
-sendEmail($epost);
 
 // Return success to admin client
-header("Content-Type: application/json");
-print(json_encode(array(
-	"fornavn" => $fornavn,
-	"etternavn" => $etternavn,
-	"epost" => $epost,
-	"success" => true)
+http_response_code(200);
+log::message("Info: Approving $first_name $surname manually", __FILE__, __LINE__);
+print(json_encode(
+	[
+		"first_name" => $first_name,
+		"surname" => $surname,
+		"email" => $email,
+		"success" => true
+	]
 ));
-$query->close();
-$conn->close();
-
