@@ -1,12 +1,17 @@
 <?php
-error_reporting(E_STRICT | E_ALL);
+// require strict type checking
+declare(strict_types=1);
+error_reporting(E_ALL & ~E_NOTICE);
+// Don't output errors to standard output. That breaks json formatting in API
+ini_set("display_errors", "0");
+ini_set("max_execution_time", "5"); // seconds
+
 // Start session
 session_save_path("sessions");
 session_set_cookie_params(4 * 60 * 60);
-ini_set("session.gc_maxlifetime", 4 * 60 * 60);
-ini_set("session.gc_probability", 1);
-ini_set("session.gc_divisor", 100);
-session_start();
+ini_set("session.gc_maxlifetime", (string)(4 * 60 * 60));
+ini_set("session.gc_probability", "1");
+ini_set("session.gc_divisor", "100");
 
 // Load settings
 include_once("library/util/settings.php");
@@ -35,12 +40,10 @@ $base_url = $settings["baseurl"]; // deprecated: expand variable locally
 if ($language == "") $language = $settings["defaults"]["language"];
 if ($page == "") $page = $settings["defaults"]["landing-page"];
 
-//Translator
+// Translator
 $t = new Translator($page, $language);
-
-//Get access rules
+// Get access rules
 $access_control = new AccessControl($user);
-
 // handle the request
 if (isValidURL($page)) {
 	switch ($page) {
