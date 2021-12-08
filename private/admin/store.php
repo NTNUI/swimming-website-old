@@ -38,8 +38,8 @@ global $settings;
 		</div>
 	</div>
 	<div class="box">
-		<form id="form-add-store-item" action="<?php print $settings["baseurl"]; ?>/api/storeadmin" method="POST">
 		<h3>Add a product to the store</h3>
+		<form id="form-add-product" action="<?php print $settings["baseurl"]; ?>/api/store" method="POST">
 			<div>
 				<label for="name_no">Title in Norwegian</label>
 				<input name="name_no" type="text" required />

@@ -32,7 +32,9 @@ if ($title == "") $title = ucwords($page);
 		}?>
 		const BASEURL = "<?php print $settings['baseurl']; ?>";
 		const STRIPE_PUBLISHABLE_KEY = "<?php print $settings['stripe']['publishable_key']; ?>";
-		const INVENTORY_URL = BASEURL + "/api/storelist?lang=" + "<?php global $language; print $language; ?>";
+		const INVENTORY_URL = BASEURL + "<?php global $language; print '/api/inventory?lang=' .$language; ?>";
+		const SERVER_TIME_OFFSET = new Date().getTime() - <?php print time() ?> * 1000;
+		const LANGUAGE = "<?php print $language ?>";
 
 	</script>
 	<script src="<?php print $base_url; ?>/js/base.js"></script>
