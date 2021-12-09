@@ -1,7 +1,7 @@
 <?php
 global $t, $settings, $page;
 $t->load_translation('menu');
-function menu_item($url, $name = '')
+function menu_entry($url, $name = '')
 {
 	global $t;
 	if ($name == '') $name = $url;
@@ -12,13 +12,13 @@ function menu_item($url, $name = '')
 ?>
 <ul>
 	<?php
-	menu_item('mainpage');
-	menu_item('practices');
-	menu_item('activities');
-	menu_item('enrollment');
-	menu_item('board');
-	menu_item('FAQ');
-	menu_item('store');
+	menu_entry('mainpage');
+	menu_entry('practices');
+	menu_entry('activities');
+	menu_entry('enrollment');
+	menu_entry('board');
+	menu_entry('FAQ');
+	menu_entry('store');
 	?>
 	<li id='lang_switch'>
 		<a href='<?php print($settings["baseurl"] . ($language != 'no' ? '/' : '/en/') . $page); ?>'>
