@@ -1,15 +1,13 @@
 "use strict";
 export default class Store {
+    static lock = false; // internal state for performing one purchase at a time.
 
     /**
-     * 
-     * @param {*} publishable_key Stripe publishable API key
-     * @param {*} successCallback Callback when form purchase is completed. One message argument of type string is passed
-     * @param {*} failureCallback Callback when form purchase fails. One message argument of type string is passed
-     * @param {*} server_time_offset Difference between client time and server time.
-     * @param {*} lang language. Accepted values are {"no", "en"}
+     * Store class opens up the possibility to perform checkouts, list inventories and perform charges.
+     * @param {string} publishable_key Stripe publishable API key
+     * @param {int} server_time_offset Difference between client time and server time. Defaults to 0.
+     * @param {string} lang language. Accepted values are {"no", "en"}. Defaults to "en"
      */
-    static lock = false;
     constructor(publishable_key, server_time_offset = 0, lang = "en") {
         this.server_time_offset = server_time_offset;
         this.displayed_product = "";
@@ -166,8 +164,8 @@ export default class Store {
         let description = product.description;
         let image = product.image;
         let price = product.price;
-        let bought = product.amount_bought || 0;
-        let max = product.amount_available;
+        let sold = product.amount_sold || 0;
+        let available = product.amount_available;
         let startTime = product.available_from ? 1e3 * product.available_from - this.serverOffset : false;
         let endTime = product.available_until ? 1e3 * product.available_until - this.serverOffset : false;
 
@@ -180,7 +178,7 @@ export default class Store {
         node.querySelector(".store_header").textContent = header;
         node.querySelector(".store_description").innerHTML = description;
         node.querySelector(".store_price").textContent = this.formatCurrency(price);
-        node.querySelector(".store_availability").textContent = max == null ? "Unlimited" : bought + " / " + max;
+        node.querySelector(".store_availability").textContent = available == null ? "Unlimited" : sold + " / " + available;
         node.querySelector("img").src = image;
 
         let openContainer = node.querySelector(".store_opensin");
@@ -211,7 +209,7 @@ export default class Store {
             }.bind(this), 250);
         }
 
-        if (max > 0 && bought >= max) locked.soldout = true;
+        if (available > 0 && sold >= available) locked.soldout = true;
         let storeButton = node.querySelector(".store_button");
         let lastLock = {};
 

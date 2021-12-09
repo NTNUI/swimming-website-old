@@ -147,7 +147,7 @@ function createTableMatrix(products, product_groups) {
         },
         {
             title: "Sold",
-            field: "amount_bought"
+            field: "amount_sold"
         },
         {
             title: "Available",

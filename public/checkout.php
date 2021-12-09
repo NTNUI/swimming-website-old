@@ -6,7 +6,7 @@ include_once("library/util/store_helper.php");
 $store = new StoreHelper($language);
 
 
-//Input data
+// Input data
 $source = $_REQUEST['source'];
 $charge = $_REQUEST['charge'];
 $client_secret = $_REQUEST["client_secret"];
@@ -23,9 +23,6 @@ $client_secret = $_REQUEST["client_secret"];
 			<h1>Ditt kjøp ble gjennomført, en bekreftelse vil snart bli sendt via epost</h1>
 
 		</div>
-		<?php
-		include_once("welcome.php"); // Temporary solution
-		 ?>
 	</div>
 	<div id="charge_failed" class="error box charge">
 		<h1>Betalingen din har feilet</h1>
@@ -37,7 +34,7 @@ $client_secret = $_REQUEST["client_secret"];
 
 <script type="text/javascript" src="<?php print "$base_url/js/checkout.js"?>"></script>
 <script type="text/javascript">
-var status_url = "<?php print "$base_url/api/order_status" ?>";
+var status_url = "<?php print "$base_url/api/order_status" ?>"; // BUG: entry point does not exists
 var SOURCE_ID = "<?php print $source ?>";
 var CLIENT_SECRET = "<?php print $client_secret ?>";
 

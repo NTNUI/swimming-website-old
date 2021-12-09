@@ -25,10 +25,6 @@
     cursor: pointer;
 }
 
-.InputContainer .InputElement {
-    color: var(--primary-foreground-color);
-}
-
 .purchase_button {
     width: 100%;
     display: block;
@@ -84,26 +80,4 @@
     100% {
         transform: rotate(1800deg);
     }
-}
-
-#paymentComplete {
-    color: #7f8;
-    font-size: 100px;
-    text-align: center;
-    display: block;
-}
-
-#failedCross {
-    color: #f33;
-    font-size: 100px;
-    text-align: center;
-    display: block;
-}
-
-#loading_box {
-    z-index: 100;
-}
-
-#failedContent {
-    display: block;
 }
