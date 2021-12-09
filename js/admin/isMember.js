@@ -1,12 +1,11 @@
 "use strict";
 import { display_modal } from "../modules/modal.js";
-//Remember elements
 
 function search() {
 	const successBox = document.getElementById("successBox");
 	const failureBox = document.getElementById("failureBox");
 	const searchingBox = document.getElementById("searchingBox");
-	//Hide boxes if show
+	// Hide boxes if show
 	successBox.style.display = "none";
 	failureBox.style.display = "none";
 	searchingBox.style.display = "";
@@ -28,7 +27,7 @@ function search() {
 		});
 }
 
-//Set up events
+// Set up events
 document.getElementById("searchButton").onclick = search;
 
 document.getElementById("searchBox").onkeydown = function(event) {
@@ -39,6 +38,6 @@ document.getElementById("searchBox").onkeydown = function(event) {
 }
 
 document.getElementById("searchBox").addEventListener("focus", function(_) {
-	//Clear content on focus gain 
+	// Clear content on focus gain 
 	document.getElementById("searchBox").value = "";
 });

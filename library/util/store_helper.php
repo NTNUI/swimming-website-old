@@ -58,7 +58,7 @@ class StoreHelper
 			available_until, 
 			require_phone, 
 			visible, 
-			(SELECT COUNT(*) FROM orders WHERE orders.products_id = products.id AND (orders.order_status='FINALIZED' OR orders.order_status='DELIVERED')) AS amount,
+			(SELECT COUNT(*) FROM orders WHERE orders.products_id = products.id AND (orders.order_status='FINALIZED' OR orders.order_status='DELIVERED')) AS amount_sold,
 			amount_available, 
 			image, 
 			group_id 
@@ -86,7 +86,7 @@ class StoreHelper
 			$available_until,
 			$require_phone,
 			$visibility,
-			$amount,
+			$amount_sold,
 			$amount_available,
 			$image,
 			$group_id
@@ -114,7 +114,7 @@ class StoreHelper
 				"available_until" => strtotime($available_until),
 				"require_phone" => $require_phone,
 				"amount_available" => $amount_available,
-				"amount_bought" => $amount,
+				"amount_sold" => $amount_sold,
 				"visibility" => $visibility,
 				"image" => $image,
 				"group_id" => $group_id
@@ -146,7 +146,7 @@ class StoreHelper
 		$product = $this->get_product($product_hash);
 
 		if ($product === false) throw \StoreException::ProductNotFound();
-		if ($product["amount_available"] != null && $product["amount_bought"] >= $product["amount_available"]) throw \StoreException::ProductSoldOut();
+		if ($product["amount_available"] != null && $product["amount_sold"] >= $product["amount_available"]) throw \StoreException::ProductSoldOut();
 		if ($product["available_from"] !== false && $product["available_from"] > time()) throw \StoreException::ProductNotAvailable("Current product is not yet available");
 		if ($product["available_until"] !== false && $product["available_until"] < time()) throw \StoreException::ProductNotAvailable("Current product is no longer available");
 		if ($name == "") throw \StoreException::MissingCustomerDetails("Missing customer name");
