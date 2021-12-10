@@ -413,7 +413,7 @@ class Store
 		$result = 0;
 		$db->stmt->bind_result($result);
 		$db->fetch();
-		if ($result !== 0 || $result !== 1) {
+		if ($result !== 0 && $result !== 1) {
 			throw new UnexpectedValueException($result);
 		}
 		return (bool)$result;
@@ -435,7 +435,7 @@ class Store
 		$result = 0;
 		$db->stmt->bind_result($result);
 		$db->fetch();
-		if ($result !== 0 || $result !== 1) {
+		if ($result !== 0 && $result !== 1) {
 			throw new UnexpectedValueException($result);
 		}
 		return (bool)$result;
