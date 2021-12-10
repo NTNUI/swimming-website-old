@@ -2,14 +2,14 @@
 global $settings;
 $last_friday = date("N") == 5 ? "today" : "last friday";
 $friday_beer = date("d-m-Y", strtotime($last_friday));
-$conn = connect("web");
+$db = new DB("web");
 // TODO: fix hard coded role rules
-$query = $conn->prepare("SELECT users.username, users.name, friday_beer.hadbeer FROM users LEFT JOIN (SELECT user_id, MAX(CASE WHEN date=? THEN 1 ELSE 0 END) as hadbeer FROM friday_beer GROUP BY user_id) friday_beer ON friday_beer.user_id = users.id WHERE users.role NOT IN (1, 3, 4)");
+$db->prepare("SELECT users.username, users.name, friday_beer.hadbeer FROM users LEFT JOIN (SELECT user_id, MAX(CASE WHEN date=? THEN 1 ELSE 0 END) as hadbeer FROM friday_beer GROUP BY user_id) friday_beer ON friday_beer.user_id = users.id WHERE users.role NOT IN (1, 3, 4)");
 $date = date("Y-m-d", strtotime($last_friday));
-$query->bind_param("s", $date);
-$query->execute();
-$query->bind_result($username, $name, $hadbeer);
-while ($query->fetch()) {
+$db->bind_param("s", $date);
+$db->execute();
+$db->stmt->bind_result($username, $name, $hadbeer);
+while ($db->fetch()) {
 	$nobeer = "nobeer" . ($hadbeer ? " hidden" : "");
 	$beer = "beer" . ($hadbeer ? "" : " hidden");
 	print "<div id='$username' class='box " . ($hadbeer ? "gold" : "") . "'>";
@@ -20,8 +20,6 @@ while ($query->fetch()) {
 	print "</div>";
 }
 
-$query->close();
-$conn->close();
 ?>
-<link href="<?php print $settings['baseurl'];?>/css/admin/fredagspils.css">
-<script type="text/javascript" src="<?php print $settings['baseurl'];?>/js/admin/fredagspils.js"></script>
+<link href="<?php print $settings['baseurl']; ?>/css/admin/fredagspils.css">
+<script type="text/javascript" src="<?php print $settings['baseurl']; ?>/js/admin/fredagspils.js"></script>

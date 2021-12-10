@@ -1,30 +1,17 @@
 <?php
 // Guess new board starts every 1st of february
 $genfors = strtotime("first day of february" . (date("m") < 2 ? " last year" : ""));
-$conn = connect("web");
+$db = new DB("web");
 $role_board_member = 2;
 $role_cashier = 5;
 $role_superadmin = 6;
 
-$query = $conn->prepare("SELECT users.name, beers.date FROM friday_beer as beers JOIN users ON users.id = beers.user_id WHERE (beers.date > ? AND users.role IN ($role_board_member, $role_cashier, $role_superadmin)) ORDER BY beers.user_id, beers.date");
-if (!$query) {
-	log::die("Could not prepare statement", __FILE__, __LINE__);
-}
-$query->bind_param("s", date("Y-m-d", $genfors));
-if (!$query) {
-	log::die("Could not bind parameters", __FILE__, __LINE__);
-}
-$query->execute();
-if (!$query) {
-	log::die("Could not execute query", __FILE__, __LINE__);
-}
-
-$query->bind_result($username, $date);
-if (!$query) {
-	log::die("Could not bind results", __FILE__, __LINE__);
-}
+$db->prepare("SELECT users.name, beers.date FROM friday_beer as beers JOIN users ON users.id = beers.user_id WHERE (beers.date > ? AND users.role IN ($role_board_member, $role_cashier, $role_superadmin)) ORDER BY beers.user_id, beers.date");
+$db->bind_param("s", date("Y-m-d", $genfors));
+$db->execute();
+$db->stmt->bind_result($username, $date);
 $result = array();
-while ($query->fetch()) {
+while ($db->fetch()) {
 	$result[$username][] = $date;
 }
 ?>

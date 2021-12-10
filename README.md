@@ -148,6 +148,9 @@ Source is what is in this repository and should be kept separate from content as
 - php pages will return html with it's corresponding script.js file and page.css style file if they exists.
 - Prefer using class types as arguments if it makes sense over plain built in types.
 - For API use RESTless principle if possible. If not try mimic them to best degree.
+- functions should be minimal and only do one thing.
+- Function name should be descriptive of what function does.
+- Function that performs actions that might fail should throw an exception instead of returning a value that needs to be checked.
 
 ### Tests
 Tests are not priority in this project at this time. Prefer spending time refactoring project into classes and use strong typing in stead. Use automated linters in GitHub actions 

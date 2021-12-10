@@ -14,4 +14,8 @@ log::message("Info: Requested product: " . $_GET["product_hash"], __FILE__, __LI
 include_once("library/util/store_helper.php");
 $store = new StoreHelper($language);
 http_response_code(200);
-print json_encode($store->get_product($_GET["product_hash"]));
+try {
+    print json_encode($store->get_product($_GET["product_hash"]));
+} catch (\StoreException $th) {
+    print json_encode(["error" => true, "message" => $th]);
+}
