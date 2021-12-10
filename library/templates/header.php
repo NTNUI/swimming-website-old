@@ -37,7 +37,7 @@ if ($title == "") $title = ucwords($page);
 		const LANGUAGE = "<?php print $language ?>";
 
 	</script>
-	<script src="<?php print $base_url; ?>/js/base.js"></script>
+	<script src="<?php print $settings["baseurl"]; ?>/js/base.js"></script>
 </head>
 
 <body>

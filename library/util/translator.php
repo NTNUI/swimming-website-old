@@ -83,8 +83,8 @@ class Translator
 
 	public function get_url($url)
 	{
-		global $base_url;
-		$ret = $base_url . "/";
+		global $settings;
+		$ret = $settings["baseurl"] . "/";
 		if ($this->language != "no") $ret .= $this->language . "/";
 		return $ret . ($url == "mainpage" ? "" : $url);
 	}
