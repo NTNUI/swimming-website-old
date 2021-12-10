@@ -3,7 +3,7 @@
 include_once("library/util/db.php");
 include_once("library/exceptions/store.php");
 
-class StoreHelper
+class Store
 {
 	private $language;
 	private $license_key;
@@ -453,5 +453,33 @@ class StoreHelper
 		$db->bind_param("sssiisss", $product["hash"], $product["name"], $product["description"], $product["price"], $product["amount"], $product["start"], $product["end"], $product["image_name"]);
 		$db->execute();
 	}
+
+
+	/**
+	 * Remove product from DB
+	 * 
+	 * @param array $product to be removed
+	 * @return void
+	 */
+	static public function remove_product(string $product_hash)
+	{
+		if (!Store::product_exists($product_hash)) {
+			throw StoreException::ProductNotFound();
+		}
+		// get image name
+		$db = new DB("web");
+		$db->prepare("SELECT image FROM products WHERE hash=?");
+		$db->bind_param("s", $product_hash);
+		$db->execute();
+		$image_path = "img/store/" . $db->fetch();
+		if (file_exists($image_path)) {
+			if (!unlink($image_path)) {
+				throw StoreException::RemoveProductFailed();
+			}
+		}
+		$db->stmt->close();
+		$db->prepare("DELETE FROM products WHERE hash=?");
+		$db->bind_param("s", $product_hash);
+		$db->execute();
 	}
 }

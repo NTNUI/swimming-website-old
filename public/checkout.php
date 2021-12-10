@@ -1,9 +1,9 @@
 <?php
 
 // Libs
-include_once("library/util/store_helper.php");
+include_once("library/util/store.php");
 
-$store = new StoreHelper($language);
+$store = new Store($language);
 
 
 // Input data

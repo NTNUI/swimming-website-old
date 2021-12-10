@@ -10,9 +10,9 @@ foreach ($_SERVER as $key => $value) {
 log::forbidden("Access denied", __FILE__, __LINE__);
 
 /*
-include_once("library/util/store_helper.php");
+include_once("library/util/store.php");
 
-$store = new StoreHelper("en");
+$store = new Store("en");
 print $secret;
 
 if(1){
