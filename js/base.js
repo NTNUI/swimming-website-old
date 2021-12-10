@@ -1,4 +1,9 @@
-// Deprecated: Use fetch()
+"use strict";
+/**
+ * @deprecated use fetch instead
+ * @param {*} url 
+ * @param {*} callback 
+ */
 let getJSON = function(url, callback) {
     let xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);

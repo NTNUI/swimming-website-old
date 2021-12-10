@@ -49,9 +49,8 @@ print_content_header(
 								if (typeof(serverResponse) === "object") {
 									serverResponse = serverResponse.message;
 								}
-								// wait until user closes the dialog, then hide the checkout modal
+								// wait until user closes the dialog
 								await display_modal("Success", serverResponse, "Accept", "", "success");
-								Store.hide_checkout_modal();
 							})
 							.catch((error) => {
 								if (typeof(error == "object")) {
@@ -81,7 +80,6 @@ print_content_header(
 								serverResponse = serverResponse.message;
 							}
 							await display_modal("Success", serverResponse, "Accept", "", "success");
-							Store.hide_checkout_modal();
 						}).catch((error) => {
 							if (typeof(error == "object")) {
 								error = error.message;

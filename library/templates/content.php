@@ -14,6 +14,7 @@
  */
 function print_content_block(string $header, string $description, string $image_path, string $image_text, string $email = "", string $image_class = "", string $image_license = "NTNUI (CC BY 4.0)")
 {
+    global $settings;
 ?>
     <div class="box">
         <div class="<?php print $image_path ? "max-60 " : ""; ?>contents">
@@ -23,14 +24,14 @@ function print_content_block(string $header, string $description, string $image_
 
         <?php
         // Should file_exists throw an error? It's not a problem in the source but in the content.
-        if (!file_exists($image_path)) {
+        if ($image_path && !file_exists($_SERVER["DOCUMENT_ROOT"] . $image_path)) {
             log::message("Warning: Cannot find image : " . $image_path, __FILE__, __LINE__);
         }
 
-        if ($image_path && file_exists($image_path)) {
+        if ($image_path && file_exists($_SERVER["DOCUMENT_ROOT"] . $image_path)) {
         ?>
             <div class="card">
-                <img class="<?php print($image_class); ?>" src="<?php print($image_path); ?>" alt="<?php print($image_text); ?>">
+                <img class="<?php print($image_class); ?>" src="<?php print($settings["baseurl"] . $image_path); ?>" alt="<?php print($image_text); ?>">
                 <label class="card_content"><?php print($image_text); ?></label>
                 <?php
                 if ($email) {
