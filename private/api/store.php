@@ -8,38 +8,52 @@
 // [PATCH] set_product_visibility(product_id, visibility)
 
 include_once("library/util/db.php");
-include_once("library/util/store_helper.php");
+include_once("library/util/store.php");
 include_once("library/util/api.php");
+include_once("library/exceptions/store.php");
 
 $response = new Response();
-$store = new StoreHelper($language);
+$store = new Store($language);
 $input = file_get_contents("php://input");
 
 Authenticator::auth_API("api/store", "", __FILE__, __LINE__);
-
-$conn = connect("web");
-switch ($_SERVER['REQUEST_METHOD']) {
-	case "GET":
-		handle_get($conn, $store, $response);
-		break;
-	case "POST":
-		handle_post($conn, $response);
-		break;
-	case "PATCH":
-		handle_patch($store, $input, $response);
-		break;
-	default:
-		$response->code = HTTP_INVALID_REQUEST;
-		$response->data = [
-			"error" => true,
-			"message" => "unsupported request method : " . $_SERVER['REQUEST_METHOD'] . " Supported methods are GET, POST, PATCH"
-		];
+try {
+	switch ($_SERVER['REQUEST_METHOD']) {
+		case "GET":
+			handle_get($store, $response);
+			break;
+		case "POST":
+			handle_post($response);
+			break;
+		case "PATCH":
+			handle_patch($store, $input, $response);
+			break;
+		default:
+			$response->code = HTTP_INVALID_REQUEST;
+			$response->data = [
+				"error" => true,
+				"message" => "unsupported request method : " . $_SERVER['REQUEST_METHOD'] . " Supported methods are GET, POST, PATCH"
+			];
+	}
+} catch (\StoreException $ex) {
+	$response->code = HTTP_INVALID_REQUEST;
+	$response->data = [
+		"error" => true,
+		"message" => $ex->getMessage()
+	];
 }
-$conn->close();
 $response->send();
 return;
 
-function handle_patch(StoreHelper $store, string $input, Response &$response)
+/**
+ * Handle PATCH requests.
+ *
+ * @param Store $store
+ * @param string $input
+ * @param Response $response
+ * @return void
+ */
+function handle_patch(Store &$store, string $input, Response &$response)
 {
 	global $access_control;
 	if (!$input) {
@@ -75,7 +89,7 @@ function handle_patch(StoreHelper $store, string $input, Response &$response)
 				];
 				break;
 			}
-			if (!StoreHelper::order_id_exists($input_json->{"params"}->{"order_id"})) {
+			if (!Store::order_id_exists($input_json->{"params"}->{"order_id"})) {
 				$response->code = HTTP_NOT_FOUND;
 				$response->data = [
 					"error" => true,
@@ -125,7 +139,14 @@ function handle_patch(StoreHelper $store, string $input, Response &$response)
 	}
 }
 
-function handle_post(mysqli $conn, Response &$response)
+
+/**
+ * Handle POST requests
+ *
+ * @param Response $response
+ * @return void
+ */
+function handle_post(Response &$response)
 {
 	// get these arguments, ignore rest
 	$args = [];
@@ -168,22 +189,6 @@ function handle_post(mysqli $conn, Response &$response)
 		}
 	}
 
-	// Move uploaded file to img/store with a random name. On error default to default.jpg
-	// TODO: same hash for image and for product_hash
-	$image_name = "default.jpg";
-
-	if (validateUploadImage("image")) {
-		$extension = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
-		do {
-			$image_name = md5(time()) . "." . $extension;
-		} while (file_exists("img/store/" . $image_name));
-		move_uploaded_file($_FILES["image"]["tmp_name"], "img/store/" . $image_name);
-		if (!file_exists("img/store/" . $image_name)) {
-			$image_name = "default.jpg";
-		}
-	} else {
-		log::message("Warning: Uploaded a new product to store without image", __FILE__, __LINE__);
-	}
 	// Do some date and time packing for SQL
 	$start = $args["date_start"] . " " . $args["time_start"];
 	$end = $args["date_end"] . " " . $args["time_end"];
@@ -196,7 +201,19 @@ function handle_post(mysqli $conn, Response &$response)
 	$product_hash = "";
 	do {
 		$product_hash = substr(md5(time()), 0, 20);
-	} while (StoreHelper::product_exists($product_hash));
+	} while (Store::product_exists($product_hash));
+
+	// upload image, set file name to be the same as the hash
+	if (validateUploadImage("image")) {
+		$extension = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
+		$image_name = $product_hash . "." . $extension;
+		move_uploaded_file($_FILES["image"]["tmp_name"], "img/store/" . $image_name);
+		if (!file_exists("img/store/" . $image_name)) {
+			throw StoreException::AddProductFailed("Could not move uploaded image to correct location");
+		}
+	} else {
+		throw StoreException::AddProductFailed("Cannot add a product without an image");
+	}
 
 	$new_product = [
 		"hash" => $product_hash,
@@ -208,12 +225,14 @@ function handle_post(mysqli $conn, Response &$response)
 		"end" => $end,
 		"image_name" => $image_name
 	];
-	// TODO: add_product returns always true
-	if (!StoreHelper::add_product($new_product)) {
+	try {
+		Store::add_product($new_product);
+		global $access_control;
+		$access_control->log("api/store", "add product", $new_product["hash"]);
+	} catch (mysqli_sql_exception $th) {
 		$response->data = ["success" => false, "message" => "Could not add new product to store"];
 		$response->code = HTTP_INTERNAL_SERVER_ERROR;
-		log::message("Error: Could not add new product to store", __FILE__, __LINE__);
-		return;
+		throw $th;
 	}
 
 	$response->data = ["success" => true];
@@ -221,26 +240,35 @@ function handle_post(mysqli $conn, Response &$response)
 	return;
 }
 
-function handle_get(mysqli $conn, StoreHelper $store, Response &$response)
+
+/**
+ * Handle GET request
+ *
+ * @param Store $store 
+ * @param Response $response
+ * @return void
+ */
+function handle_get(Store &$store, Response &$response)
 {
 	switch (argsURL("GET", "request_type")) {
 		case "get_orders":
 			$product = $store->get_product($_GET["product_hash"]);
 			$sql = "SELECT id, name, email, phone, comment, order_status FROM orders WHERE products_id=? AND (order_status='FINALIZED' OR order_status='DELIVERED') ORDER BY FIELD(order_status, 'FINALIZED', 'DELIVERED')";
-			$query = $conn->prepare($sql);
-			$query->bind_param("i", $product["id"]);
-			$query->execute();
-			$id = "";
+			$db = new DB("web");
+			$db->prepare($sql);
+			$db->bind_param("i", $product["id"]);
+			$db->execute();
+			$order_id = "";
 			$name = "";
 			$email = "";
 			$phone = "";
 			$comment = "";
 			$status = "";
-			$query->bind_result($id, $name, $email, $phone, $comment, $status);
+			$db->stmt->bind_result($order_id, $name, $email, $phone, $comment, $status);
 			$result = array();
-			while ($query->fetch()) {
+			while ($db->fetch()) {
 				$row = [
-					"id" => $id,
+					"id" => $order_id,
 					"name" => $name,
 					"email" => $email,
 					"phone" => $phone,
@@ -263,27 +291,31 @@ function handle_get(mysqli $conn, StoreHelper $store, Response &$response)
 			$response->code = HTTP_OK;
 			break;
 		case "get_product_groups":
-			$sql = "SELECT id, name FROM product_groups";
-			$query = $conn->prepare($sql);
-			$query->execute();
+			$db = new DB("web");
+			$db->prepare("SELECT id, name FROM product_groups");
+			$db->execute();
 			$group_id = 0;
 			$name = "";
 			$groups = [];
-			$query->bind_result($group_id, $name);
-			while ($query->fetch()) {
+			$db->stmt->bind_result($group_id, $name);
+			while ($db->fetch()) {
 				$groups[$group_id] = $name;
 			}
 			$response->data = $groups;
 			$response->code = HTTP_OK;
 			break;
 		default:
-			foreach ($_GET as $key => $value) {
-				print("$key: $value\n");
-			}
 			$response->error("Got invalid request: '" . argsURL("GET", "request_type") . "'. Valid requests are get_orders, get_products and get_product_groups.");
 	}
 }
 
+
+/**
+ * Validate image
+ *
+ * @param string $input_name
+ * @return boolean true if image is accepted for upload. False otherwise.
+ */
 function validateUploadImage(string $input_name): bool
 {
 	if (!isset($_FILES[$input_name]["tmp_name"])) {

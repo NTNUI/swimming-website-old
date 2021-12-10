@@ -1,8 +1,8 @@
 <?php
 // Documentation: https://stripe.com/docs/webhooks
-include_once("library/util/store_helper.php");
+include_once("library/util/store.php");
 
-$store = new StoreHelper("en");
+$store = new Store("en");
 
 $secret = $settings["stripe"]["signing_key"];
 

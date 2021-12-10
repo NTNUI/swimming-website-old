@@ -1,9 +1,9 @@
 <?php
 include_once("library/templates/store.php");
-include_once("library/util/store_helper.php");
+include_once("library/util/store.php");
 include_once("library/templates/modal.php");
 include_once("library/templates/content.php");
-$store = new StoreHelper($language);
+$store = new Store($language);
 $tabindex = 0;
 
 function print_textBox($title, $type, $name, $extra = "")

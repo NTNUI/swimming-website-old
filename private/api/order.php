@@ -1,5 +1,5 @@
 <?php
-include_once("library/util/store_helper.php");
+include_once("library/util/store.php");
 function handle_error($id, $error) {
 	global $t;
 	if (array_key_exists("message", $error)) $error = $error["message"];
@@ -7,7 +7,7 @@ function handle_error($id, $error) {
 	header("Location: $url");
 	exit();
 }
-$store = new StoreHelper("en");
+$store = new Store("en");
 
 $source = $_POST["source"];
 $hash = $_POST["id"]; //TODO:  update incoming requests to pass inn hash or product_hash
