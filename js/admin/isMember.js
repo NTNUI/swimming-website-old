@@ -2,6 +2,11 @@
 import { display_modal } from "../modules/modal.js";
 
 function search() {
+	const name = document.getElementById("searchBox").value;
+	if (name == "") {
+		return;
+	}
+
 	const successBox = document.getElementById("successBox");
 	const failureBox = document.getElementById("failureBox");
 	const searchingBox = document.getElementById("searchingBox");
@@ -11,12 +16,15 @@ function search() {
 	searchingBox.style.display = "";
 
 	const names = document.getElementById("names");
-	const name = document.getElementById("searchBox").value;
 	fetch(BASEURL + "/api/isMember?surname=" + name)
-		.then(response => response.json())
+		.then(async (response) => {
+			if (response.ok) {
+				return response.json();
+			}
+			throw (await response.json()).message;
+		})
 		.then((people) => {
 			people.forEach((person) => {
-				console.log(person);
 				names.innerHTML += "<li>" + person.first_name + " " + person.surname + "</li>";
 			});
 			successBox.style.display = "block";

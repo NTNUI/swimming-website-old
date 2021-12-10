@@ -1,7 +1,7 @@
 <?php
-include_once("library/templates/store.php");
-include_once("library/templates/content.php");
-include_once("library/templates/modal.php");
+require_once("library/templates/store.php");
+require_once("library/templates/content.php");
+require_once("library/templates/modal.php");
 global $t;
 print_content_header(
 	$t->get_translation("mainHeader"),

@@ -1,6 +1,6 @@
 <?php
 global $settings;
-include_once("library/templates/content.php");
+require_once("library/templates/content.php");
 
 print_content_header(
 	"Membership requests " . date('Y'),

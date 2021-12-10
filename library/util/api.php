@@ -12,7 +12,7 @@ class Response{
     public array $data = ["error" => true, "message" => "no data"];
     
     public function send(){
-        header("Content-type: application/json");
+        header("Content-type: application/json; charset=UTF-8");
         http_response_code($this->code);
         echo json_encode($this->data);
     }
@@ -27,4 +27,3 @@ class Response{
     }
 
 }
-?>

@@ -1,6 +1,6 @@
 <?php
-include_once("library/exceptions/user.php");
-include_once("library/exceptions/authentication.php");
+require_once("library/exceptions/user.php");
+require_once("library/exceptions/authentication.php");
 // TODO: new function: Generate random password
 // TODO: new function: require password reset on user_id
 // TODO: merge with access_control class

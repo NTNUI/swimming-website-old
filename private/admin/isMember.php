@@ -1,7 +1,7 @@
 <?php
 global $t, $settings;
 $base_url = $settings['baseurl'];
-include_once("library/templates/modal.php");
+require_once("library/templates/modal.php");
 ?>
 
 <div class='box'>

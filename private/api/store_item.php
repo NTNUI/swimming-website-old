@@ -11,7 +11,7 @@ if(!isset($_GET["product_hash"])){
     return json_encode([]);
 }
 log::message("Info: Requested product: " . $_GET["product_hash"], __FILE__, __LINE__);
-include_once("library/util/store.php");
+require_once("library/util/store.php");
 $store = new Store($language);
 http_response_code(200);
 try {

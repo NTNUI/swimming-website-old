@@ -1,4 +1,5 @@
 <?php
+require_once("library/util/db.php");
 
 function valid_KID($KID){
     if($KID > 99999999){
@@ -56,7 +57,6 @@ function save_CIN(int $member_id, int $CIN){
 }
 
 // remove randoms from the internet
-include_once("library/util/db.php");
 if (!Authenticator::is_logged_in()){
     log::forbidden("Access denied", __FILE__, __LINE__);
 }

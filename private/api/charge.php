@@ -1,5 +1,5 @@
 <?php
-include_once("library/util/store.php");
+require_once("library/util/store.php");
 define("DEBUG", false);
 function handle_error(Throwable $th, int $code = HTTP_INTERNAL_SERVER_ERROR) 
 {

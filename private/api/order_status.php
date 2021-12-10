@@ -1,6 +1,6 @@
 <?php
 
-include_once("library/util/store.php");
+require_once("library/util/store.php");
 $store = new Store($language);
 $source = $_REQUEST["source"]; 
 

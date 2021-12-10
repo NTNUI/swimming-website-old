@@ -46,7 +46,7 @@ if ($title == "") $title = ucwords($page);
 	</div>
 	<div id="menu_container">
 		<div id="menu" class="menu">
-			<?php include("library/templates/menu.php"); ?>
+			<?php require_once("library/templates/menu.php"); ?>
 		</div>
 	</div>
 	<div class="content">

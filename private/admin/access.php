@@ -1,6 +1,6 @@
 <?php
 // Fuck this mess...
-include_once("library/util/db.php");
+require_once("library/util/db.php");
 
 // get roles
 $roles = array(); {

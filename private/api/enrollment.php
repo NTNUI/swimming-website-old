@@ -1,4 +1,5 @@
 <?php
+require_once("library/util/api.php");
 global $settings;
 function trim_space(string $text): string
 {
@@ -62,7 +63,7 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
 }
 /*
 if(!valid_captcha()){
-    http_response_code(400);
+    http_response_code(HTTP_INVALID_REQUEST);
     print(json_encode(["error" => true, "message" => "captcha failed."]));
     return;
 }
@@ -72,7 +73,7 @@ if(!valid_captcha()){
 foreach (["name", "isMale", "phone", "birthDate", "zip", "address", "email"] as $param) {
     if (!isset($_POST[$param])) {
         log::message("Warning: missing parameter, " . $param, __FILE__, __LINE__);
-        http_response_code(400);
+        http_response_code(HTTP_INVALID_REQUEST);
         print(json_encode(["error" => true, "message" => "missing parameter, " . $param]));
         return;
     }
@@ -107,7 +108,7 @@ $input["name"] = trim_space($input["name"]);
 
 if (strlen($input["name"]) < 5) {
     log::message("Warning: parameter 'name' is too small", __FILE__, __LINE__);
-    http_response_code(400);
+    http_response_code(HTTP_INVALID_REQUEST);
     $input["message"] = "parameter 'name' is too small";
     print(json_encode($input));
     return;
@@ -115,7 +116,7 @@ if (strlen($input["name"]) < 5) {
 
 if (strlen($input["name"]) > 40) {
     log::message("Warning: parameter 'name' is greater than 40 characters: ", $input["name"], __FILE__, __LINE__);
-    http_response_code(400);
+    http_response_code(HTTP_INVALID_REQUEST);
     $input["message"] = "parameter 'name' is greater than 40 characters";
     print(json_encode($input));
     return;
@@ -123,7 +124,7 @@ if (strlen($input["name"]) > 40) {
 
 if (!strpos($input["name"], " ")) {
     log::message("Warning: Space was not found in the name", __FILE__, __LINE__);
-    http_response_code(400);
+    http_response_code(HTTP_INVALID_REQUEST);
     $input["message"] = "parameter 'name' is too small";
     print(json_encode($input));
     return;
@@ -131,7 +132,7 @@ if (!strpos($input["name"], " ")) {
 
 if (filter_var($input["isMale"], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === null) {
     log::message("Warning: Parameter isMale accepts only strings", __FILE__, __LINE__);
-    http_response_code(400);
+    http_response_code(HTTP_INVALID_REQUEST);
     print(json_encode($input));
     return;
 }
@@ -145,7 +146,7 @@ if (strncmp($input["phone"], "+47", 3) == 0) {
 
 if (strlen($input["phone"]) < 8) {
     log::message("Warning: Phone number is less than 8 characters", __FILE__, __LINE__);
-    http_response_code(400);
+    http_response_code(HTTP_INVALID_REQUEST);
     $input["message"] = "parameter 'phone' is less than 8 characters";
     print(json_encode($input));
     return;
@@ -153,7 +154,7 @@ if (strlen($input["phone"]) < 8) {
 
 if (strlen($input["phone"]) > 15) {
     log::message("Warning: Phone number is greater than 15 characters", __FILE__, __LINE__);
-    http_response_code(400);
+    http_response_code(HTTP_INVALID_REQUEST);
     $input["message"] = "parameter 'phone' is greater than 15 characters";
     print(json_encode($input));
     return;
@@ -161,7 +162,7 @@ if (strlen($input["phone"]) > 15) {
 
 if ($input["email"] === null) {
     log::message("Email validation failed", __FILE__, __LINE__);
-    http_response_code(400);
+    http_response_code(HTTP_INVALID_REQUEST);
     $input["message"] = "parameter 'name' is too small";
     print(json_encode($input));
     return;
@@ -171,7 +172,7 @@ if ($input["email"] === null) {
 $input["age"] = get_age(new DateTime($input["birthDate"]));
 if ($input["age"] < 18) {
     log::message("Warning: User too young", __FILE__, __LINE__);
-    http_response_code(400);
+    http_response_code(HTTP_INVALID_REQUEST);
     $input["message"] = "User too young. Minimum age is 18 years old";
     print(json_encode($input));
     return;
@@ -180,7 +181,7 @@ if ($input["age"] < 18) {
 // Address and zip
 if ($input["zip"] === null) {
     log::message("Warning: Could not decode zip", __FILE__, __LINE__);
-    http_response_code(400);
+    http_response_code(HTTP_INVALID_REQUEST);
     $input["message"] = "parameter 'name' is too small";
     print(json_encode($input));
     return;
@@ -189,7 +190,7 @@ if ($input["zip"] === null) {
 $input["address"] = trim_space($input["address"]);
 if (strlen($input["address"]) < 6) {
     log::message("Warning: Address is less than 6 characters", __FILE__, __LINE__);
-    http_response_code(400);
+    http_response_code(HTTP_INVALID_REQUEST);
     $input["message"] = "parameter 'name' is too small";
     print(json_encode($input));
     return;
@@ -200,7 +201,7 @@ $input["licensee"] = trim_space($input["licensee"]);
 $clubs = json_decode(file_get_contents("assets/clubs.json"));
 if (!value_exists($input["licensee"], $clubs) && $input["licensee"] !== "NTNUI Triatlon" && $input["licensee"] !== "") {
     log::message("Warning: Invalid licensee club", __FILE__, __LINE__);
-    http_response_code(400);
+    http_response_code(HTTP_INVALID_REQUEST);
     $input["message"] = "parameter 'name' is too small";
     print(json_encode($input));
     return;
@@ -231,7 +232,7 @@ $input["surname"] = get_surname($input["name"]);
     $input["membership_status"] = $approved_date ? "active" : "pending";
     if ($result) {
         log::message("Warning: User already registered", __FILE__, __LINE__);
-        http_response_code(400);
+        http_response_code(HTTP_INVALID_REQUEST);
         $input["message"] = "User is already registered with " . ($input["membership_status"] === "active" ? "an active" : "a pending") ." membership" ;
         print(json_encode($input));
         return;
