@@ -1,6 +1,5 @@
 <?php
-global $t, $settings;
-$base_url = $settings['baseurl'];
+global $settings;
 require_once("library/templates/modal.php");
 ?>
 
@@ -27,4 +26,4 @@ require_once("library/templates/modal.php");
 	</div>
 
 </div>
-<script src='<?php print "$base_url/js/admin/isMember.js" ?>' type='module'></script>
+<script src='<?php print $settings["baseurl"] . "/js/admin/isMember.js" ?>' type='module'></script>

@@ -36,7 +36,6 @@ $action = argsURL("REQUEST", "action");
 $user = argsURL("SESSION", "username");
 
 // Defaults
-$base_url = $settings["baseurl"]; // deprecated: expand variable locally
 if ($language == "") $language = $settings["defaults"]["language"];
 if ($page == "") $page = $settings["defaults"]["landing-page"];
 
