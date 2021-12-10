@@ -227,12 +227,12 @@ $input["surname"] = get_surname($input["name"]);
     $db->stmt->bind_result($result, $approved_date);
     $db->fetch();
     $input["user_exists"] = (bool)$result;
-    $input["approved_date"] = isset($approval_date) ? $approved_date : null;
+    $input["approved_date"] = isset($approved_date) ? $approved_date : null;
     $input["membership_status"] = $approved_date ? "active" : "pending";
     if ($result) {
         log::message("Warning: User already registered", __FILE__, __LINE__);
         http_response_code(400);
-        $input["message"] = "User already registered.";
+        $input["message"] = "User is already registered with " . ($input["membership_status"] === "active" ? "an active" : "a pending") ." membership" ;
         print(json_encode($input));
         return;
     }
@@ -243,12 +243,12 @@ $input["surname"] = get_surname($input["name"]);
     $db = new DB("member");
     $sql = "SELECT NSF_CIN FROM member_CIN WHERE hash=?";
     $db->prepare($sql);
-    $input["hash"] = hash("sha256", $input["birthDate"] . $input["phone"] . $input["isMale"]);
-    $db->bind_param("s", $input["hash"]);
+    $input["CIN_hash"] = hash("sha256", $input["birthDate"] . $input["phone"] . $input["isMale"]);
+    $db->bind_param("s", $input["CIN_hash"]);
     $db->execute();
     $CIN = 0;
     $db->stmt->bind_result($CIN);
-    $db->stmt->fetch();
+    $db->fetch();
     $input["CIN"] = $CIN;
     if ($CIN && !$input["dryrun"]) {
         // update last valid date for CIN number
@@ -273,7 +273,7 @@ if (!$input["dryrun"]) {
 }
 
 // return success
-http_response_code(200);
+http_response_code(HTTP_OK);
 $input["error"] = false;
 $input["message"] = "Member has been registered successfully";
 

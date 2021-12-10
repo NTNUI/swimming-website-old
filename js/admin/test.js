@@ -24,7 +24,6 @@ addLoadEvent(async () => {
                         serverResponse = serverResponse.message;
                     }
                     await display_modal("Success", serverResponse, "Accept", "", "success");
-                    Store.hide_checkout_modal();
                 }).catch(async (error) => {
                     if (typeof (error == "object")) {
                         error = error.message;

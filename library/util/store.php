@@ -250,7 +250,10 @@ class Store
 			];
 		} else if ($intent->status == "succeeded") {
 			$this->finalize_order($intent["id"]);
-			$src = ["success" => true];
+			$src = [
+				"success" => true,
+				"message" => "Purchase succeeded"
+			];
 		} else {
 			throw new \Stripe\Exception\ApiErrorException("stripe_error");
 		}

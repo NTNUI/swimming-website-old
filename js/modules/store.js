@@ -13,16 +13,19 @@ export default class Store {
         this.displayed_product = "";
         this.lang = lang;
         this.inventory = [];
+        this.card_validation_error = true;
+
         this.error_div = document.querySelector('#card-errors');
         this.form = document.querySelector('#payment-form');
+        this.submitButton = this.form.querySelector("[type='submit']");
+        this.overlay = document.querySelector("#checkout_overlay");
 
         this.stripe = Stripe(publishable_key);
         this.elements = this.stripe.elements();
         this.card = this.elements.create('card');
         this.card.mount("#card-element");
-        this.card.addEventListener('change', this.card_validation_handler.bind(this));
 
-        this.overlay = document.querySelector("#checkout_overlay");
+        this.card.addEventListener('change', this.card_validation_handler.bind(this));
     }
 
     /**
@@ -63,28 +66,33 @@ export default class Store {
                 this.overlay.querySelector("#checkout_phone").disabled = true;
                 this.overlay.querySelector("#checkout_comment").style.display = "none";
             }
-            // attach event listeners
-            // reject promise if user cancels 
-            this.overlay.querySelector("span.close").addEventListener("click", () => {
-                this.overlay.style.display = "none";
-                Store.lock = false;
-                document.querySelector("#checkout_overlay").style.display = "none";
-                reject();
+
+            // reject promise if user cancels or closes
+            this.overlay.querySelectorAll("span.close, button.locked").forEach(element => {
+                element.addEventListener("click", () => {
+                    Store.lock = false;
+                    this.overlay.style.display = "none";
+                    reject();
+                });
             });
-            this.overlay.querySelector("button.locked").addEventListener("click", () => {
-                this.overlay.style.display = "none";
-                Store.lock = false;
-                document.querySelector("#checkout_overlay").style.display = "none";
-                reject();
-            });
+
+            // resolve with an order on submit
             this.form.addEventListener('submit', (event) => {
                 event.preventDefault();
-                const overlay = document.querySelector("#checkout_overlay");
+
+                // disable charge button when cards validation errors are present
+                if (this.card_validation_error) {
+                    return;
+                }
+
+                // grab order info
                 let customer = {};
-                customer.name = overlay.querySelector("#checkout_name").value;
-                customer.email = overlay.querySelector("#checkout_email").value;
-                customer.phone = overlay.querySelector("#checkout_phone").value;
-                document.querySelector("#checkout_overlay").style.display = "none";
+                customer.name = this.overlay.querySelector("#checkout_name").value;
+                customer.email = this.overlay.querySelector("#checkout_email").value;
+                customer.phone = this.overlay.querySelector("#checkout_phone").value;
+                
+                // close checkout modal and return new order
+                this.overlay.style.display = "none";
                 resolve({ product: product, customer: customer });
             });
         });
@@ -92,8 +100,8 @@ export default class Store {
 
     /**
      * Charge a customer for a product 
-     * @param {*} product 
-     * @param {*} customer 
+     * @param {object} product 
+     * @param {object} customer 
      * @returns a promise that get fulfilled when successful request from server is received.
      */
     charge(product, customer) {
@@ -110,7 +118,8 @@ export default class Store {
                         billing_details: customer
                     }
                 );
-                const chargeResponse = await fetch("api/charge", {
+                // absolute path is required because of dynamic document root
+                const chargeResponse = await fetch(BASEURL + "/api/charge", {
                     method: "POST",
                     headers: {
                         "Content-Type": "application/json"
@@ -139,18 +148,27 @@ export default class Store {
     }
 
     card_validation_handler(event) {
+
         if (event.error) {
+            this.card_validation_error = true;
+            if (!this.submitButton.classList.contains("btn_disabled")) {
+                this.submitButton.classList.add("btn_disabled");
+            }
             this.error_div.textContent = event.error.message;
             return;
         }
         this.error_div.textContent = '';
+        this.card_validation_error = false;
+        if (this.submitButton.classList.contains("btn_disabled")) {
+            this.submitButton.classList.remove("btn_disabled");
+        }
     }
 
     /**
      * @deprecated
      */
     static hide_checkout_modal() {
-        document.querySelector("#checkout_overlay").style.display = "none";
+        this.overlay.style.display = "none";
     }
 
     /**

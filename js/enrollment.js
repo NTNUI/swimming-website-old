@@ -45,30 +45,34 @@ addLoadEvent(() => {
         event.preventDefault();
         const member = get_form_data();
         // if licensed confirm with modal
-        if (member.licensee) {
-            const licenseQuestion = await display_modal("Confirm", "you're licensed, plz confirm blablabla use translation API later", "Continue", "Cancel");
-            if (licenseQuestion == "cancel") {
+        if (member.get("licensee")) {
+            const licenseQuestion = await display_modal("Do you have a valid license?", "You've selected that you have a valid license.\nPlease make sure you see your entry on https:\/\/medley.no\nIf you're not on the list you'll not be manually approved. You can either wait until you appear on the list and we see it ot you can continue to purchase an NSF license now.", "Continue", "Cancel");
+            if (licenseQuestion == "Cancel") {
                 return;
             }
         }
         // send membership request
         const enrollResponse = await enroll(member);
         console.table(enrollResponse);
-        switch (enrollResponse.membership_status) {
-            // BUG: New users will always have membership_status = pending. 
-            case "pending":
-                const user_response = await display_modal("Warning", "It seems like you already have a pending membership. We need to manually review your request. This might take some time. If you wish, you can continue to purchase a license and get a active membership instantly.", "Continue", "Cancel");
-                if (user_response === "Cancel") {
+
+        if (enrollResponse.error) {
+            switch (enrollResponse.membership_status) {
+                case "pending":
+                    const user_response = await display_modal("Warning", "It seems like you already have a pending membership. We need to manually review your request. This might take some time. You can either wait or, if you wish, continue to purchase a license and get a active membership instantly.", "Continue", "Cancel");
+                    if (user_response === "Cancel") {
+                        return;
+                    }
+                    break;
+                case "active":
+                    await display_modal("Failure", enrollResponse.message, "Accept", "", "failure");
+                    // window.location.href = BASEURL;
                     return;
-                }
-                break;
-            case "active":
-                await display_modal("Failure", "This user already has an active and valid membership", "Accept", "", "failure");
-                // window.location.href = BASEURL;
-                return;
-            default:
-                throw enrollResponse.message
+                default:
+                    throw enrollResponse.message
+            }
         }
+
+
         // purchase license
         const customer = {
             name: enrollResponse.name,
@@ -77,18 +81,24 @@ addLoadEvent(() => {
         }
         const store = new Store(STRIPE_PUBLISHABLE_KEY, SERVER_TIME_OFFSET, LANGUAGE);
         store.init(INVENTORY_URL);
-        // display checkout for license
         try {
+            // display checkout for license payment
             const order = await store.checkout(license_product, customer);
             if (order === undefined) {
                 // If user aborts the checkout customer object is not available
                 return;
             }
+            display_modal("Loading", "Attempting to empty your bank account", "", "", "wait");
             const chargeResponse = await store.charge(order.product, order.customer);
-            await display_modal("Success", chargeResponse, "Accept", "", "success");
+            await display_modal("Success", chargeResponse.message, "Accept", "", "success");
+            await display_modal("Welcome as a new member!", "Together we will make Norwegian swimming more fun.\nSprut nice 💦💦", "Accept", "", "success");
             // window.location.href = BASEURL;
         } catch (error) {
             console.error(error);
+            if (typeof (error) === "object") {
+                display_modal("Error", error.message, "Accept", "", "failure");
+                return;
+            }
             display_modal("Error", error, "Accept", "", "failure");
         }
     });
