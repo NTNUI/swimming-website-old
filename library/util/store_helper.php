@@ -15,7 +15,17 @@ class StoreHelper
 		$this->license_key = $settings["license_product_hash"];
 	}
 
-	function get_products(int $start = 0, int $limit = 10, string $product_hash = "", bool $rawData = false, bool $visibility_check = true)
+	/**
+	 * Undocumented function
+	 *
+	 * @param integer $start how many products to skip. Defaults to 0.
+	 * @param integer $limit max amount of products to return. Defaults to 30
+	 * @param string $product_hash hash of the product
+	 * @param boolean $rawData idk
+	 * @param boolean $visibility_check when true, return only visible products.
+	 * @return array of products where each product is an array
+	 */
+	function get_products(int $start = 0, int $limit = 30, string $product_hash = "", bool $rawData = false, bool $visibility_check = true)
 	{
 		$language = $this->language;
 		$db = new DB("web");
@@ -37,16 +47,21 @@ class StoreHelper
 			available_until, 
 			require_phone, 
 			visible,
-			(SELECT COUNT(*) FROM orders
-			WHERE orders.products_id = products.id
-			AND (orders.order_status='FINALIZED'
-			OR orders.order_status='DELIVERED'))
-			AS amount, amount_available, image, group_id FROM products AS products $visibility ORDER BY visible DESC, id DESC LIMIT ? OFFSET ?";
+			(	/* count completed orders */
+				SELECT COUNT(*) FROM orders
+				WHERE orders.products_id = products.id
+				AND (orders.order_status='FINALIZED'
+				OR orders.order_status='DELIVERED')
+			) AS amount_sold,
+			amount_available,
+			image,
+			group_id
+			FROM products AS products $visibility ORDER BY visible DESC, id DESC LIMIT ? OFFSET ?";
 
 			$db->prepare($sql);
 			$db->bind_param("ii", $limit, $start);
 		} else {
-			// Select every column from products, add a column called "amount" (which should really be called num_sold or something) given column hash (which should really be called product_hash)
+			// Select every column from products, add a column called "amount_sold" given column hash (which should really be called product_hash)
 			// get 13 variables
 			$sql = "SELECT
 			id, 
@@ -58,7 +73,16 @@ class StoreHelper
 			available_until, 
 			require_phone, 
 			visible, 
-			(SELECT COUNT(*) FROM orders WHERE orders.products_id = products.id AND (orders.order_status='FINALIZED' OR orders.order_status='DELIVERED')) AS amount_sold,
+			(	/* count completed orders */
+				SELECT COUNT(*) FROM orders WHERE 
+				orders.products_id = products.id
+				AND 
+				(
+					orders.order_status='FINALIZED'
+					OR
+					orders.order_status='DELIVERED'
+				)
+			) AS amount_sold,
 			amount_available, 
 			image, 
 			group_id 
@@ -93,6 +117,7 @@ class StoreHelper
 		);
 		while ($db->fetch()) {
 			if (!$rawData) {
+				// documentation needed
 				$name = json_decode($name);
 				if (property_exists($name, $language)) $name = $name->$language;
 				else if (array_key_exists("no", $name)) $name = $name->no;
@@ -123,19 +148,35 @@ class StoreHelper
 		return $result;
 	}
 
-	// TODO: throw on error
-	function get_product(string $product_hash, bool $rawData = false)
+
+	/**
+	 * Get a product given a product hash
+	 *
+	 * @param string $product_hash
+	 * @param boolean $rawData idk
+	 * @return array of one product
+	 * @throws \StoreException if @param $product_hash is not fund
+	 */
+	function get_product(string $product_hash, bool $rawData = false): array
 	{
 		if (!$product_hash || $product_hash == "") return false;
 		$result = $this->get_products(0, 1, $product_hash, $rawData);
-		if (sizeof($result) < 1) return false;
+		if (sizeof($result) < 1) throw \StoreException::ProductNotFound();
 		return $result[0];
 	}
 
-	// old: function create_order(string $product_hash, $paymentId, $owner, $comment)
-	function create_order(string $product_hash, $paymentId, $owner)
-	{
 
+	// old: function create_order(string $product_hash, string $paymentId, object $owner, string $comment)
+	/**
+	 * Create an order
+	 *
+	 * @param string $product_hash
+	 * @param string $paymentId
+	 * @param object $owner
+	 * @return void
+	 */
+	function create_order(string $product_hash, string $paymentId, object $owner)
+	{
 		$name = $owner->name;
 		$email = $owner->email;
 		$phone = NULL;
@@ -145,7 +186,6 @@ class StoreHelper
 
 		$product = $this->get_product($product_hash);
 
-		if ($product === false) throw \StoreException::ProductNotFound();
 		if ($product["amount_available"] != null && $product["amount_sold"] >= $product["amount_available"]) throw \StoreException::ProductSoldOut();
 		if ($product["available_from"] !== false && $product["available_from"] > time()) throw \StoreException::ProductNotAvailable("Current product is not yet available");
 		if ($product["available_until"] !== false && $product["available_until"] < time()) throw \StoreException::ProductNotAvailable("Current product is no longer available");
@@ -177,12 +217,31 @@ class StoreHelper
 		return $this->update_order($intent);
 	}
 
-	function get_intent_by_id($id)
+
+	/**
+	 * retrieve Payment Intent given its id
+	 *
+	 * @see \Stripe\PaymentIntent::retrieve()
+	 * @param string $paymentIntent_id of the PaymentIntent to retrieve
+	 * @throws \Stripe\Exception\ApiErrorException — if the request fails
+	 * @return \Stripe\PaymentIntent
+	 */
+	function get_intent_by_id(string $paymentIntent_id): \Stripe\PaymentIntent
 	{
-		return \Stripe\PaymentIntent::retrieve($id);
+		return \Stripe\PaymentIntent::retrieve($paymentIntent_id);
 	}
 
-	function update_order(\Stripe\PaymentIntent $intent)
+
+	/**
+	 * Read payment intent return its status
+	 * Side effects:
+	 * - Updates copy of the status in the DB if order succeeds. 
+	 *
+	 * @param \Stripe\PaymentIntent $intent
+	 * @throws \Stripe\Exception\ApiErrorException - on illegal request
+	 * @return array
+	 */
+	function update_order(\Stripe\PaymentIntent $intent): array
 	{
 		if ($intent->status == "requires_action" && $intent->next_action->type == "use_stripe_sdk") {
 			$src = [
@@ -198,6 +257,13 @@ class StoreHelper
 		return $src;
 	}
 
+
+	/**
+	 * Get string product hash given its int product id
+	 *
+	 * @param integer $product_id
+	 * @return string product hash
+	 */
 	function get_product_hash(int &$product_id): string
 	{
 		$db = new DB("web");
@@ -210,18 +276,27 @@ class StoreHelper
 		return $res;
 	}
 
-	function finalize_order($intent_id)
+
+	/**
+	 * Update order to FINALIZED in db
+	 * Side effects:
+	 * - if order was used to purchase a license then member is approved. Following it's side effects.
+	 * 
+	 * @see Store_helper::approve_member()
+	 * @param string $intent_id
+	 * @return void
+	 */
+	function finalize_order(string $intent_id)
 	{
 		$db = new DB("web");
-		$sql = "SELECT id, products_id, phone AS products_id FROM orders WHERE source_id=?";
-		$db->prepare($sql);
+		$db->prepare("SELECT id, products_id, phone AS products_id FROM orders WHERE source_id=?");
 		$db->bind_param("s", $intent_id);
 		$db->execute();
-		$db->stmt->bind_result($id, $product_id, $phone);
+		$db->stmt->bind_result($order_id, $product_id, $phone);
 
 		if (!$db->fetch()) throw \StoreException::ProductNotFound();
 
-		$this->set_order_status($id, "FINALIZED");
+		$this->set_order_status($order_id, "FINALIZED");
 
 		// Member registration hook
 		if ($this->get_product_hash($product_id) == $this->license_key) {
@@ -229,94 +304,154 @@ class StoreHelper
 		}
 	}
 
+
+	/**
+	 * Update order in DB to be FAILED.
+	 *
+	 * @param \Stripe\Charge $charge_event
+	 * @return void
+	 */
 	function fail_order(\Stripe\Charge $charge_event)
 	{
 		$db = new DB("web");
-		$sql = "UPDATE orders SET order_status='FAILED' WHERE source_id=? OR charge_id=?";
-		$db->prepare($sql);
+		$db->prepare("UPDATE orders SET order_status='FAILED' WHERE source_id=? OR charge_id=?");
 		$db->bind_param("ss", $charge_event["payment_intent"], $charge_event["id"]);
 		$db->execute();
 	}
 
+
+	/**
+	 * Approve a member 
+	 *
+	 * @param string $phone
+	 * @return void
+	 */
 	function approve_member(string $phone)
 	{
-		log::message("Info: Approving member with phone number: " . $phone, __FILE__, __LINE__);
 		$db = new DB("member");
-		$sql = "UPDATE member SET approved_date=NOW() WHERE phone=?";
-		$db->prepare($sql);
+		$db->prepare("UPDATE member SET approved_date=NOW() WHERE phone=?");
 		$db->bind_param("s", $phone);
 		$db->execute();
 	}
 
+
+	/**
+	 * Set order status
+	 *
+	 * @param integer $order_id row identifier in the database.
+	 * @param string $status allowed input: 'FINALIZED' | 'DELIVERED' | 'FAILED'
+	 * @throws \InvalidArgumentException if instructions above are ignored
+	 * @return void
+	 * @note @param int $order_id should not be confused with stripe id system witch uses strings as identifier.
+	 */
 	function set_order_status(int $order_id, string $status)
 	{
 		if ($status !== "FINALIZED" && $status !== "DELIVERED" && $status !== "FAILED") {
 			throw new \InvalidArgumentException($status . " is not one of 'FINALIZED' | 'DELIVERED' | 'FAILED'");
 		}
 		$db = new DB("web");
-		$sql = "UPDATE orders SET order_status=? WHERE id=?";
-		$db->prepare($sql);
+		$db->prepare("UPDATE orders SET order_status=? WHERE id=?");
 		$db->bind_param("si", $status, $order_id);
 		$db->execute();
 	}
 
+
+	/**
+	 * Set product visibility
+	 *
+	 * @param integer $product_id
+	 * @param boolean $visibility
+	 * @return void
+	 */
 	function set_product_visibility(int $product_id, bool $visibility)
 	{
 		$db = new DB("web");
-		$sql = "UPDATE products SET visible=? WHERE id=?";
-		$db->prepare($sql);
+		$db->prepare("UPDATE products SET visible=? WHERE id=?");
 		$db->bind_param("ii", $visibility, $product_id);
 		$db->execute();
 	}
 
+
 	// TODO: new signature: get_order_status
-	function get_status(string $source): string
+	/**
+	 * Get order status
+	 *
+	 * @param string $paymentIntent_id
+	 * @return string only 'FINALIZED' | 'DELIVERED' | 'FAILED'
+	 * @throws StoreException::OrderNotFound if order is not found.
+	 */
+	function get_status(string $paymentIntent_id): string
 	{
 		$db = new DB("web");
-		$sql = "SELECT order_status FROM orders WHERE source_id=?";
-		$db->prepare($sql);
-		$db->bind_param("s", $source);
+		$db->prepare("SELECT order_status FROM orders WHERE source_id=?");
+		$db->bind_param("s", $paymentIntent_id);
 		$db->execute();
 		$db->fetch();
-		$db->stmt->bind_result($charge);
-		return $charge;
+		$db->stmt->bind_result($order_status);
+		if ($order_status !== 'FINALIZED' && $order_status !== 'DELIVERED' && $order_status !== 'FAILED') {
+			throw StoreException::OrderNotFound();
+		}
+		return $order_status;
 	}
 
+
+	/**
+	 * Does order exists?
+	 *
+	 * @param integer $order_id identifier in the database
+	 * @return boolean true if order exists. False otherwise.
+	 */
 	static public function order_id_exists(int $order_id): bool
 	{
 		$db = new DB("web");
-		$sql = "SELECT COUNT(*) FROM orders WHERE id=?";
-		$db->prepare($sql);
+		$db->prepare("SELECT COUNT(*) FROM orders WHERE id=?");
 		$db->bind_param("i", $order_id);
 		$db->execute();
+		$result = 0;
 		$db->stmt->bind_result($result);
 		$db->fetch();
-		return $result;
+		if ($result !== 0 || $result !== 1) {
+			throw new UnexpectedValueException($result);
+		}
+		return (bool)$result;
 	}
 
+
+	/**
+	 * Check if product exists
+	 *
+	 * @param string $product_hash
+	 * @return boolean true if product exists. False otherwise.
+	 */
 	static public function product_exists(string $product_hash): bool
 	{
 		$db = new DB("web");
-		$sql = "SELECT COUNT(*) FROM products WHERE hash=?";
-		$db->prepare($sql);
+		$db->prepare("SELECT COUNT(*) FROM products WHERE hash=?");
 		$db->bind_param("s", $product_hash);
 		$db->execute();
-		$result = true;
+		$result = 0;
 		$db->stmt->bind_result($result);
 		$db->fetch();
-		return $result;
+		if ($result !== 0 || $result !== 1) {
+			throw new UnexpectedValueException($result);
+		}
+		return (bool)$result;
 	}
 
-	static public function add_product(array $product): bool
+
+	/**
+	 * Add new product to db
+	 * 
+	 * @param array $product to be added
+	 * @return void
+	 */
+	static public function add_product(array $product)
 	{
-		global $access_control;
 		$db = new DB("web");
 		$sql = "INSERT INTO products (hash, name, description, price, amount_available, available_from, available_until, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
 		$db->prepare($sql);
-
 		$db->bind_param("sssiisss", $product["hash"], $product["name"], $product["description"], $product["price"], $product["amount"], $product["start"], $product["end"], $product["image_name"]);
 		$db->execute();
-		$access_control->log("admin/store", "add product", $product["hash"]);
-		return true;
+	}
 	}
 }

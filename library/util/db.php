@@ -116,7 +116,7 @@ class DB
 	public function fetch()
 	{
 		$ret = $this->stmt->fetch();
-		if($ret === false){
+		if ($ret === false) {
 			throw new mysqli_sql_exception("Could not fetch data");
 		}
 		return $ret;
@@ -137,42 +137,4 @@ class DB
 			throw new mysqli_sql_exception("Could not close connection to db");
 		}
 	}
-}
-
-/**
- * @deprecated use class DB instead.
- * @see class DB() in library/util/db.php
- */
-function connect($database)
-{
-	global $settings;
-	mysqli_report(MYSQLI_REPORT_ALL ^ MYSQLI_REPORT_INDEX);
-
-	/**
-	 * temporary workaround to allow use of english table name.
-	 * TODO:
-	 * 1. change source code to use the english name
-	 * 2. rename table name from medlem to member and update the settings.json file
-	 * 3. remove this workaround
-	 */
-	if ($database == 'member') {
-		$database = "medlem";
-	}
-
-	$database = $settings["SQL_server"]["databases"][$database];
-	$server_name = $settings["SQL_server"]["servername"];
-	$username = $settings["SQL_server"]["username"];
-	$password = $settings["SQL_server"]["password"];
-
-	if (!$database) {
-		log::die("Failed to retrieve database name", __FILE__, __LINE__);
-	}
-	$conn = mysqli_connect($server_name, $username, $password, $database);
-	if (!$conn) {
-		log::die("Failed to connect to database: " . mysqli_connect_error(), __FILE__, __LINE__);
-	}
-	if (!$conn->set_charset("utf8")) {
-		log::die("Failed to set utf8 charset: " . mysqli_error($conn), __FILE__, __LINE__);
-	}
-	return $conn;
 }
