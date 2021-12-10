@@ -8,13 +8,7 @@ if (isset($_GET["register"])) {
 
 	$db->prepare("SELECT id FROM users WHERE username=?");
 	$db->bind_param("s", $username);
-	if (!$query) {
-		log::die("could not bind params", __FILE__, __LINE__);
-	}
 	$db->execute();
-	if (!$query) {
-		log::die("could not execute query", __FILE__, __LINE__);
-	}
 	$db->stmt->bind_result($id);
 	if ($db->fetch()) {
 		$db->stmt->close();
@@ -30,7 +24,6 @@ if (isset($_GET["register"])) {
 			$db->prepare("INSERT INTO friday_beer (user_id, date) VALUES (?, ?)");
 			$db->bind_param("is", $id, $friday);
 			$db->execute();
-			$db->stmt->close();
 			$access_control->log("api/friday_beer", "beered", $username);
 			$result = array("success" => "ok");
 		} else {
