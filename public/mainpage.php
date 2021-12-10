@@ -1,5 +1,5 @@
 <?php
-include_once("library/templates/content.php");
+require_once("library/templates/content.php");
 global $t;
 print_content_header(
 	$t->get_translation("mainHeader"),

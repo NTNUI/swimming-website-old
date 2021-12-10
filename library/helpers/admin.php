@@ -12,17 +12,17 @@ function redirect($action)
 	if ($action != "") {
 		$side = "private/admin/${action}_$language.php";
 		if (file_exists($side)) {
-			include($side);
+			require_once($side);
 			return;
 		}
 		$side = "private/admin/${action}_no.php";
 		if (file_exists($side)) {
-			include($side);
+			require_once($side);
 			return;
 		}
 		$side = "private/admin/${action}.php";
 		if (file_exists($side)) {
-			include($side);
+			require_once($side);
 			return;
 		}
 		print("Page $action not found");
@@ -110,6 +110,7 @@ function print_section($section)
 			access_link("translations", $inline);
 			access_link("store", $inline);
 			access_link("fredagspils", $inline);
+			access_link("test", $inline);
 			break;
 		default:
 			log::die("Wrong parameter: $section", __FILE__, __LINE__);
@@ -123,6 +124,7 @@ function access_link($page, $inline = false)
 	global $t, $access_control;
 	$link = $t->get_url("admin/$page");
 	$text = $t->get_translation("admin_$page");
+	$text = $text ? $text : $page;
 
 	print("<button onclick=window.location.href='$link'>");
 	if (!$access_control->can_access("admin", $page)) {

@@ -1,7 +1,7 @@
 <?php
 // TODO: rename class to just Store
-include_once("library/util/db.php");
-include_once("library/exceptions/store.php");
+require_once("library/util/db.php");
+require_once("library/exceptions/store.php");
 
 class Store
 {

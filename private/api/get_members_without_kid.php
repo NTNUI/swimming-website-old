@@ -1,4 +1,5 @@
 <?php
+require_once("library/util/db.php");
 
 // Remove randoms from the internet
 if (!Authenticator::is_logged_in()){
@@ -12,7 +13,6 @@ if (!$access_control->can_access("api", "KID")) {
 }
 
 // connect to server
-include_once("library/util/db.php");
 $db = new DB("member");
 
 global $settings;

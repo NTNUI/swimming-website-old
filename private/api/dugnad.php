@@ -1,5 +1,5 @@
 <?php
-include_once("library/util/db.php");
+require_once("library/util/db.php");
 if (!$access_control->can_access("api", "volunteer")) {
 	log::forbidden("Access denied", __FILE__, __LINE__);
 }

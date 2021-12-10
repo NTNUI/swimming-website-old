@@ -1,7 +1,7 @@
 <?php
 // Get all products. Get the inventory
 // TODO: merge with api/store.php
-include_once("library/util/store.php");
+require_once("library/util/store.php");
 $store = new Store($language);
 header("Content-Type: application/json");
 $products = $store->get_products();

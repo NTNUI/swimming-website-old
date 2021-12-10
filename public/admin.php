@@ -1,6 +1,6 @@
 <?php
 
-include_once("library/helpers/admin.php");
+require_once("library/helpers/admin.php");
 
 if (!Authenticator::is_logged_in()) {
 	if (!Authenticator::has_posted_login_credentials()) {

@@ -1,5 +1,5 @@
 <?php
-include_once("library/util/db.php");
+require_once("library/util/db.php");
 class AccessControl
 {
 	private $user, $group_rules;

@@ -7,10 +7,10 @@
 // [PATCH] set_order_status(order_id, status)
 // [PATCH] set_product_visibility(product_id, visibility)
 
-include_once("library/util/db.php");
-include_once("library/util/store.php");
-include_once("library/util/api.php");
-include_once("library/exceptions/store.php");
+require_once("library/util/db.php");
+require_once("library/util/store.php");
+require_once("library/util/api.php");
+require_once("library/exceptions/store.php");
 
 $response = new Response();
 $store = new Store($language);

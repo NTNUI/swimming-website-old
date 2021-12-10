@@ -1,7 +1,7 @@
 <?php
-include_once("library/templates/content.php");
-include_once("library/templates/modal.php");
-include_once("library/templates/store.php");
+require_once("library/templates/content.php");
+require_once("library/templates/modal.php");
+require_once("library/templates/store.php");
 
 print_content_header(
     "Testing page",

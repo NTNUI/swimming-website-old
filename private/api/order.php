@@ -1,5 +1,5 @@
 <?php
-include_once("library/util/store.php");
+require_once("library/util/store.php");
 function handle_error($id, $error) {
 	global $t;
 	if (array_key_exists("message", $error)) $error = $error["message"];
