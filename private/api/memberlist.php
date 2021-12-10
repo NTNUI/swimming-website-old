@@ -13,7 +13,7 @@ $db->execute();
 $db->stmt->bind_result($id, $registration_date, $surname, $name, $email);
 
 $result = [];
-while ($query->fetch()) {
+while ($db->fetch()) {
 	$surname = htmlspecialchars($surname);
 	$first_name = htmlspecialchars($first_name);
 	$email = htmlspecialchars($email);
