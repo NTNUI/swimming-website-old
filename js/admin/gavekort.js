@@ -1,3 +1,4 @@
+"use strict";
 const form = document.getElementById("form");
 const url = BASEURL + "/api/gavekort";
 
@@ -11,7 +12,7 @@ function sendJSON(requesturl, json) {
     }).catch((err) => {
         err.then((text) => {
             console.log(text);
-            alert("Noe gikk galt: " + text);
+            alert("Something went wrong: " + text);
         });
     });
 }
@@ -39,7 +40,7 @@ function sendEmail(e) {
     e.preventDefault();
     const data = getFormData();
     sendJSON(url + "?submit=1", data).then((text) => {
-        alert("Epost er sendt. TODO: ikke bruk alert her");
+        alert("Email has been sent");
         resetForm();
     });
 }

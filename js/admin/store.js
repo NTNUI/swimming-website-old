@@ -1,4 +1,5 @@
 "use strict";
+import { display_modal } from "../modules/modal.js";
 // TODO: add drag & drop support for image uploads
 // TODO: add handler for date modification
 // TODO: move styles to css
@@ -17,7 +18,7 @@ function set_product_visibility(product_hash, visibility) {
         method: 'PATCH',
         body: JSON.stringify(data),
     }).catch((err) => {
-        alert("Something went wrong, check the console.");
+        display_modal("Failure", err.json(), "Accept", "", "failure");
         console.error(err.json());
     });
 }
@@ -39,7 +40,7 @@ function deliverHandler(event) {
             event.target.disabled = true
         })
         .catch((response) => {
-            alert("Something went wrong. Check the console.");
+            display_modal("Failure", response.json(), "Accept", "", "failure");
             console.error(response.json());
         });
 }
@@ -54,11 +55,12 @@ function submitNewProductHandler(event) {
     fetch(BASEURL + "/api/store", {
         method: 'POST',
         body: form_data
-    }).then(
-        alert("New product has been added to the store")
+    }).then(() => {
+        display_modal("Success", "New product has been added to the store", "Accept", "", "success");
+    }
     ).catch((response => {
+        display_modal("Failure", response.json(), "Accept", "", "failure");
         console.error(response.json());
-        alert("Could not add new product to the store, check the console");
     }));
 }
 
@@ -202,7 +204,7 @@ function createTableMatrix(products, product_groups) {
                     show_orders(orders);
                 })
                 .catch((err) => {
-                    alert("Something went wrong, check the console.");
+                    display_modal("Failure", err, "Accept", "", "failure");
                     console.err(err);
                 });
         }

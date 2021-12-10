@@ -225,12 +225,6 @@ element.classListRemove("visible");
 // with
 element.classListReplace("hidden", "visible");
 ```
-```php
-// replace
-include_once("file.php");
-// with
-require_once("file.php");
-```
 
 ### Move to Alpine Linux for images
 Convert images to use Alpine Linux

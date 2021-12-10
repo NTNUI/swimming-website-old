@@ -14,7 +14,7 @@ function search() {
     let query = document.querySelector("input[name=name]").value;
     getJSON(BASEURL + "/api/dugnad?search=" + query, function(err, json) {
         if (err != null) {
-            alert("Noe gikk galt: " + err);
+            alert("Something went wrong: " + err);
             return;
         }
         let container = document.getElementById("members");
@@ -36,7 +36,7 @@ function approve(id) {
     button_approve.innerText = "Godkjenner...";
     getJSON(BASEURL + "/api/dugnad?approve=" + id, function(err, json) {
         if (err != null) {
-            alert("Noe gikk galt: " + err);
+            alert("Something went wrong: " + err);
             return;
         }
         button_approve.innerText = "Godkjent";
@@ -53,7 +53,7 @@ function reject(id) {
     button_reject.innerText = "Melder avslag..."
     getJSON(BASEURL + "/api/dugnad?reject=" + id, function(err, json) {
         if (err != null) {
-            alert("Noe gikk galt: " + err);
+            alert("Something went wrong: " + err);
             return;
         }
         button_reject.innerText = "Innmeldt avslag";
@@ -66,7 +66,7 @@ function reject(id) {
 function getMembers(num) {
     getJSON(BASEURL + "/api/dugnad?getRandom=" + num, function(err, json) {
         if (err != null) {
-            alert("Noe gikk galt: " + err);
+            alert("Something went wrong: " + err);
             return;
         }
         let container = document.getElementById("members");

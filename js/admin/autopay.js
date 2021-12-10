@@ -1,3 +1,4 @@
+"use strict";
 function createCommand(command, target, value) {
 	value = value || "";
 	target = target || "";

@@ -1,4 +1,4 @@
-// TODO: use strict
+"use strict";
 let stripe = Stripe(STRIPE_PUBLISHABLE_KEY);
 
 // After some amount of time, we should stop trying to resolve the order synchronously:
