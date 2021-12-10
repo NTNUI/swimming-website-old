@@ -81,6 +81,7 @@ function getAction($getRandom = 0, $approve_id = 0, $reject_id = 0, $search = ""
 }
 
 $action = getAction($getRandom, $approve_id, $reject_id, $search);
+$result = "";
 switch ($action) {
 	case 'getRandom':
 		// don't log search queries
