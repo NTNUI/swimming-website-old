@@ -1,3 +1,4 @@
+"use strict";
 function godkjenn(id) {
     let button = document.querySelector("#medlem-" + id).querySelector("button");
     button.disabled = true;
@@ -7,7 +8,7 @@ function godkjenn(id) {
             button.disabled = true;
             button.innerText = "Godkjent";
         } else {
-            alert("Noe gikk galt: " + err);
+            alert("Something went wrong: " + err);
             button.innerText = "Feil!";
         }
     });

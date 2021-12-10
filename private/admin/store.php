@@ -1,5 +1,6 @@
 <?php
 global $settings;
+require_once("library/templates/modal.php");
 // TODO: remove unused html classes
 // TODO: implement translations
 ?>
@@ -8,7 +9,7 @@ global $settings;
 <link href="https://unpkg.com/tabulator-tables@4.5.3/dist/css/tabulator.min.css" rel="stylesheet" />
 <script defer type="text/javascript" src="https://unpkg.com/tabulator-tables@4.5.3/dist/js/tabulator.min.js"></script>
 <script defer type="text/javascript" src="https://momentjs.com/downloads/moment.min.js"></script>
-<script defer type="text/javascript" src="<?php print($settings['baseurl']); ?>/js/admin/store.js"></script>
+<script type="module" src="<?php print($settings['baseurl']); ?>/js/admin/store.js"></script>
 
 <div class="hidden">
 	<div class="box">
