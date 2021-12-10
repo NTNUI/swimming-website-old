@@ -31,7 +31,6 @@ $users = array(); {
 }
 
 $role_rules = array();
-$user_rules = array();
 
 $role_id = intval(argsURL("REQUEST", "role"));
 $user_id = intval(argsURL("REQUEST", "user"));
@@ -91,16 +90,6 @@ if ($role_id !== 0) {
 	$db->stmt->bind_result($role_access_id, $type, $page);
 	while ($db->fetch()) {
 		$role_rules[] = array("id" => $role_access_id, "type" => $type, "page" => $page);
-	}
-}
-if ($user_id !== 0) {
-	$db = new DB("web");
-	$db->prepare("SELECT id, type, page FROM user_access WHERE role=?");
-	$db->bind_param("i", $user_id);
-	$db->execute();
-	$db->stmt->bind_result($id, $type, $page);
-	while ($db->fetch()) {
-		$user_rules[] = array("id" => $id, "type" => $type, "page" => $page);
 	}
 }
 
