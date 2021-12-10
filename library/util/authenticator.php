@@ -1,4 +1,6 @@
 <?php
+include_once("library/exceptions/user.php");
+include_once("library/exceptions/authentication.php");
 // TODO: new function: Generate random password
 // TODO: new function: require password reset on user_id
 // TODO: merge with access_control class
@@ -8,24 +10,34 @@ class Authenticator
 {
 
     /**
-     * Attempt to log user in
+     * Logs in user given username and password
+     * Side effects:
+     * - update session variables.
+     * 
      * @see Authenticator::is_logged_in()
      * @param string $username
      * @param string $password
-     * @return bool true if login is successful. False otherwise
+     * @throws \AuthenticationException on failure
+     * @return void
      */
-    static public function log_in(string $username, string $password): bool
+    static public function log_in(string $username, string $password)
     {
         if (Authenticator::is_logged_in()) {
             log::die("Trying to log in even though a user is logged in", __FILE__, __LINE__);
         }
-        $password_hash = (new Authenticator)->load_from_db($username);
-        if (password_verify($password, $password_hash)) {
-            $_SESSION["logged_in"] = 1;
-            $_SESSION["username"] = $username;
-            return true;
+        $password_hash = "";
+        try {
+            $password_hash = (new Authenticator)->load_from_db($username);
+        } catch (\UserException $_) {
+            throw \AuthenticationException::WrongCredentials();
         }
-        return false;
+        if (!password_verify($password, $password_hash)) {
+            throw \AuthenticationException::WrongCredentials();
+        }
+
+        // update session variables
+        $_SESSION["logged_in"] = 1;
+        $_SESSION["username"] = $username;
     }
 
 
@@ -226,12 +238,9 @@ class Authenticator
         $password_hash = "";
         $password_date = "";
         $name = "";
-        if (!$db->stmt->bind_result($name, $password_hash, $password_date)) {
-            log::die("Could not bind result", __FILE__, __LINE__);
-        }
+        $db->stmt->bind_result($name, $password_hash, $password_date);
         if ($db->fetch() === null) {
-            log::message("Info: username $username is not found", __FILE__, __LINE__);
-            return null;
+            throw UserException::NotFound();
         }
 
         // refresh access control

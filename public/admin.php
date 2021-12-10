@@ -9,8 +9,10 @@ if (!Authenticator::is_logged_in()) {
 	}
 	$username = argsURL("POST", "username");
 	$password = argsURL("POST", "password");
-	if (!Authenticator::log_in($username, $password)) {
-		print_password_form(false, "Wrong credentials");
+	try {
+		Authenticator::log_in($username, $password);
+	} catch (\AuthenticationException $ex ) {
+		print_password_form(false, $ex->getMessage());
 		return;
 	}
 }
