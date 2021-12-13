@@ -12,6 +12,7 @@ session_set_cookie_params(4 * 60 * 60);
 ini_set("session.gc_maxlifetime", (string)(4 * 60 * 60));
 ini_set("session.gc_probability", "1");
 ini_set("session.gc_divisor", "100");
+session_start();
 
 // Load settings
 require_once("library/util/settings.php");
