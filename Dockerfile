@@ -13,6 +13,9 @@ RUN mkdir vendor
 RUN mkdir translations
 RUN mkdir -p img/store
 
+RUN mkdir /var/lib/mariadb
+RUN chmod -R 777 /var/lib/mariadb
+
 COPY translations/ translations
 COPY composer.json .
 COPY composer.lock .
