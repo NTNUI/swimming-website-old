@@ -74,6 +74,9 @@ Some times things does not go as intended. Therefore checking logs are crucial. 
 | `/var/log/mysql/sql_error.log`     | Seems like it contains query log                                       |
 > Log files are defined in `docker/mariadb/my.cfg`. This config should be updated so that log file names correspond with the actual content.
 
+## Logging into mariadb as root
+You usually don't need mariadb's root account since `svommer_web` has all access. If you however need to log in as root you need to get the root password. It is randomly generated and you can check the logs to get it. run `docker logs mariadb` and look for line `[Note] [Entrypoint]: GENERATED ROOT PASSWORD:`
+
 ## How this project is built up
 This project contains three four images:
 - web
