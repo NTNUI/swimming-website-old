@@ -16,7 +16,6 @@ $response = new Response();
 $store = new Store($language);
 $input = file_get_contents("php://input");
 
-Authenticator::auth_API("api/store", "", __FILE__, __LINE__);
 try {
 	switch ($_SERVER['REQUEST_METHOD']) {
 		case "GET":
@@ -55,6 +54,7 @@ return;
  */
 function handle_patch(Store &$store, string $input, Response &$response)
 {
+	Authenticator::auth_API("api/store", "", __FILE__, __LINE__);
 	global $access_control;
 	if (!$input) {
 		$response->code = HTTP_INVALID_REQUEST;
@@ -148,6 +148,7 @@ function handle_patch(Store &$store, string $input, Response &$response)
  */
 function handle_post(Response &$response)
 {
+	Authenticator::auth_API("api/store", "", __FILE__, __LINE__);
 	// get these arguments, ignore rest
 	$args = [];
 	foreach ($_POST as $key => $value) {
