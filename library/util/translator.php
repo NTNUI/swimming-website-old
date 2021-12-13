@@ -2,7 +2,7 @@
 class Translator
 {
 	private $page; 			// page name
-	private $language; 		// language code. Currently supportig "no" and "en"
+	private $language; 		// language code. Currently supporting "no" and "en"
 	private $directory;		// path to translation directory
 	private $translations; 	// global array of all translations
 
