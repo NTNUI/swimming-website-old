@@ -50,6 +50,9 @@ function sendEmail($emailAdress)
 	$db->execute();
 }
 
+$first_name ="";
+$surname = "";
+$email = "";
 // Send approval email to member
 {
 	// log action

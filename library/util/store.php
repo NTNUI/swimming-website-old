@@ -503,8 +503,8 @@ class Store
 		$product = $this->get_product($product_hash);
 
 		if ($product["amount_available"] != null && $product["amount_sold"] >= $product["amount_available"]) throw \StoreException::ProductSoldOut();
-		if ($product["available_from"] !== false && $product["available_from"] > time()) throw \StoreException::ProductNotAvailable("Current product is not yet available");
-		if ($product["available_until"] !== false && $product["available_until"] < time()) throw \StoreException::ProductNotAvailable("Current product is no longer available");
+		if ($product["available_from"] !== null && $product["available_from"] > time()) throw \StoreException::ProductNotAvailable("Current product is not yet available");
+		if ($product["available_until"] !== null && $product["available_until"] < time()) throw \StoreException::ProductNotAvailable("Current product is no longer available");
 		if ($name == "") throw \StoreException::MissingCustomerDetails("Missing customer name");
 		if ($email == "") throw \StoreException::MissingCustomerDetails("Missing customer email");
 		if ($phone == NULL && $product["require_phone"]) throw \StoreException::MissingCustomerDetails("Missing customer phone");

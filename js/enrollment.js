@@ -68,7 +68,9 @@ addLoadEvent(() => {
                     // window.location.href = BASEURL;
                     return;
                 default:
-                    throw enrollResponse.message
+                    display_modal("Error", enrollResponse.message, "Accept" ,"", "failure");
+                    console.error(enrollResponse);
+                    return;
             }
         }
 

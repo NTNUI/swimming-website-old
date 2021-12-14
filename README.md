@@ -215,6 +215,8 @@ Warnings are minor bugs or potential bugs that should be fixed. For instance whe
 
 Errors are crashes that stop the execution on the server and results with a client receiving an error message as a modal if the use web browser or as an json object if they use API. Errors get logged and require a developer to investigate and fix the issue.
 
+When configuring logging make sure that you provide a path for .htaccess without symlinks. Navigate to the folder you want your logs to get to and run `pwd -P` to get the physical path (without symlinks).
+
 ## TODO
 
 ### Split web image
