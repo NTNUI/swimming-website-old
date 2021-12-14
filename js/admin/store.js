@@ -225,7 +225,7 @@ function createTableMatrix(products, product_groups) {
             title: "Available from",
             field: "available_from",
             formatter: function(cell, formatterParams, onRendered) {
-                if (cell.getValue() === false) return "Always";
+                if (cell.getValue() === null) return "Always";
                 return new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" });
             },
             editor: dateEditor,
@@ -244,7 +244,7 @@ function createTableMatrix(products, product_groups) {
             title: "Available until",
             field: "available_until",
             formatter: function(cell, formatterParams, onRendered) {
-                if (cell.getValue() === false) return "Always";
+                if (cell.getValue() === null) return "Always";
                 return new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" });
             },
             editor: dateEditor,
