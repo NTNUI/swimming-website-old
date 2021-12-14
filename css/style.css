@@ -54,7 +54,6 @@ https://dev.to/cadienvan/the-unsolvable-z-index-auto-increment-3l77
 }
 
 * {
-    transition: 0.3s;
     transition: background 500ms ease-in-out, color 1000ms ease-in-out;
 }
 
