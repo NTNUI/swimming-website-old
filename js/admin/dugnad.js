@@ -96,13 +96,13 @@ function appendMembers(json, container) {
         node.querySelector(".status").id = "status-" + member.id;
 
         // Approved
-        if (member.dugnad == 1) {
+        if (member.volunteer_status == 1) {
             node.querySelector(".approve").disabled = true;
             node.querySelector(".status").innerText = accepted;
-        } else if (member.dugnad == 0) {
+        } else if (member.volunteer_status == 0) {
             node.querySelector(".reject").disabled = true;
             node.querySelector(".status").innerText = rejected;
-        } else if (member.dugnad == null) {
+        } else if (member.volunteer_status == null) {
             node.querySelector(".status").innerText = notAsked;
         }
 
