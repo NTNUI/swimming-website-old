@@ -1,5 +1,5 @@
 <?php
-// TODO: rename class to just Store
+// TODO: split this class into product and order
 require_once("library/util/db.php");
 require_once("library/exceptions/store.php");
 
@@ -16,6 +16,37 @@ class Store
 	}
 
 	/**
+	 * retrieve Payment Intent given its id
+	 *
+	 * @see \Stripe\PaymentIntent::retrieve()
+	 * @param string $paymentIntent_id of the PaymentIntent to retrieve
+	 * @throws \Stripe\Exception\ApiErrorException — if the request fails
+	 * @return \Stripe\PaymentIntent
+	 */
+	function get_intent_by_id(string $paymentIntent_id): \Stripe\PaymentIntent
+	{
+		return \Stripe\PaymentIntent::retrieve($paymentIntent_id);
+	}
+
+
+	/**
+	 * Approve a member 
+	 *
+	 * @param string $phone
+	 * @return void
+	 */
+	function approve_member(string $phone)
+	{
+		$db = new DB("member");
+		$db->prepare("UPDATE member SET approved_date=NOW() WHERE phone=?");
+		$db->bind_param("s", $phone);
+		$db->execute();
+	}
+
+
+	// Section products
+
+	/**
 	 * Undocumented function
 	 *
 	 * @param integer $start how many products to skip. Defaults to 0.
@@ -27,7 +58,6 @@ class Store
 	 */
 	function get_products(int $start = 0, int $limit = 30, string $product_hash = "", bool $rawData = false, bool $visibility_check = true)
 	{
-		$language = $this->language;
 		$db = new DB("web");
 		$visibility = "";
 		if ($visibility_check) {
@@ -115,6 +145,8 @@ class Store
 			$image,
 			$group_id
 		);
+
+		$language = $this->language;
 		while ($db->fetch()) {
 			if (!$rawData) {
 				// documentation needed
@@ -166,69 +198,89 @@ class Store
 	}
 
 
-	// old: function create_order(string $product_hash, string $paymentId, object $owner, string $comment)
 	/**
-	 * Create an order
+	 * Check if product exists
 	 *
 	 * @param string $product_hash
-	 * @param string $paymentId
-	 * @param object $owner
-	 * @return void
+	 * @return boolean true if product exists. False otherwise.
 	 */
-	function create_order(string $product_hash, string $paymentId, object $owner)
+	static public function product_exists(string $product_hash): bool
 	{
-		$name = $owner->name;
-		$email = $owner->email;
-		$phone = NULL;
-		if (property_exists($owner, "phone")) {
-			$phone = $owner->phone;
-		}
-
-		$product = $this->get_product($product_hash);
-
-		if ($product["amount_available"] != null && $product["amount_sold"] >= $product["amount_available"]) throw \StoreException::ProductSoldOut();
-		if ($product["available_from"] !== false && $product["available_from"] > time()) throw \StoreException::ProductNotAvailable("Current product is not yet available");
-		if ($product["available_until"] !== false && $product["available_until"] < time()) throw \StoreException::ProductNotAvailable("Current product is no longer available");
-		if ($name == "") throw \StoreException::MissingCustomerDetails("Missing customer name");
-		if ($email == "") throw \StoreException::MissingCustomerDetails("Missing customer email");
-		if ($phone == NULL && $product["require_phone"]) throw \StoreException::MissingCustomerDetails("Missing customer phone");
-
-		//Perform a 3D secure checkout
-		$intent = \Stripe\PaymentIntent::create([
-			"payment_method" => $paymentId,
-			"amount" => $product["price"],
-			"currency" => "nok",
-			"confirmation_method" => "manual",
-			"confirm" => true,
-			"receipt_email" => $email,
-			"description" => $product["name"],
-		]);
-
-		// Save payment intent. Wait for callback
 		$db = new DB("web");
-		//$sql = "INSERT INTO orders (products_id, name, email, phone, source_id, comment) VALUES (?, ?, ?, ?, ?, ?)";
-		$sql = "INSERT INTO orders (products_id, name, email, phone, source_id) VALUES (?, ?, ?, ?, ?)";
-		$db->prepare($sql);
-		$intent_id = $intent["id"];
-		//$db->bind_param("isssss", $product["id"], $name, $email, $phone, $intent_id, $comment);
-		$db->bind_param("issss", $product["id"], $name, $email, $phone, $intent_id);
+		$db->prepare("SELECT COUNT(*) FROM products WHERE hash=?");
+		$db->bind_param("s", $product_hash);
 		$db->execute();
-
-		return $this->update_order($intent);
+		$result = 0;
+		$db->stmt->bind_result($result);
+		$db->fetch();
+		if ($result !== 0 && $result !== 1) {
+			throw new UnexpectedValueException($result);
+		}
+		return (bool)$result;
 	}
 
 
 	/**
-	 * retrieve Payment Intent given its id
-	 *
-	 * @see \Stripe\PaymentIntent::retrieve()
-	 * @param string $paymentIntent_id of the PaymentIntent to retrieve
-	 * @throws \Stripe\Exception\ApiErrorException — if the request fails
-	 * @return \Stripe\PaymentIntent
+	 * Add new product to db
+	 * 
+	 * @param array $product to be added
+	 * @return void
 	 */
-	function get_intent_by_id(string $paymentIntent_id): \Stripe\PaymentIntent
+	static public function add_product(array $product)
 	{
-		return \Stripe\PaymentIntent::retrieve($paymentIntent_id);
+		$db = new DB("web");
+		$sql = "INSERT INTO products (hash, name, description, price, amount_available, available_from, available_until, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+		$db->prepare($sql);
+		$db->bind_param("sssiisss", $product["hash"], $product["name"], $product["description"], $product["price"], $product["amount"], $product["start"], $product["end"], $product["image_name"]);
+		$db->execute();
+	}
+
+
+	/**
+	 * Remove product from DB
+	 * 
+	 * @param array $product to be removed
+	 * @return void
+	 */
+	static public function remove_product(string $product_hash)
+	{
+		if (!Store::product_exists($product_hash)) {
+			throw StoreException::ProductNotFound();
+		}
+		// get image name
+		$db = new DB("web");
+		$db->prepare("SELECT image FROM products WHERE hash=?");
+		$db->bind_param("s", $product_hash);
+		$db->execute();
+		$image_path = "img/store/" . $db->fetch();
+		if (file_exists($image_path)) {
+			if (!unlink($image_path)) {
+				throw StoreException::RemoveProductFailed();
+			}
+		}
+		$db->stmt->close();
+		$db->prepare("DELETE FROM products WHERE hash=?");
+		$db->bind_param("s", $product_hash);
+		$db->execute();
+	}
+
+
+	/**
+	 * Get string product hash given its int product id
+	 *
+	 * @param integer $product_id
+	 * @return string product hash
+	 */
+	function get_product_hash(int &$product_id): string
+	{
+		$db = new DB("web");
+		$db->prepare("SELECT hash FROM products WHERE id=?");
+		$db->bind_param("i", $product_id);
+		$db->execute();
+		$res = "";
+		$db->stmt->bind_result($res);
+		$db->fetch();
+		return $res;
 	}
 
 
@@ -258,25 +310,6 @@ class Store
 			throw new \Stripe\Exception\ApiErrorException("stripe_error");
 		}
 		return $src;
-	}
-
-
-	/**
-	 * Get string product hash given its int product id
-	 *
-	 * @param integer $product_id
-	 * @return string product hash
-	 */
-	function get_product_hash(int &$product_id): string
-	{
-		$db = new DB("web");
-		$db->prepare("SELECT hash FROM products WHERE id=?");
-		$db->bind_param("i", $product_id);
-		$db->execute();
-		$res = "";
-		$db->stmt->bind_result($res);
-		$db->fetch();
-		return $res;
 	}
 
 
@@ -319,21 +352,6 @@ class Store
 		$db = new DB("web");
 		$db->prepare("UPDATE orders SET order_status='FAILED' WHERE source_id=? OR charge_id=?");
 		$db->bind_param("ss", $charge_event["payment_intent"], $charge_event["id"]);
-		$db->execute();
-	}
-
-
-	/**
-	 * Approve a member 
-	 *
-	 * @param string $phone
-	 * @return void
-	 */
-	function approve_member(string $phone)
-	{
-		$db = new DB("member");
-		$db->prepare("UPDATE member SET approved_date=NOW() WHERE phone=?");
-		$db->bind_param("s", $phone);
 		$db->execute();
 	}
 
@@ -419,70 +437,56 @@ class Store
 		return (bool)$result;
 	}
 
+	// section orders
 
+	// old: function create_order(string $product_hash, string $paymentId, object $owner, string $comment)
 	/**
-	 * Check if product exists
+	 * Create an order
 	 *
 	 * @param string $product_hash
-	 * @return boolean true if product exists. False otherwise.
-	 */
-	static public function product_exists(string $product_hash): bool
-	{
-		$db = new DB("web");
-		$db->prepare("SELECT COUNT(*) FROM products WHERE hash=?");
-		$db->bind_param("s", $product_hash);
-		$db->execute();
-		$result = 0;
-		$db->stmt->bind_result($result);
-		$db->fetch();
-		if ($result !== 0 && $result !== 1) {
-			throw new UnexpectedValueException($result);
-		}
-		return (bool)$result;
-	}
-
-
-	/**
-	 * Add new product to db
-	 * 
-	 * @param array $product to be added
+	 * @param string $paymentId
+	 * @param object $owner
 	 * @return void
 	 */
-	static public function add_product(array $product)
+	function create_order(string $product_hash, string $paymentId, object $owner)
 	{
+		$name = $owner->name;
+		$email = $owner->email;
+		$phone = NULL;
+		if (property_exists($owner, "phone")) {
+			$phone = $owner->phone;
+		}
+
+		$product = $this->get_product($product_hash);
+
+		if ($product["amount_available"] != null && $product["amount_sold"] >= $product["amount_available"]) throw \StoreException::ProductSoldOut();
+		if ($product["available_from"] !== false && $product["available_from"] > time()) throw \StoreException::ProductNotAvailable("Current product is not yet available");
+		if ($product["available_until"] !== false && $product["available_until"] < time()) throw \StoreException::ProductNotAvailable("Current product is no longer available");
+		if ($name == "") throw \StoreException::MissingCustomerDetails("Missing customer name");
+		if ($email == "") throw \StoreException::MissingCustomerDetails("Missing customer email");
+		if ($phone == NULL && $product["require_phone"]) throw \StoreException::MissingCustomerDetails("Missing customer phone");
+
+		//Perform a 3D secure checkout
+		$intent = \Stripe\PaymentIntent::create([
+			"payment_method" => $paymentId,
+			"amount" => $product["price"],
+			"currency" => "nok",
+			"confirmation_method" => "manual",
+			"confirm" => true,
+			"receipt_email" => $email,
+			"description" => $product["name"],
+		]);
+
+		// Save payment intent. Wait for callback
 		$db = new DB("web");
-		$sql = "INSERT INTO products (hash, name, description, price, amount_available, available_from, available_until, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+		//$sql = "INSERT INTO orders (products_id, name, email, phone, source_id, comment) VALUES (?, ?, ?, ?, ?, ?)";
+		$sql = "INSERT INTO orders (products_id, name, email, phone, source_id) VALUES (?, ?, ?, ?, ?)";
 		$db->prepare($sql);
-		$db->bind_param("sssiisss", $product["hash"], $product["name"], $product["description"], $product["price"], $product["amount"], $product["start"], $product["end"], $product["image_name"]);
+		$intent_id = $intent["id"];
+		//$db->bind_param("isssss", $product["id"], $name, $email, $phone, $intent_id, $comment);
+		$db->bind_param("issss", $product["id"], $name, $email, $phone, $intent_id);
 		$db->execute();
-	}
 
-
-	/**
-	 * Remove product from DB
-	 * 
-	 * @param array $product to be removed
-	 * @return void
-	 */
-	static public function remove_product(string $product_hash)
-	{
-		if (!Store::product_exists($product_hash)) {
-			throw StoreException::ProductNotFound();
-		}
-		// get image name
-		$db = new DB("web");
-		$db->prepare("SELECT image FROM products WHERE hash=?");
-		$db->bind_param("s", $product_hash);
-		$db->execute();
-		$image_path = "img/store/" . $db->fetch();
-		if (file_exists($image_path)) {
-			if (!unlink($image_path)) {
-				throw StoreException::RemoveProductFailed();
-			}
-		}
-		$db->stmt->close();
-		$db->prepare("DELETE FROM products WHERE hash=?");
-		$db->bind_param("s", $product_hash);
-		$db->execute();
+		return $this->update_order($intent);
 	}
 }
