@@ -219,7 +219,7 @@ $input["surname"] = get_surname($input["name"]);
 // check if phone number has been registered
 {
     $db = new DB("member");
-    $sql = "SELECT count(*), approved_date FROM member WHERE phone=?";
+    $sql = "SELECT approved_date, count(*) AS count FROM member WHERE phone=? GROUP BY approved_date";
     $db->prepare($sql);
     $db->bind_param("s", $input["phone"]);
     $db->execute();

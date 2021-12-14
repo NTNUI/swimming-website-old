@@ -10,12 +10,12 @@ function handle_order(store, order) {
     display_modal("Loading", "Attempting to empty your bank account", "", "", "wait");
     store.charge(order.product, order.customer)
         .then(async (serverResponse) => {
-            if (typeof(serverResponse === "object")) {
+            if (typeof (serverResponse === "object")) {
                 serverResponse = serverResponse.message;
             }
             await display_modal("Success", serverResponse, "Accept", "", "success");
         }).catch((error) => {
-            if (typeof(error === "object")) {
+            if (typeof (error === "object")) {
                 error = error.message;
             }
             display_modal("Failure", error, "Accept", "", "failure");
@@ -27,7 +27,9 @@ store.init(BASEURL + "/api/inventory").then(async () => {
     const inventory = await store.inventory;
     const requested_product = inventory.find(product => product.hash === REQUESTED_PRODUCT_HASH);
     console.log(inventory);
-    if (inventory.length) {
+    let num_elements_hidden;
+    inventory.forEach((el) => { num_elements_hidden += !el.visibility });
+    if (inventory.length - num_elements_hidden) {
         document.querySelector("#storeEmpty").classList.add("hidden");
     }
     for (let i = 0; i < inventory.length; ++i) {
@@ -37,14 +39,14 @@ store.init(BASEURL + "/api/inventory").then(async () => {
         }
         // Create a product entry
         const productEntry = store.createProductEntry(inventory[i]);
-        
+
         const purchaseButtonHandler = () => {
             // display checkout modal on purchase click
             store.checkout(inventory[i])
-            .then((order) => {
-                handle_order(store, order);
-            })
-            .catch(()=>{});
+                .then((order) => {
+                    handle_order(store, order);
+                })
+                .catch(() => { });
         }
         productEntry.querySelector(".store_button").addEventListener("click", purchaseButtonHandler);
         // append product entry to DOM
@@ -57,6 +59,6 @@ store.init(BASEURL + "/api/inventory").then(async () => {
             .then((order) => {
                 handle_order(store, order);
             })
-            .catch(()=>{});
+            .catch(() => { });
     }
 });

@@ -35,8 +35,12 @@ class AccessControl
 		}
 	}
 
-	public function can_access(string $page, mixed $action = "") : bool
+	public function can_access(string $page, $action): bool
 	{
+		// php 7.4 does not support assigning that input variable to "" yet.
+		if (!isset($action)) {
+			$action  = "";
+		}
 		$result = false;
 		$match_level = 0;
 		if ($this->group_rules == NULL) {
@@ -69,7 +73,7 @@ class AccessControl
 		return $result;
 	}
 
-	public function log(string $page, string $action, mixed $value = NULL)
+	public function log(string $page, string $action, $value = NULL)
 	{
 		$username = $this->user;
 		if ($this->user == "") $username = "~Unregistered User~";

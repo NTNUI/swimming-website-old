@@ -24,14 +24,14 @@ function print_content_block(string $header, string $description, string $image_
 
         <?php
         // Should file_exists throw an error? It's not a problem in the source but in the content.
-        if ($image_path && !file_exists($_SERVER["DOCUMENT_ROOT"] . $image_path)) {
+        if ($image_path && !file_exists($image_path)) {
             log::message("Warning: Cannot find image : " . $image_path, __FILE__, __LINE__);
         }
 
-        if ($image_path && file_exists($_SERVER["DOCUMENT_ROOT"] . $image_path)) {
+        if ($image_path && file_exists($image_path)) {
         ?>
             <div class="card">
-                <img class="<?php print($image_class); ?>" src="<?php print($settings["baseurl"] . $image_path); ?>" alt="<?php print($image_text); ?>">
+                <img class="<?php print($image_class); ?>" src="<?php print($settings["baseurl"] . "/" . $image_path); ?>" alt="<?php print($image_text); ?>">
                 <label class="card_content"><?php print($image_text); ?></label>
                 <?php
                 if ($email) {
@@ -78,10 +78,10 @@ function style_and_script(string $caller)
     $css_path = "css/" . $caller . ".css";
     
     global $settings;
-    if (file_exists($_SERVER["DOCUMENT_ROOT"] . "/" . $js_path)) {
+    if (file_exists($js_path)) {
         print("<script defer type='text/javascript' src='${settings["baseurl"]}/$js_path'></script>");
     }
-    if (file_exists($_SERVER["DOCUMENT_ROOT"] . "/" . $css_path)) {
+    if (file_exists($css_path)) {
         print("<link rel='stylesheet' type='text/css' href='${settings["baseurl"]}/$css_path'></link>");
     }
 }
