@@ -166,7 +166,10 @@ function createTableMatrix(products, product_groups) {
         },
         columns: [{
             title: "Name",
-            field: "name"
+            field: "name",
+            cellClick: () => {
+                display_modal("Info", "Changing the name of a product is not yet supported", "Accept", "");
+            }
         },
         {
             title: "Sold",
@@ -178,6 +181,9 @@ function createTableMatrix(products, product_groups) {
             formatter: function(cell, formatterParams, onRendered) {
                 return cell.getValue() === null ? "Unlimited" : cell.getValue();
             },
+            cellClick: () => {
+                display_modal("Info", "Changing the amount of available products is not yet supported", "Accept", "");
+            }
         },
         {
             title: "Price",
