@@ -125,7 +125,7 @@ h1, h2, h3, h4, p, .email {
 }
 
 .error, .red, .delete {
-    background-color: var(--cancel-color) !important;
+    background-color: var(--cancel-color);
     color: #fff;
 }
 

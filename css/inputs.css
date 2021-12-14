@@ -39,6 +39,7 @@ input[type=reset] {
 
 button:disabled, input[type=submit]:disabled {
     background-color: var(--disabled);
+    cursor: default;
 }
 input:disabled{
     color: var(--disabled);
