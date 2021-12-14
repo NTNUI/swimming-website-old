@@ -1,10 +1,7 @@
 "use strict";
 import { display_modal } from "../modules/modal.js";
 // TODO: add drag & drop support for image uploads
-// TODO: add handler for date modification
 // TODO: move styles to css
-// TODO: add handler for price modification
-// TODO: add handler for date modification
 
 function set_product_visibility(product_hash, visibility) {
     let data = {
@@ -189,6 +186,33 @@ function createTableMatrix(products, product_groups) {
             editorParams: {
                 min: 100,
                 mask: "9999999"
+            },
+            cellEdited: (cell) => {
+                const data = {
+                    "request_type": "update_price",
+                    "params": {
+                        "product_hash": cell.getRow().getData().hash,
+                        "price": cell.getValue()
+                    }
+                }
+                fetch(BASEURL + "/api/store", {
+                    method: 'PATCH',
+                    body: JSON.stringify(data),
+                })
+                    .then(async (response) => {
+                        if (!response.ok) {
+                            throw await response.json();
+                        }
+                    })
+                    .catch((err) => {
+                        console.error(err);
+                        if (typeof (err) === "object") {
+                            display_modal("Failure", err.message + "\n\n" + err.trace, "Accept", "", "failure");
+                            return;
+                        }
+                        display_modal("Failure", err, "Accept", "", "failure");
+                    });
+
             }
         },
         {

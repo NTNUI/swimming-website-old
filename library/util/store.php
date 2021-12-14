@@ -183,11 +183,11 @@ class Store
 				else if (array_key_exists("no", $description)) $description = $description->no;
 				else $description = "";
 			}
-			
+
 			// add timezone info
 			$available_from = new DateTime($available_from, new DateTimeZone("Europe/Oslo"));
 			$available_until = new DateTime($available_until, new DateTimeZone("Europe/Oslo"));
-			
+
 			// create date with time zone info
 			$result[] = array(
 				"id" => intval($id),
@@ -223,6 +223,21 @@ class Store
 		$result = $this->get_products(0, 1, $product_hash, $rawData);
 		if (sizeof($result) < 1) throw \StoreException::ProductNotFound();
 		return $result[0];
+	}
+
+	/**
+	 * Update price for a product
+	 *
+	 * @param string $product_hash of the product
+	 * @param integer $price in Norwegian øre. 1 NOK = 100 Øre
+	 * @return void
+	 */
+	static function update_price(string $product_hash, int $price)
+	{
+		$db = new DB("web");
+		$db->prepare("UPDATE products SET price=? WHERE hash=?");
+		$db->bind_param("is", $price, $product_hash);
+		$db->execute();
 	}
 
 
