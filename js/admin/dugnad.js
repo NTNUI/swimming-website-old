@@ -33,14 +33,14 @@ function approve(id) {
     let button_approve = document.getElementById("approve-" + id);
     let button_reject = document.getElementById("reject-" + id);
     button_approve.disabled = true;
-    button_approve.innerText = "Godkjenner...";
+    button_approve.innerText = "Approving...";
     getJSON(BASEURL + "/api/dugnad?approve=" + id, function(err, json) {
         if (err != null) {
             alert("Something went wrong: " + err);
             return;
         }
-        button_approve.innerText = "Godkjent";
-        button_reject.innerText = "Meld avslag";
+        button_approve.innerText = "Approved";
+        button_reject.innerText = "Rejected";
         button_reject.disabled = false;
         document.getElementById("status-" + id).innerText = accepted;
     });
@@ -50,14 +50,14 @@ function reject(id) {
     let button_reject = document.getElementById("reject-" + id);
     let button_approve = document.getElementById("approve-" + id);
     button_reject.disabled = true;
-    button_reject.innerText = "Melder avslag..."
+    button_reject.innerText = "Rejecting...";
     getJSON(BASEURL + "/api/dugnad?reject=" + id, function(err, json) {
         if (err != null) {
             alert("Something went wrong: " + err);
             return;
         }
-        button_reject.innerText = "Innmeldt avslag";
-        button_approve.innerText = "Godkjenn";
+        button_reject.innerText = "Reject";
+        button_approve.innerText = "Approve";
         button_approve.disabled = false;
         document.getElementById("status-" + id).innerText = rejected;
     });
