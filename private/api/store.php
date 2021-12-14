@@ -134,6 +134,44 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			];
 			$access_control->log("admin/store", "update visibility", $product_hash);
 			break;
+		case 'update_availability':
+			// get product
+			$product_hash = $input_json->{"params"}->{"product_hash"};
+			$product = [];
+			try {
+				$product = $store->get_product($product_hash);
+			} catch (\StoreException $ex) {
+				$response->code = HTTP_NOT_FOUND;
+				$response->data = [
+					"error" => true,
+					"message" => "Product not found"
+				];
+				break;
+			}
+			// construct DateTime object
+			$format = "d.m.Y, H:i:s"; // https://www.php.net/manual/en/datetime.createfromformat.php
+			$date_start = new DateTime;
+			if (property_exists($input_json->{"params"}, "date_start")) {
+				$date_start = DateTime::createFromFormat($format, $input_json->{"params"}->{"date_start"}, new DateTimeZone("Europe/Oslo"));
+			} else {
+				$date_start = null;
+			}
+
+			$date_end = new DateTime;
+			if (property_exists($input_json->{"params"}, "date_end")) {
+				$date_end = DateTime::createFromFormat($format, $input_json->{"params"}->{"date_end"}, new DateTimeZone("Europe/Oslo"));
+			} else {
+				$date_end = null;
+			}
+			// save result and return
+			Store::update_product_date($product_hash, $date_start, $date_end);
+			$response->code = HTTP_OK;
+			$response->data = [
+				"success" => true
+			];
+			$access_control->log("admin/store", "update availability", $product_hash);
+			break;
+
 		default:
 			$response->error("Got invalid request: '" . $input_json->{"request_type"} . "'. Valid requests are request_type and update_visibility");
 	}

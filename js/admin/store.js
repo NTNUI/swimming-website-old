@@ -93,10 +93,10 @@ let dateEditor = function(cell, onRendered, success, cancel) {
 
     // create and style input
     const val = cell.getValue() * 1000 || new Date().getTime();
-    let cellValue = moment(val).format("YYYY-MM-DD H:mm:ss"),
-        input = document.createElement("input");
+    let cellValue = moment(val).format("YYYY-MM-DD H:mm:ss");
+    const input = document.createElement("input");
 
-    input.setAttribute("type", "datetime");
+    input.setAttribute("type", "datetime-local");
 
     input.style.padding = "4px";
     input.style.width = "100%";
@@ -134,6 +134,26 @@ let dateEditor = function(cell, onRendered, success, cancel) {
     return input;
 };
 
+function update_availability(data) {
+    fetch(BASEURL + "/api/store", {
+        method: 'PATCH',
+        body: JSON.stringify(data),
+    })
+        .then(async (response) => {
+            if (!response.ok) {
+                throw await response.json();
+            }
+        })
+        .catch((err) => {
+            console.error(err);
+            if (typeof (err) === "object") {
+                display_modal("Failure", err.message + "\n\n" + err.trace, "Accept", "", "failure");
+                return;
+            }
+            display_modal("Failure", err, "Accept", "", "failure");
+        });
+}
+
 // Create Date Editor
 function createTableMatrix(products, product_groups) {
     products.forEach(product => {
@@ -157,7 +177,10 @@ function createTableMatrix(products, product_groups) {
         },
         {
             title: "Available",
-            field: "amount_available"
+            field: "amount_available",
+            formatter: function(cell, formatterParams, onRendered) {
+                return cell.getValue() === null ? "Unlimited" : cell.getValue();
+            },
         },
         {
             title: "Price",
@@ -173,18 +196,38 @@ function createTableMatrix(products, product_groups) {
             field: "available_from",
             formatter: function(cell, formatterParams, onRendered) {
                 if (cell.getValue() === false) return "Always";
-                return new Date(cell.getValue() * 1000).toLocaleString();
+                return new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" });
             },
-            editor: dateEditor
+            editor: dateEditor,
+            cellEdited: function(cell) {
+                const data = {
+                    "request_type": "update_availability",
+                    "params": {
+                        "product_hash": cell.getRow().getData().hash,
+                        "date_start": new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" })
+                    }
+                }
+                update_availability(data);
+            }
         },
         {
             title: "Available until",
             field: "available_until",
             formatter: function(cell, formatterParams, onRendered) {
                 if (cell.getValue() === false) return "Always";
-                return new Date(cell.getValue() * 1000).toLocaleString();
+                return new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" });
             },
-            editor: dateEditor
+            editor: dateEditor,
+            cellEdited: function(cell) {
+                const data = {
+                    "request_type": "update_availability",
+                    "params": {
+                        "product_hash": cell.getRow().getData().hash,
+                        "date_end": new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" })
+                    }
+                }
+                update_availability(data);
+            }
 
         },
         {
