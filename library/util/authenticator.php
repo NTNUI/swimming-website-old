@@ -11,9 +11,6 @@ class Authenticator
 
     /**
      * Logs in user given username and password
-     * Side effects:
-     * - update session variables.
-     * 
      * @see Authenticator::is_logged_in()
      * @param string $username
      * @param string $password
@@ -34,10 +31,6 @@ class Authenticator
         if (!password_verify($password, $password_hash)) {
             throw \AuthenticationException::WrongCredentials();
         }
-
-        // update session variables
-        $_SESSION["logged_in"] = 1;
-        $_SESSION["username"] = $username;
     }
 
 
@@ -179,21 +172,6 @@ class Authenticator
         return "";
     }
 
-
-    /**
-     * Get user's name
-     *
-     * @return string|null current users name if logged in. Null is returned otherwise.
-     */
-    static public function get_name()
-    {
-        if (!Authenticator::is_logged_in()) {
-            return null;
-        }
-        return argsURL("SESSION", "name");
-    }
-
-
     /**
      * Change a password for @param username
      * Side effects:
@@ -218,6 +196,30 @@ class Authenticator
         $_SESSION["password_date"] = new DateTime("now");
     }
 
+    /**
+     * Get a users name
+     *
+     * @param string $username of the user
+     * @return string users display name
+     * @throws UserException if current user is not logged in
+     * @throws UserException if user is not found
+     */
+    static public function get_name(string $username): string
+    {
+        if(!Authenticator::is_logged_in()){
+            throw UserException::LoginRequired();
+        }
+        $db = new DB("web");
+        $db->prepare("SELECT name FROM users WHERE username=?");
+        $db->bind_param("s", $username);
+        $db->execute();
+        $name = "";
+        $db->stmt->bind_result($name);
+        if ($db->fetch() === null) {
+            throw UserException::NotFound();
+        }
+        return $name;
+    }
 
     /**
      * Get credentials

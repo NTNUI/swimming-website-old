@@ -19,4 +19,8 @@ class UserException extends \Exception
     {
         return new static($message);
     }
+
+    public static function LoginRequired(string $message = "Login required"){
+        return new static($message);
+    }
 }

@@ -1,5 +1,4 @@
 <?php
-
 require_once("library/helpers/admin.php");
 
 if (!Authenticator::is_logged_in()) {
@@ -15,13 +14,14 @@ if (!Authenticator::is_logged_in()) {
 		print_password_form(false, $ex->getMessage());
 		return;
 	}
+	// update session variables
+	$_SESSION["logged_in"] = 1;
+	$_SESSION["username"] = $username;
 }
+global $access_control;
+$access_control = new AccessControl($_SESSION["username"]);
 
-$name = argsURL("SESSION", "name");
-$username = argsURL("SESSION", "username");
-$access_control = new AccessControl($username);
-
-print_admin_header($name);
+print_admin_header(Authenticator::get_name($_SESSION["username"]));
 
 if (Authenticator::log_out_requested()) {
 	Authenticator::log_out();
@@ -33,7 +33,6 @@ if (Authenticator::log_out_requested()) {
 }
 
 if (Authenticator::pass_change_requested()) {
-
 	if (!Authenticator::has_posted_updated_credentials()) {
 		print_password_form(true);
 		return;
