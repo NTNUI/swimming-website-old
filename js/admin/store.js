@@ -136,6 +136,10 @@ let dateEditor = function(cell, onRendered, success, cancel) {
 
 // Create Date Editor
 function createTableMatrix(products, product_groups) {
+    products.forEach(product => {
+        product.link_no = BASEURL + "/store?product_hash=" + product.hash;
+        product.link_en = BASEURL + "/en/store?product_hash=" + product.hash;
+    });
     let table = new Tabulator("#products", {
         layout: "fitDataStretch",
         data: products,
@@ -194,6 +198,24 @@ function createTableMatrix(products, product_groups) {
                 const data = cell.getData();
                 set_product_visibility(data.hash, data.visibility);
             },
+        },
+        {
+            title: "Link NO",
+            field: "link_no",
+            formatter: (cell) => { return '<i class="fa fa-copy"></i>' },
+            editor: false,
+            cellClick: (e, cell) => {
+                navigator.clipboard.writeText(cell.getValue());
+            }
+        },
+        {
+            title: "Link EN",
+            field: "link_en",
+            formatter: (cell) => { return '<i class="fa fa-copy"></i>' },
+            editor: false,
+            cellClick: (e, cell) => {
+                navigator.clipboard.writeText(cell.getValue());
+            }
         }
         ],
         rowDblClick: function(e, row) {

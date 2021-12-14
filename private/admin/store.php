@@ -7,6 +7,7 @@ require_once("library/templates/modal.php");
 
 <link href="<?php print($settings['baseurl']); ?>/css/admin/store.css" />
 <link href="https://unpkg.com/tabulator-tables@4.5.3/dist/css/tabulator.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 <script defer type="text/javascript" src="https://unpkg.com/tabulator-tables@4.5.3/dist/js/tabulator.min.js"></script>
 <script defer type="text/javascript" src="https://momentjs.com/downloads/moment.min.js"></script>
 <script type="module" src="<?php print($settings['baseurl']); ?>/js/admin/store.js"></script>
