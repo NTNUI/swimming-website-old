@@ -40,6 +40,25 @@ try {
 		"error" => true,
 		"message" => $ex->getMessage()
 	];
+} catch (\Exception $ex) {
+	$response->code = HTTP_INTERNAL_SERVER_ERROR;
+	$response->data = [
+		"error" => true
+	];
+	// append crash information if logged in
+	if (Authenticator::is_logged_in()) {
+		$response->data = array_merge($response->data, [
+			"message" => $ex->getMessage(),
+			"trace" => $ex->getTraceAsString()
+		]);
+	} else {
+		$response->data = array_merge($response->data, [
+			"message" => "Something went wrong. Developers are alerted. We will look into this",
+		]);
+	}
+
+	$response->send();
+	throw $ex;
 }
 $response->send();
 return;
