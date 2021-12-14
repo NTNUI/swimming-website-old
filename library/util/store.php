@@ -46,6 +46,29 @@ class Store
 
 	// Section products
 
+	public static function update_product_date(string $product_hash, ?DateTime $date_from, ?DateTime $date_to)
+	{
+		if (!isset($date_from) && !isset($date_to)) {
+			throw new InvalidArgumentException("one of the date arguments must be set");
+		}
+		if (isset($date_from)) {
+			$db = new DB("web");
+			$db->prepare("UPDATE products SET available_from=? WHERE hash=?");
+			$val = $date_from->format("Y-m-d H:i:s");
+			log::message("Attempting to save timestamp: " . $val, __FUNCTION__, __LINE__);
+			$db->bind_param("ss", $val, $product_hash);
+			$db->execute();
+		}
+		if (isset($date_to)) {
+			$db = new DB("web");
+			$db->prepare("UPDATE products SET available_until=? WHERE hash=?");
+			$val = $date_to->format("Y-m-d H:i:s");
+			log::message("Attempting to save timestamp: " . $val, __FUNCTION__, __LINE__);
+			$db->bind_param("ss", $val, $product_hash);
+			$db->execute();
+		}
+	}
+
 	/**
 	 * Undocumented function
 	 *
@@ -160,15 +183,20 @@ class Store
 				else if (array_key_exists("no", $description)) $description = $description->no;
 				else $description = "";
 			}
-
+			
+			// add timezone info
+			$available_from = new DateTime($available_from, new DateTimeZone("Europe/Oslo"));
+			$available_until = new DateTime($available_until, new DateTimeZone("Europe/Oslo"));
+			
+			// create date with time zone info
 			$result[] = array(
 				"id" => intval($id),
 				"hash" => $product_hash,
 				"name" => $name,
 				"description" => $description,
 				"price" => intval($price),
-				"available_from" => strtotime($available_from),
-				"available_until" => strtotime($available_until),
+				"available_from" => $available_from->getTimestamp(),
+				"available_until" => $available_until->getTimestamp(),
 				"require_phone" => $require_phone,
 				"amount_available" => $amount_available,
 				"amount_sold" => $amount_sold,
