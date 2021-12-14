@@ -207,7 +207,7 @@ export default class Store {
             locked.startTime = true;
 
             let open = setInterval(function() {
-                let timeLeft = startTime - new Date().getTime();
+                const timeLeft = startTime - new Date().getTime();
                 if (timeLeft < 0) {
                     locked.startTime = false;
                     clearInterval(open);
@@ -218,7 +218,7 @@ export default class Store {
         } else if (endTime !== false) {
             node.querySelector(".store_countdown").style.display = "";
             let close = setInterval(function() {
-                let timeLeft = (endTime - new Date().getTime());
+                const timeLeft = (endTime - new Date().getTime());
                 if (timeLeft < 0) {
                     locked.timeout = true;
                     clearInterval(close);
