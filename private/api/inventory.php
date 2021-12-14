@@ -5,8 +5,8 @@ require_once("library/util/store.php");
 $store = new Store($language);
 global $settings;
 header("Content-Type: application/json");
-$products = $store->get_products();
-if($products === false){
+$products = $store->get_products(0, 30, "", false, false); // get 30 products
+if ($products === false) {
 	http_response_code(404);
 	return;
 }
