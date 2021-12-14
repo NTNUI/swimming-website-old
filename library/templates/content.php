@@ -76,11 +76,12 @@ function style_and_script(string $caller)
     $caller = str_replace(".php", "", basename($caller));
     $js_path = "js/" . $caller . ".js";
     $css_path = "css/" . $caller . ".css";
-
+    
+    global $settings;
     if (file_exists($_SERVER["DOCUMENT_ROOT"] . "/" . $js_path)) {
-        print("<script defer type='text/javascript' src='$js_path'></script>");
+        print("<script defer type='text/javascript' src='${settings["baseurl"]}/$js_path'></script>");
     }
     if (file_exists($_SERVER["DOCUMENT_ROOT"] . "/" . $css_path)) {
-        print("<link rel='stylesheet' type='text/css' href='$css_path'></link>");
+        print("<link rel='stylesheet' type='text/css' href='${settings["baseurl"]}/$css_path'></link>");
     }
 }
