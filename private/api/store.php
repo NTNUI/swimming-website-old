@@ -191,6 +191,36 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			$access_control->log("admin/store", "update availability", $product_hash);
 			break;
 
+
+		case "update_price":
+			if (!isset($input_json->{"params"}->{"product_hash"})) {
+				throw new InvalidArgumentException("Missing product_hash");
+			}
+			if (!isset($input_json->{"params"}->{"price"})) {
+				throw new InvalidArgumentException("Missing price");
+			}
+			// get product
+			$product_hash = $input_json->{"params"}->{"product_hash"};
+			$product = [];
+			try {
+				$product = $store->get_product($product_hash);
+			} catch (\StoreException $ex) {
+				$response->code = HTTP_NOT_FOUND;
+				$response->data = [
+					"error" => true,
+					"message" => "Product not found"
+				];
+				break;
+			}
+			$price = $input_json->{"params"}->{"price"};
+			Store::update_price($product_hash, $price);
+			$response->code = HTTP_OK;
+			$response->data = [
+				"success" => true
+			];
+			$access_control->log("admin/store", "update availability", $product_hash);
+			break;
+
 		default:
 			$response->error("Got invalid request: '" . $input_json->{"request_type"} . "'. Valid requests are request_type and update_visibility");
 	}
