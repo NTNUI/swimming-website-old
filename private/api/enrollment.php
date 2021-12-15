@@ -117,7 +117,7 @@ if (strlen($input["name"]) < 5) {
 if (strlen($input["name"]) > 40) {
     log::message("Warning: parameter 'name' is greater than 40 characters: ", $input["name"], __FILE__, __LINE__);
     http_response_code(HTTP_INVALID_REQUEST);
-    $input["message"] = "parameter 'name' is greater than 40 characters";
+    $input["message"] = "parameter 'name' is greater than 40 characters. Send us an email with your id if this is your name.";
     print(json_encode($input));
     return;
 }
@@ -125,7 +125,7 @@ if (strlen($input["name"]) > 40) {
 if (!strpos($input["name"], " ")) {
     log::message("Warning: Space was not found in the name", __FILE__, __LINE__);
     http_response_code(HTTP_INVALID_REQUEST);
-    $input["message"] = "parameter 'name' is too small";
+    $input["message"] = "No space was found in parameter 'name'. Make sure to use your full name.";
     print(json_encode($input));
     return;
 }
@@ -163,7 +163,7 @@ if (strlen($input["phone"]) > 15) {
 if ($input["email"] === null) {
     log::message("Email validation failed", __FILE__, __LINE__);
     http_response_code(HTTP_INVALID_REQUEST);
-    $input["message"] = "parameter 'name' is too small";
+    $input["message"] = "Failed to validate email";
     print(json_encode($input));
     return;
 }
@@ -182,7 +182,7 @@ if ($input["age"] < 18) {
 if ($input["zip"] === null) {
     log::message("Warning: Could not decode zip", __FILE__, __LINE__);
     http_response_code(HTTP_INVALID_REQUEST);
-    $input["message"] = "parameter 'name' is too small";
+    $input["message"] = "Could not decode parameter zip";
     print(json_encode($input));
     return;
 }
@@ -191,7 +191,7 @@ $input["address"] = trim_space($input["address"]);
 if (strlen($input["address"]) < 6) {
     log::message("Warning: Address is less than 6 characters", __FILE__, __LINE__);
     http_response_code(HTTP_INVALID_REQUEST);
-    $input["message"] = "parameter 'name' is too small";
+    $input["message"] = "parameter 'address' is too small";
     print(json_encode($input));
     return;
 }
@@ -202,7 +202,7 @@ $clubs = json_decode(file_get_contents("assets/clubs.json"));
 if (!value_exists($input["licensee"], $clubs) && $input["licensee"] !== "NTNUI Triatlon" && $input["licensee"] !== "") {
     log::message("Warning: Invalid licensee club", __FILE__, __LINE__);
     http_response_code(HTTP_INVALID_REQUEST);
-    $input["message"] = "parameter 'name' is too small";
+    $input["message"] = "parameter 'licensee' is not recognized";
     print(json_encode($input));
     return;
 }
