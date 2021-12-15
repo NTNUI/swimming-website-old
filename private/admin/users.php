@@ -104,17 +104,15 @@ function create_user(string $name, string $username, string $email)
 	// TODO: move content to settings
 	global $settings;
 	$email_title = "NTNUI Swimming: New user";
-	$email_content = "Your user account has been created.\n" .
-		"Username: $username\n" .
-		"Password: $random_password\n" .
-		"You will be forced to change password on first login.\n";
-	$email_from = "From: " . $settings["emails"]["bot-general"];
+	$message = "Your user account has been created.\n";
+	$message .=	"Username: $username\n";
+	$message .=	"Password: $random_password\n";
+	$message .=	"You will be forced to change password on first login.\n";
 
 	mail(
 		$email,
 		$email_title,
-		$email_content,
-		$email_from
+		$message
 	);
 }
 

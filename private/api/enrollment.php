@@ -283,8 +283,7 @@ if ($input["membership_status"] == "pending") {
         // notification to cashier
         $sendTo = $settings["emails"]["analyst"];
         $message = "A new member needs manual approval. Log in to admin pages and approve member.";
-        $from = $settings["emails"]["bot-general"];
-        mail($sendTo, "NTNUI-Swimming: New membership request", $message, "From: $from\r\nContent-type: text/plain; charset=utf-8");
+        mail($sendTo, "NTNUI-Swimming: New membership request", $message);
     }
     $input["url"] =  $settings["baseurl"] . "/store?product_hash=" . $settings['license_product_hash'];
 }
