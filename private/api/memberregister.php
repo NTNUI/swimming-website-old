@@ -4,11 +4,10 @@ if (!$access_control->can_access("api", "memberregister")) {
 	log::forbidden("Access denied", __FILE__, __LINE__);
 }
 
-function sendEmail($emailAdress)
+function sendEmail($emailAddress)
 {
 
 	$subject = "NTNUI Svomming: Medlemskap godkjent / Membership approved";
-	$from = "svomming-kasserer@ntnui.no";
 
 	// norwegian
 	$headers = "Dette er en automatisk e-post sendt av NTNUI-Svømmegruppas medlemssystem. <br>";
@@ -27,7 +26,7 @@ function sendEmail($emailAdress)
 	$headers .= "NTNUI Svømming";
 
 	// send mail
-	mail($emailAdress, $subject, $headers, "From: $from\r\nContent-type: text/html; charset=utf-8");
+	mail($emailAddress, $subject, $headers, "Content-type: text/html; charset=utf-8");
 }
 
 
