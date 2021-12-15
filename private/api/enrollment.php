@@ -40,15 +40,16 @@ function get_age(DateTime $birthDate): int
     return $interval->y;
 }
 
-function valid_captcha(): bool{
+function valid_captcha(): bool
+{
     global $settings;
     $secret = $settings["captcha_key"];
-	$token = $_POST['g-recaptcha-response'];
-	$url = "https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=$token";
-	$ch = curl_init($url);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-	$verify = curl_exec($ch);
-	return json_decode($verify)->success;
+    $token = $_POST['g-recaptcha-response'];
+    $url = "https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=$token";
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    $verify = curl_exec($ch);
+    return json_decode($verify)->success;
 }
 
 header("Content-Type: application/json; charset=UTF-8");
@@ -137,29 +138,25 @@ if (filter_var($input["isMale"], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE
     return;
 }
 
-// Phone and email
-$input["phone"] = str_replace(" ", "", $input["phone"]);
+// Phone
+// https://github.com/giggsey/libphonenumber-for-php#quick-examples
+use \libphonenumber\PhoneNumberUtil;
+use \libphonenumber\PhoneNumber;
+use \libphonenumber\NumberParseException;
+use \libphonenumber\PhoneNumberFormat;
 
-if (strncmp($input["phone"], "+47", 3) == 0) {
-    $input["phone"] = substr($input["phone"], 3);
-}
-
-if (strlen($input["phone"]) < 8) {
-    log::message("Warning: Phone number is less than 8 characters", __FILE__, __LINE__);
-    http_response_code(HTTP_INVALID_REQUEST);
-    $input["message"] = "parameter 'phone' is less than 8 characters";
+$phone = new PhoneNumber();
+try {
+    $phoneUtil = PhoneNumberUtil::getInstance();
+    $phone = $phoneUtil->parse($input["phone"], "NO");
+    $input["phone"] = $phoneUtil->format($phone, PhoneNumberFormat::E164);
+} catch (NumberParseException $e) {
+    $input["message"] = $e->getMessage();
     print(json_encode($input));
     return;
 }
 
-if (strlen($input["phone"]) > 15) {
-    log::message("Warning: Phone number is greater than 15 characters", __FILE__, __LINE__);
-    http_response_code(HTTP_INVALID_REQUEST);
-    $input["message"] = "parameter 'phone' is greater than 15 characters";
-    print(json_encode($input));
-    return;
-}
-
+// email
 if ($input["email"] === null) {
     log::message("Email validation failed", __FILE__, __LINE__);
     http_response_code(HTTP_INVALID_REQUEST);
@@ -210,7 +207,6 @@ if (!value_exists($input["licensee"], $clubs) && $input["licensee"] !== "NTNUI T
 // sanitize against injections
 $input["name"] = filter_var($input["name"], FILTER_SANITIZE_STRING);
 $input["email"] = filter_var($input["email"], FILTER_SANITIZE_EMAIL);
-$input["phone"] = filter_var($input["phone"], FILTER_SANITIZE_STRING);
 $input["address"] = filter_var($input["address"], FILTER_SANITIZE_STRING);
 $input["licensee"] = filter_var($input["licensee"], FILTER_SANITIZE_STRING);
 $input["first_name"] = get_first_name($input["name"]);
@@ -233,7 +229,7 @@ $input["surname"] = get_surname($input["name"]);
     if ($result) {
         log::message("Warning: User already registered", __FILE__, __LINE__);
         http_response_code(HTTP_INVALID_REQUEST);
-        $input["message"] = "User is already registered with " . ($input["membership_status"] === "active" ? "an active" : "a pending") ." membership" ;
+        $input["message"] = "User is already registered with " . ($input["membership_status"] === "active" ? "an active" : "a pending") . " membership";
         print(json_encode($input));
         return;
     }
