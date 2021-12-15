@@ -47,7 +47,7 @@ if (Authenticator::pass_change_requested()) {
 		print_password_form(true, $error);
 		exit;
 	} else {
-		Authenticator::change_password($username, $new_password);
+		Authenticator::change_password($_SESSION["username"], $new_password);
 		Authenticator::log_out();
 		header("Location: " . $settings["baseurl"] . "/admin");
 		exit;
