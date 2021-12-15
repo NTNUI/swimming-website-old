@@ -6,6 +6,7 @@
         "stripe/stripe-php": "^7.97",
         "michelf/php-markdown": "^1.9",
         "justinrainbow/json-schema": "^5.2",
-        "slim/slim": "^4.9"
+        "slim/slim": "^4.9",
+        "giggsey/libphonenumber-for-php": "^8.12"
     }
 }
