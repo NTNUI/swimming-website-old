@@ -1,6 +1,6 @@
 FROM archlinux
 
-RUN pacman -Syu --noconfirm php php-apache php-dblib composer neovim bat micro
+RUN pacman -Syu --noconfirm php php-apache php-dblib composer neovim bat micro perl
 
 WORKDIR /srv/http/
 
