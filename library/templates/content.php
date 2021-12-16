@@ -38,7 +38,7 @@ function print_content_block(string $header, string $description, string $image_
                     print("<a class='email card_content' href='mailto:$email'>$email</a>");
                 }
                 ?>
-                <p class="license card_content">Foto: <?php print $image_license ?></p>
+                <p class="license card_content"><span class="emoji">📷</span><?php print $image_license ?></p>
             </div>
         <?php
         }

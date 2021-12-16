@@ -70,7 +70,7 @@ function print_radio(string $title, string $input_name, string $opt1_value, stri
 
 function print_recaptcha()
 {
-	print('<div class="enrollment box"><div style="display: inline-block;" class="g-recaptcha center" data-sitekey="6LdrnW8UAAAAAJa67cSTnwyho53uTJRJlwf9_B9W"></div></div>');
+	// print('<div class="enrollment box"><div style="display: inline-block;" class="g-recaptcha center" data-sitekey="6LdrnW8UAAAAAJa67cSTnwyho53uTJRJlwf9_B9W"></div></div>');
 }
 
 function print_reset_and_submit_buttons()
@@ -123,7 +123,7 @@ if (!$registration_open) {
 	print_textBox("address", "text", "address", "required");
 	print_textBox("email", "email", "email", "required");
 	$path = "assets/clubs.json";
-	print_selectBox("licensee", "Licensee", json_decode(file_get_contents($path)), "<a style='text-decoration: none;'href='FAQ'>&#10067;</a>");
+	print_selectBox("licensee", "Licensee", json_decode(file_get_contents($path)), "<a style='text-decoration: none;'href='FAQ'><span class='emoji'>❓</span></a>");
 	if ($settings["baseurl"] == "https://org.ntnu.no/svommer") {
 		print_recaptcha();
 	}
