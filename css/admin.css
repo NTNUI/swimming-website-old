@@ -1,3 +1,8 @@
 .admin_header {
     text-decoration: none;
 }
+
+button {
+    margin-left: 4px;
+    margin-right: 4px;
+}
