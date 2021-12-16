@@ -14,9 +14,12 @@
 
 .card>img {
     width: 100%;
+    border-top-left-radius: var(--border-radius);
+    border-top-right-radius: var(--border-radius);
 }
 
 .card {
+    border-radius: var(--border-radius);
     box-shadow: 0 4px 8px 0 var(--accent-color), 0 6px 20px 0 var(--accent-color);
     width: 30%;
     background-color: var(--primary-background-color);
