@@ -45,8 +45,8 @@ if (Authenticator::is_logged_in()) {
 		$interval = date_diff(date_create(), date_create($registration_date));
 		$time = createTime($interval->y, $interval->m, $interval->d);
 ?>
-		<div class="box" id="medlem-<?php print $id ?>">
-			<h2><?php print "$surname, $first_name" ?><button style="" onclick="godkjenn(<?php print $id ?>)">Approve</button></h2>
+		<div class="box" id="member-<?php print $id ?>">
+			<h2><?php print "$surname, $first_name" ?><button style="" onclick="approve(<?php print $id ?>)">Approve</button></h2>
 			<table class="center_table" style="width: 100%">
 				<tr>
 					<td>Registration date:</td>
@@ -67,5 +67,4 @@ if (Authenticator::is_logged_in()) {
 }
 
 ?>
-<link href="<?php print $settings['baseurl']; ?>/css/admin/medlemsreg.css">
-<script type="text/javascript" src="<?php print $settings['baseurl']; ?>/js/admin/medlemsreg.js"></script>
+<script type="text/javascript" src="<?php print $settings['baseurl']; ?>/js/admin/member_register.js"></script>

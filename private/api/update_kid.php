@@ -62,7 +62,7 @@ if (!Authenticator::is_logged_in()){
 }
 
 // remove peasants from the board
-if (!$access_control->can_access("api", "CIN")) {
+if (!$access_control->can_access("api", "kid")) {
     log::message("Info: Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
     log::forbidden("Access denied", __FILE__, __LINE__);
 }
