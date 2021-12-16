@@ -68,6 +68,7 @@ button, input[type=button], input[type=submit] {
     border: none;
     border-radius: var(--border-radius);
     cursor: pointer;
+    font-size: large;
 }
 
 input[type=button]:hover {
