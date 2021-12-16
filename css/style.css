@@ -105,6 +105,12 @@ h1, h2, h3, h4, p, .email {
     display: block;
 }
 
+.emoji {
+    margin-right: 5px;
+    vertical-align: bottom;
+    line-height: 1.5;
+}
+
 /* TABLES */
 
 .center_table tr td {

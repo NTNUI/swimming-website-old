@@ -128,7 +128,7 @@ function access_link($page, $inline = false)
 
 	print("<button onclick=window.location.href='$link'>");
 	if (!$access_control->can_access("admin", $page)) {
-		print("<span>&#x1f512;</span>"); // padlock emoji
+		print("<span>🔒</span>");
 	}
 	print("$text</button>");
 
