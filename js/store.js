@@ -27,11 +27,8 @@ store.init(BASEURL + "/api/inventory").then(async () => {
     const inventory = await store.inventory;
     const requested_product = inventory.find(product => product.hash === REQUESTED_PRODUCT_HASH);
     console.log(inventory);
-    let num_elements_hidden;
-    inventory.forEach((el) => { num_elements_hidden += !el.visibility });
-    if (inventory.length - num_elements_hidden) {
-        document.querySelector("#storeEmpty").classList.add("hidden");
-    }
+    const empty_store = document.querySelector("#storeEmpty");
+
     for (let i = 0; i < inventory.length; ++i) {
         // don't display hidden elements
         if (!inventory[i].visibility) {
@@ -51,6 +48,10 @@ store.init(BASEURL + "/api/inventory").then(async () => {
         productEntry.querySelector(".store_button").addEventListener("click", purchaseButtonHandler);
         // append product entry to DOM
         document.querySelector("#store_container").appendChild(productEntry);
+
+        if (!empty_store.classList.contains("hidden")) {
+            empty_store.classList.add("hidden");
+        }
     }
 
     // if some product is requested, display the purchase modal right away.
