@@ -46,11 +46,14 @@ class AccessControl
 		if ($this->group_rules == NULL) {
 			log::die("role rules are null", __FILE__, __LINE__);
 		}
+		if ($page === "admin" && $action === "") {
+			return true; // accept users to dashboard
+		}
 		foreach ($this->group_rules as $rule) {
 			$type = $rule["type"] == "ALLOW";
 			$pattern = $rule["pattern"];
 			// full path
-			if ($pattern == "$page/$action" && $match_level < 4) {
+			if ($pattern === "$page/$action" && $match_level < 4) {
 				$result = $type;
 				$match_level = 4;
 			}
@@ -59,7 +62,7 @@ class AccessControl
 				$match_level = 3;
 			}
 			// Top level match
-			else if ($action == $pattern && $match_level < 2) {
+			else if ($action === $pattern && $match_level < 2) {
 				$result = $type;
 				$match_level = 2;
 			}

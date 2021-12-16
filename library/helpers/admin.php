@@ -98,9 +98,9 @@ function print_section($section)
 	$inline = true;
 	switch ($section) {
 		case "member":
-			access_link("medlemsreg", $inline);
+			access_link("member_register", $inline);
 			access_link("autopay", $inline);
-			access_link("dugnad", $inline);
+			access_link("volunteer", $inline);
 			access_link("kid", $inline);
 			access_link("isMember", $inline);
 			break;
@@ -109,7 +109,7 @@ function print_section($section)
 			access_link("access", $inline);
 			access_link("translations", $inline);
 			access_link("store", $inline);
-			access_link("fredagspils", $inline);
+			access_link("friday_beer", $inline);
 			access_link("test", $inline);
 			break;
 		default:

@@ -2,6 +2,10 @@
 if (!Authenticator::is_logged_in()) {
 	log::forbidden("Access denied", __FILE__, __LINE__);
 }
+global $access_control;
+if (!$access_control->can_access("api", "memberlist")) {
+	log::forbidden("Access denied", __FILE__, __LINE__);
+}
 
 // Connect to server
 $db = new DB("member");
