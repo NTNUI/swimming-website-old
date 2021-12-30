@@ -2,12 +2,12 @@
 require_once("library/templates/content.php");
 global $t;
 $entries = [
-	"stevner",
-	"koietur",
-	"SL",
-	"sprinten",
-	"leir",
-	"fredagspils"
+	"swim_meets",
+	"student_games",
+	"swim_course",
+	"cabin_trips",
+	"referee_course",
+	"training_camps"
 ];
 
 print_content_header(
@@ -19,7 +19,8 @@ foreach ($entries as $key) {
 		$t->get_translation($key . "_header"),
 		$t->get_translation($key . "_description"),
 		$t->get_translation($key . "_img_path"),
-		$t->get_translation($key . "_caption")
+		$t->get_translation($key . "_caption"),
+		"",
+		""
 	);
 }
-?>
