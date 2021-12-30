@@ -46,7 +46,8 @@ if (Authenticator::is_logged_in()) {
 		$time = createTime($interval->y, $interval->m, $interval->d);
 ?>
 		<div class="box" id="member-<?php print $id ?>">
-			<h2><?php print "$surname, $first_name" ?><button style="" onclick="approve(<?php print $id ?>)">Approve</button></h2>
+			<h2><?php print "$surname, $first_name" ?></h2>
+			<button style="float: right;" onclick="approve(<?php print $id ?>)">Approve</button>
 			<table class="center_table" style="width: 100%">
 				<tr>
 					<td>Registration date:</td>
