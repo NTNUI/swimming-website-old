@@ -1,5 +1,7 @@
 <?php
 require_once("library/util/api.php");
+require_once("library/util/enrollment.php");
+
 global $settings;
 function trim_space(string $text): string
 {
@@ -254,6 +256,14 @@ $input["surname"] = get_surname($input["name"]);
         $db->bind_param("i", $CIN);
         $db->execute();
     }
+}
+
+// block registration unless enrollment is open
+if (!enrollment_is_active()) {
+    http_response_code(HTTP_FORBIDDEN);
+    $input["message"] = "Enrollment is closed";
+    print(json_encode($input));
+    return;
 }
 
 // register

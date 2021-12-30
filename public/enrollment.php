@@ -1,8 +1,10 @@
 <?php
-require_once("library/templates/store.php");
-require_once("library/util/store.php");
-require_once("library/templates/modal.php");
 require_once("library/templates/content.php");
+require_once("library/templates/modal.php");
+require_once("library/templates/store.php");
+require_once("library/util/enrollment.php");
+require_once("library/util/store.php");
+
 $store = new Store($language);
 $tabindex = 0;
 
@@ -97,12 +99,7 @@ print_content_header(
 );
 
 // Start Content
-// TODO: modify to support date range instead of starting first of january each year
-$close_date = $settings["registration_close"];
-$close_date = strtotime("${close_date['date']} ${close_date['month']} this year");
-$registration_open = ($close_date - strtotime("now") > 0);
-
-if (!$registration_open) {
+if (!enrollment_is_active()) {
 	print_content_block(
 		$t->get_translation("registration_closed_header"),
 		$t->get_translation("registration_closed_content"),
