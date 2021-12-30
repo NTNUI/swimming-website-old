@@ -1,0 +1,410 @@
+{
+	"definitions": {},
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "https://example.com/object1640891522.json",
+	"title": "Root",
+	"type": "object",
+	"required": [
+		"baseurl",
+		"memberTable",
+		"translations_dir",
+		"captcha_key",
+		"stripe",
+		"emails",
+		"SQL_server",
+		"enrollment",
+		"defaults",
+		"license_product_hash"
+	],
+	"additionalProperties": false,
+	"properties": {
+		"baseurl": {
+			"$id": "#root/baseurl",
+			"title": "Baseurl",
+			"type": "string",
+			"default": "",
+			"examples": [
+				"https://127.0.0.1"
+			],
+			"pattern": "^https://"
+		},
+		"memberTable": {
+			"$id": "#root/memberTable",
+			"title": "Member table",
+			"description": "Name of the table containing member rows",
+			"type": "string",
+			"default": "",
+			"examples": [
+				"member"
+			],
+			"pattern": "^.*$"
+		},
+		"translations_dir": {
+			"$id": "#root/translations_dir",
+			"title": "Translations_dir",
+			"description": "Relative location from root of the project on where to locate translation files",
+			"type": "string",
+			"default": "",
+			"examples": [
+				"translations"
+			],
+			"pattern": "^.*$"
+		},
+		"captcha_key": {
+			"$id": "#root/captcha_key",
+			"title": "Captcha_key",
+			"type": "string",
+			"description": "API key for Google reCaptcha",
+			"minLength": 40,
+			"maxLength": 40
+		},
+		"stripe": {
+			"$id": "#root/stripe",
+			"title": "Stripe",
+			"description": "Set of API keys for accessing Stripe backend",
+			"type": "object",
+			"required": [
+				"secret_key",
+				"publishable_key",
+				"signing_key"
+			],
+			"properties": {
+				"secret_key": {
+					"$id": "#root/stripe/secret_key",
+					"title": "Secret key",
+					"description": "Stripe API secret key",
+					"type": "string",
+					"minLength": 32,
+					"maxLength": 32
+				},
+				"publishable_key": {
+					"$id": "#root/stripe/publishable_key",
+					"title": "Publishable key",
+					"description": "Stripe API publishable key",
+					"type": "string",
+					"minLength": 32,
+					"maxLength": 32
+				},
+				"signing_key": {
+					"$id": "#root/stripe/signing_key",
+					"title": "Signing key",
+					"description": "Stripe API signing key",
+					"type": "string",
+					"minLength": 38,
+					"maxLength": 38
+				}
+			}
+		},
+		"emails": {
+			"$id": "#root/emails",
+			"title": "Emails",
+			"description": "Email addresses for sending and receiving automated messages",
+			"type": "object",
+			"required": [
+				"leader",
+				"developer",
+				"analyst",
+				"coach",
+				"bot-general"
+			],
+			"properties": {
+				"leader": {
+					"$id": "#root/emails/leader",
+					"description": "Leader email address",
+					"title": "Leader",
+					"type": "string",
+					"default": "",
+					"examples": [
+						"leader@dom.net"
+					],
+					"format": "email"
+				},
+				"developer": {
+					"$id": "#root/emails/developer",
+					"title": "Developer",
+					"description": "Developer email address",
+					"type": "string",
+					"default": "",
+					"examples": [
+						"developer@dom.net"
+					],
+					"format": "email"
+				},
+				"analyst": {
+					"$id": "#root/emails/analyst",
+					"title": "Analyst",
+					"description": "Analyst / Cashier email address",
+					"type": "string",
+					"default": "",
+					"examples": [
+						"analyst@dom.net"
+					],
+					"format": "email"
+				},
+				"coach": {
+					"$id": "#root/emails/coach",
+					"title": "Coach",
+					"email" : "Coach email address",
+					"type": "string",
+					"default": "",
+					"examples": [
+						"coach@dom.net"
+					],
+					"format": "email"
+				},
+				"bot-general": {
+					"$id": "#root/emails/bot-general",
+					"title": "Bot-general",
+					"description": "Bot email address. Used only as a sender address for automated messages",
+					"type": "string",
+					"default": "",
+					"examples": [
+						"bot@dom.net"
+					],
+					"format": "email"
+				}
+			}
+		},
+		"SQL_server": {
+			"$id": "#root/SQL_server",
+			"title": "Sql_server",
+			"description" : "Database connection settings",
+			"type": "object",
+			"required": [
+				"servername",
+				"username",
+				"password",
+				"databases"
+			],
+			"properties": {
+				"servername": {
+					"$id": "#root/SQL_server/servername",
+					"title": "Server address",
+					"description": "Database server address. Can be either ipv4 or an public http address",
+					"type": "string",
+					"default": "",
+					"examples": [
+						"172.24.0.2"
+					],
+					"pattern": "^.*$",
+					"format": "ipv4"
+				},
+				"username": {
+					"$id": "#root/SQL_server/username",
+					"title": "Username",
+					"description": "Database login username",
+					"type": "string",
+					"examples": [
+						"web"
+					],
+					"pattern": "^.*$"
+				},
+				"password": {
+					"$id": "#root/SQL_server/password",
+					"title": "Password",
+					"description": "Database login password",
+					"type": "string",
+					"examples": [
+						"testing_password"
+					],
+					"pattern": "^.*$"
+				},
+				"databases": {
+					"$id": "#root/SQL_server/databases",
+					"title": "Databases",
+					"description": "Database information on server",
+					"type": "object",
+					"required": [
+						"member",
+						"web"
+					],
+					"properties": {
+						"member": {
+							"$id": "#root/SQL_server/databases/member",
+							"title": "Member",
+							"description": "Member database name",
+							"type": "string",
+							"default": "",
+							"examples": [
+								"members"
+							],
+							"pattern": "^.*$"
+						},
+						"web": {
+							"$id": "#root/SQL_server/databases/web",
+							"title": "Web",
+							"description": "Web database name",
+							"type": "string",
+							"default": "",
+							"examples": [
+								"web"
+							],
+							"pattern": "^.*$"
+						}
+					}
+				}
+			}
+		},
+		"enrollment": {
+			"$id": "#root/enrollment",
+			"title": "Enrollment open",
+			"type": "object",
+			"required": [
+				"open",
+				"start_month",
+				"start_day",
+				"end_month",
+				"end_day"
+			],
+			"properties": {
+				"open": {
+					"$id": "#root/enrollment/open",
+					"title": "open",
+					"default": "auto",
+					"description": "set true to always open, false to always close and auto to use dates",
+					"examples": [
+						"auto",
+						true,
+						false
+					],
+					"enum": [
+						"auto",
+						true,
+						false
+					],
+					"pattern": "^.*$"
+				},
+				"start_month": {
+					"$id": "#root/enrollment/start_month",
+					"title": "Start_month",
+					"type": "string",
+					"default": "",
+					"examples": [
+						"january",
+						"february",
+						"march",
+						"april",
+						"may",
+						"june",
+						"july",
+						"august",
+						"september",
+						"october",
+						"november",
+						"december"
+					],
+					"enum": [
+						"january",
+						"february",
+						"march",
+						"april",
+						"may",
+						"june",
+						"july",
+						"august",
+						"september",
+						"october",
+						"november",
+						"december"
+					]
+				},
+				"start_day": {
+					"$id": "#root/enrollment/start_day",
+					"title": "Start_day",
+					"type": "integer",
+					"default": 1,
+					"minimum": 1,
+					"maximum": 31
+				},
+				"end_month": {
+					"$id": "#root/enrollment/end_month",
+					"title": "End_month",
+					"type": "string",
+					"default": "",
+					"examples": [
+						"january",
+						"february",
+						"march",
+						"april",
+						"may",
+						"june",
+						"july",
+						"august",
+						"september",
+						"october",
+						"november",
+						"december"
+					],
+					"enum": [
+						"january",
+						"february",
+						"march",
+						"april",
+						"may",
+						"june",
+						"july",
+						"august",
+						"september",
+						"october",
+						"november",
+						"december"
+					]
+				},
+				"end_day": {
+					"$id": "#root/enrollment/end_day",
+					"title": "End day",
+					"type": "integer",
+					"default": 1,
+					"minimum": 1,
+					"maximum": 31
+				}
+			}
+		},
+		"defaults": {
+			"$id": "#root/defaults",
+			"title": "Defaults",
+			"type": "object",
+			"required": [
+				"language",
+				"landing-page"
+			],
+			"properties": {
+				"language": {
+					"$id": "#root/defaults/language",
+					"title": "Language",
+					"type": "string",
+					"default": "",
+					"examples": [
+						"no",
+						"en"
+					],
+					"enum":[
+						"no",
+						"en"
+					],
+					"pattern": "^.*$"
+				},
+				"landing-page": {
+					"$id": "#root/defaults/landing-page",
+					"title": "Landing-page",
+					"type": "string",
+					"default": "",
+					"examples": [
+						"homepage"
+					],
+					"pattern": "^.*$"
+				}
+			}
+		},
+		"license_product_hash": {
+			"$id": "#root/license_product_hash",
+			"title": "Product hash of the NSF swimming license",
+			"description": "Product hash of the NSF swimming license for enrollment approval",
+			"type": "string",
+			"default": "",
+			"maxLength": 20,
+			"minLength": 20,
+			"pattern": "^.*$"
+		}
+	}
+}

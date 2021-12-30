@@ -1,4 +1,5 @@
 {
+    "$schema": "./docker.schema.json",
     "baseurl": "https://127.0.0.1",
     "memberTable": "member",
     "translations_dir": "translations",
