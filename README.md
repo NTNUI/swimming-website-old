@@ -217,6 +217,13 @@ Errors are crashes that stop the execution on the server and results with a clie
 
 When configuring logging make sure that you provide a path for .htaccess without symlinks. Navigate to the folder you want your logs to get to and run `pwd -P` to get the physical path (without symlinks).
 
+## Helpful scripts
+
+list all images and their resolutions:
+```bash
+for file in $(find . -name "*.jpg"); do exiv2 $file 2>/dev/null | grep -a "Image size\|File name" | cut -d: -f2; done
+```
+
 ## TODO
 
 ### Split web image
