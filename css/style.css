@@ -82,6 +82,11 @@ a, span, p, li, label {
     font-weight: 500;
 }
 
+.content{
+    max-width: 1000px;
+    margin: auto;
+}
+
 /*TODO: remove this class and make it somehow work */
 .visible {
     display: block !important;
