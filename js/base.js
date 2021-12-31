@@ -41,4 +41,7 @@ addLoadEvent(() => {
     document.getElementById("menu_container").addEventListener("click", function(e) {
         document.getElementById("menu_container").classList.remove("visible");
     });
+    if (localStorage.getItem("admin")) {
+        document.getElementById("admin_menu_link").style.display = "";
+    }
 });

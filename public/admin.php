@@ -21,6 +21,7 @@ if (!Authenticator::is_logged_in()) {
 global $access_control;
 $access_control = new AccessControl($_SESSION["username"]);
 
+print("<script>localStorage.setItem('admin', true);</script>");
 print_admin_header(Authenticator::get_name($_SESSION["username"]));
 
 if (Authenticator::log_out_requested()) {
