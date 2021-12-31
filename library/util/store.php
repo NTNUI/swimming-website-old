@@ -37,6 +37,9 @@ class Store
 	 */
 	function approve_member(string $phone)
 	{
+		if (!$phone) {
+			throw new InvalidArgumentException("phone is required");
+		}
 		$db = new DB("member");
 		$db->prepare("UPDATE member SET approved_date=NOW() WHERE phone=?");
 		$db->bind_param("s", $phone);

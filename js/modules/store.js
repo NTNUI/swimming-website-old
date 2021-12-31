@@ -86,11 +86,12 @@ export default class Store {
                 }
 
                 // grab order info
-                let customer = {};
-                customer.name = this.overlay.querySelector("#checkout_name").value;
-                customer.email = this.overlay.querySelector("#checkout_email").value;
-                customer.phone = this.overlay.querySelector("#checkout_phone").value;
-                
+                if (customer === null) {
+                    customer.name = this.overlay.querySelector("#checkout_name").value;
+                    customer.email = this.overlay.querySelector("#checkout_email").value;
+                    customer.phone = this.overlay.querySelector("#checkout_phone").value;
+                }
+
                 // close checkout modal and return new order
                 this.overlay.style.display = "none";
                 resolve({ product: product, customer: customer });
