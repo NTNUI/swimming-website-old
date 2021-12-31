@@ -223,7 +223,7 @@ $input["surname"] = get_surname($input["name"]);
     $db->execute();
     $result = 0;
     $approved_date;
-    $db->stmt->bind_result($result, $approved_date);
+    $db->stmt->bind_result($approved_date, $result);
     $db->fetch();
     $input["user_exists"] = (bool)$result;
     $input["approved_date"] = isset($approved_date) ? $approved_date : null;
@@ -258,7 +258,12 @@ $input["surname"] = get_surname($input["name"]);
     }
 }
 
-// block registration unless enrollment is open
+// don't perform destructive actions on dryrun
+if ($input["dryrun"]) {
+    goto return_response;
+}
+
+// block registration unless enrollment is open.
 if (!enrollment_is_active()) {
     http_response_code(HTTP_FORBIDDEN);
     $input["message"] = "Enrollment is closed";
@@ -267,25 +272,36 @@ if (!enrollment_is_active()) {
 }
 
 // register
-if (!$input["dryrun"]) {
+{
     $db = new DB("member");
-    $sql = "INSERT INTO member (first_name, surname, gender, birth_date, phone, email, address, zip, licensee, CIN, registration_date) VALUES (?,?,?,?,?,?,?,?,?,?,NOW())";
+    $sql = "INSERT INTO member (first_name, surname, gender, birth_date, phone, email, address, zip, licensee, registration_date) VALUES (?,?,?,?,?,?,?,?,?,NOW())";
     $db->prepare($sql);
     $gender = $input["isMale"] ? "Male" : "Female";
     $first_name = get_first_name($input["name"]);
     $surname = get_surname($input["name"]);
     $birthDate = date("Y-m-d", strtotime($input["birthDate"]));
-    $db->bind_param("sssssssisi", $first_name, $surname, $gender, $birthDate, $input["phone"], $input["email"], $input["address"], $input["zip"], $input["licensee"], $input["CIN"]);
+    $db->bind_param("sssssssis", $first_name, $surname, $gender, $birthDate, $input["phone"], $input["email"], $input["address"], $input["zip"], $input["licensee"]);
+    $db->execute();
+}
+
+// update CIN number if found
+if ($input["CIN"]) {
+    $db = new DB("member");
+    $sql = "UPDATE member SET CIN=? WHERE phone=?";
+    $db->prepare($sql);
+    $db->bind_param("is", $input["CIN"], $input["phone"]);
     $db->execute();
 }
 
 // return success
+return_response:
+
 http_response_code(HTTP_OK);
 $input["error"] = false;
 $input["message"] = "Member has been registered successfully";
 
 if ($input["membership_status"] == "pending") {
-    if (false) {
+    if (false && !$input["dryrun"]) {
         // notification to cashier
         $sendTo = $settings["emails"]["analyst"];
         $message = "A new member needs manual approval. Log in to admin pages and approve member.";
