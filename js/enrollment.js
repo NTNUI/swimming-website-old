@@ -52,7 +52,14 @@ addLoadEvent(() => {
             }
         }
         // send membership request
-        const enrollResponse = await enroll(member);
+        let enrollResponse = {};
+        try {
+            enrollResponse = await enroll(member);
+        } catch (err) {
+            display_modal("Error", "Something unexpected happened. Developers are alerted 👷", "Accept" ,"", "failure");
+            console.error(err);
+            return;
+        }
         console.table(enrollResponse);
 
         if (enrollResponse.error) {
