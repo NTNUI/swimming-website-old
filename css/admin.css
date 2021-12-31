@@ -1,8 +1,8 @@
 .admin_header {
-    color: #000;
     text-decoration: none;
 }
 
-.admin_username {
-    color: #000;
+button {
+    margin-left: 4px;
+    margin-right: 4px;
 }

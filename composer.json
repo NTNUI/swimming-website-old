@@ -1,11 +1,24 @@
 {
-    "name": "ntnuisvomming/webpage",
-    "description": "Professional swimming beer relay team",
+    "name": "ntnui/swimming-webpage",
+    "description": "Web site for swimming group in NTNUI sports club in Trondheim, Norway",
     "type": "project",
     "require": {
-        "stripe/stripe-php": "^7.97",
-        "michelf/php-markdown": "^1.9",
-        "justinrainbow/json-schema": "^5.2",
-        "slim/slim": "^4.9"
-    }
+        "giggsey/libphonenumber-for-php": "^8.12",
+        "stripe/stripe-php": "^7.107"
+    },
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Olav Bech Bråten",
+            "email": "olav.braaten@ntnui.no"
+        },
+        {
+            "name": "Pavel Skipenes",
+            "email": "pavel.skipenes@ntnui.no"
+        },
+        {
+            "name": "Martin Gundersen",
+            "email": "martin.gundersen@ntnui.no"
+        }
+    ]
 }

@@ -1,6 +1,6 @@
 <?php
-global $t, $settings;
-$base_url = $settings['baseurl'];
+global $settings;
+require_once("library/templates/modal.php");
 ?>
 
 <div class='box'>
@@ -26,7 +26,4 @@ $base_url = $settings['baseurl'];
 	</div>
 
 </div>
-<script type="text/javascript">
-	const api_src = '<?php print "$base_url/api" ?>';
-</script>
-<script src='<?php print "$base_url/js/admin/isMember.js" ?>' type='text/javascript'></script>
+<script src='<?php print $settings["baseurl"] . "/js/admin/isMember.js" ?>' type='module'></script>

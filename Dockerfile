@@ -1,6 +1,6 @@
 FROM archlinux
 
-RUN pacman -Syu --noconfirm php php-apache php-dblib composer
+RUN pacman -Syu --noconfirm php php-apache php-dblib composer neovim bat micro perl
 
 WORKDIR /srv/http/
 
@@ -12,6 +12,9 @@ RUN mkdir sessions
 RUN mkdir vendor
 RUN mkdir translations
 RUN mkdir -p img/store
+
+RUN mkdir /var/lib/mariadb
+RUN chmod -R 777 /var/lib/mariadb
 
 COPY translations/ translations
 COPY composer.json .
@@ -42,6 +45,7 @@ RUN cp httpd-ssl.conf /etc/httpd/conf/extra/httpd-ssl.conf
 RUN cp -f .htaccess /srv/http/
 RUN cp -f docker.json /srv/http/settings/settings.json
 
+WORKDIR /srv/http
 # Run
 EXPOSE 80 443
 CMD httpd -D FOREGROUND

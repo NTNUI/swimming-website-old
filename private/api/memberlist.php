@@ -2,42 +2,42 @@
 if (!Authenticator::is_logged_in()) {
 	log::forbidden("Access denied", __FILE__, __LINE__);
 }
+global $access_control;
+if (!$access_control->can_access("api", "memberlist")) {
+	log::forbidden("Access denied", __FILE__, __LINE__);
+}
 
 // Connect to server
-$conn = connect("medlem");
+$db = new DB("member");
 
-$sql = "SELECT id, regdato, etternavn, fornavn, kommentar, epost FROM " . $settings["memberTable"] . " WHERE kontrolldato IS NULL OR YEAR(kontrolldato) <> YEAR(NOW()) ORDER BY regdato";
-$query = $conn->prepare($sql);
+$sql = "SELECT id, registration_date, surname, first_name, email FROM member WHERE approved_date IS NULL OR YEAR(approved_date) <> YEAR(NOW()) ORDER BY registration_date";
+$db->prepare($sql);
+$db->execute();
 
-if (!$query->execute()) {
-	die("Connection failed: " . $query->error);
-}
-$query->bind_result($id, $registration_date, $surname, $name, $comment, $email);
+$db->stmt->bind_result($id, $registration_date, $surname, $name, $email);
 
 $result = [];
-while ($query->fetch()) {
+while ($db->fetch()) {
 	$surname = htmlspecialchars($surname);
-	$name = htmlspecialchars($name);
-	$comment = htmlspecialchars($comment);
+	$first_name = htmlspecialchars($first_name);
 	$email = htmlspecialchars($email);
 
 	$interval = date_diff(date_create(), date_create($registration_date));
-	$tid = "";
+	$registration_diff = "";
 	if ($interval->y != 0) {
-		$tid .= $interval->y . " år, ";
+		$registration_diff .= $interval->y . " year, ";
 	}
 	if ($interval->m != 0) {
-		$tid .= $interval->m . " måneder, ";
+		$registration_diff .= $interval->m . " month, ";
 	}
-	$tid .= $interval->d . " dager";
+	$registration_diff .= $interval->d . " days";
 	$result[] = array(
 		"id" => $id,
-		"fornavn" => $fornavn,
-		"etternavn" => $etternavn,
-		"epost" => $epost,
-		"regdato" => $registration_date,
-		"regdiff" => $tid,
-		"kommentar" => $kommentar
+		"first_name" => $first_name,
+		"surname" => $surname,
+		"email" => $epost,
+		"registration_date" => $registration_date,
+		"registration_diff" => $registration_diff,
 	);
 }
 header("Content-Type: application/json");

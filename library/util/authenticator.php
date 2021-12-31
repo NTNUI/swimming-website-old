@@ -1,4 +1,6 @@
 <?php
+require_once("library/exceptions/user.php");
+require_once("library/exceptions/authentication.php");
 // TODO: new function: Generate random password
 // TODO: new function: require password reset on user_id
 // TODO: merge with access_control class
@@ -6,23 +8,38 @@
 // Static class Authenticator provides object less authentication services.
 class Authenticator
 {
-    // Log user in given a username and a password. Check if login is successful with is_logged_in()
-    static public function log_in($username, $password)
+
+    /**
+     * Logs in user given username and password
+     * @see Authenticator::is_logged_in()
+     * @param string $username
+     * @param string $password
+     * @throws \AuthenticationException on failure
+     * @return void
+     */
+    static public function log_in(string $username, string $password)
     {
         if (Authenticator::is_logged_in()) {
             log::die("Trying to log in even though a user is logged in", __FILE__, __LINE__);
         }
-        $password_hash = (new Authenticator)->load_from_db($username);
-        if (password_verify($password, $password_hash)) {
-            $_SESSION["logged_in"] = 1;
-            $_SESSION["username"] = $username;
-            return true;
+        $password_hash = "";
+        try {
+            $password_hash = (new Authenticator)->load_from_db($username);
+        } catch (\UserException $_) {
+            throw \AuthenticationException::WrongCredentials();
         }
-        return false;
+        if (!password_verify($password, $password_hash)) {
+            throw \AuthenticationException::WrongCredentials();
+        }
     }
 
-    // returns true if the user has POST'ed username and password
-    static public function has_posted_login_credentials()
+
+    /**
+     * Check if user has POSTed login credentials
+     *
+     * @return bool true if user has posted login credentials. False otherwise.
+     */
+    static public function has_posted_login_credentials(): bool
     {
         if (Authenticator::is_logged_in()) {
             log::die("User is POSTing credentials while being logged in", __FILE__, __LINE__);
@@ -30,10 +47,12 @@ class Authenticator
         return argsURL("POST", "username") && argsURL("POST", "password");
     }
 
-    // returns true if user has POST'ed username, old password and two identical new passwords.
-    // to be used when updating old password.
-    // TODO: remove if this should be a non authenticator problem
-    static public function has_posted_updated_credentials()
+
+    /**
+     * Check if user has sent a POST request containing new passwords. Used when changing passwords.
+     * @return bool true if new passwords has been sent. False otherwise. 
+     */
+    static public function has_posted_updated_credentials(): bool
     {
         if (!Authenticator::is_logged_in()) {
             log::die("Non logged in user tries to POST credentials", __FILE__, __LINE__);
@@ -41,14 +60,24 @@ class Authenticator
         return argsURL("POST", "new_pass1") && argsURL("POST", "new_pass2");
     }
 
-    // returns if the user is logged in
-    static public function is_logged_in()
+
+    /**
+     * Is user logged in?
+     *
+     * @return bool true if user is logged in. False otherwise.
+     */
+    static public function is_logged_in(): bool
     {
         return argsURL("SESSION", "logged_in") == 1;
     }
 
-    // Returns true if user wants to log out
-    static public function log_out_requested()
+
+    /**
+     * User wants to log out?
+     *
+     * @return bool true if user wants to log out. False otherwise.
+     */
+    static public function log_out_requested(): bool
     {
         if (!Authenticator::is_logged_in()) {
             log::die("User is not logged in.", __FILE__, __LINE__);
@@ -56,7 +85,12 @@ class Authenticator
         return argsURL("REQUEST", "action") == "logout";
     }
 
-    // @returns string|null
+
+    /**
+     * Get username
+     *
+     * @return string of currently logged in user. null otherwise.
+     */
     static public function get_username()
     {
         if (!Authenticator::is_logged_in()) {
@@ -65,17 +99,30 @@ class Authenticator
         return $_SESSION["username"];
     }
 
-    // Log out currently logged in user
+
+    /**
+     * Log out currently logged in user
+     * Side effects:
+     * - destroy session
+     * - free all session variables
+     * @return void
+     */
     static public function log_out()
     {
         if (!Authenticator::is_logged_in()) {
             log::die("Cannot log out a user that is not logged in", __FILE__, __LINE__);
             return;
         }
-        return session_unset() && session_destroy();
+        session_unset();
+        session_destroy();
     }
 
-    // returns true if user needs or requested to change password
+
+    /**
+     * Password change requested?
+     * If requested action is "changepass" or current password date is older than one year.
+     * @return bool true if password change has been requested. False otherwise.
+     */
     static public function pass_change_requested()
     {
 
@@ -93,8 +140,15 @@ class Authenticator
         return $password_date > date_add($deadline, $oneYear) || argsURL("REQUEST", "action") == "changepass";
     }
 
-    // returns a string with an error if error is present. empty string is returned on no error
-    static public function validate_new_passwords($password, $password2)
+
+    /**
+     * Validate new passwords
+     *
+     * @param string $password1
+     * @param string $password2
+     * @return string error message if any error is present. Empty string is returned otherwise.
+     */
+    static public function validate_new_passwords(string $password, string $password2): string
     {
         $username = argsURL("SESSION", "username");
         if (!Authenticator::is_logged_in() || !$username) {
@@ -118,158 +172,162 @@ class Authenticator
         return "";
     }
 
-    static public function get_name()
-    {
-        if (!Authenticator::is_logged_in()) {
-            return null;
-        }
-        return argsURL("SESSION", "name");
-    }
-
-    // set new password
-    static public function change_password($username, $new_password)
+    /**
+     * Change a password for @param username
+     * Side effects:
+     * - Update session variables
+     * 
+     * @param string $username to modify
+     * @param string $new_password
+     * @return void
+     */
+    static public function change_password(string $username, string $new_password)
     {
         if (!Authenticator::is_logged_in() || !$username) {
             log::die("ERROR: User is not logged in", __FILE__, __LINE__);
         }
 
-        $conn = connect("web");
-
-        $query = $conn->prepare("UPDATE users SET passwd=?, last_password=NOW() WHERE username=?");
-        if (!$query) {
-            log::die("ERROR: Could not prepare query" . mysqli_error($conn), __FILE__, __LINE__);
-        }
-
+        $db = new DB("web");
+        $db->prepare("UPDATE users SET passwd=?, last_password=NOW() WHERE username=?");
         $password_hash = password_hash($new_password, PASSWORD_DEFAULT);
-        $query->bind_param("ss", $password_hash, $username);
-        if (!$query) {
-            log::die("ERROR: Could not bind params " . mysqli_error($conn), __FILE__, __LINE__);
-        }
-
-        if (!$query->execute()) {
-            log::die("ERROR: Could not update password. " . mysqli_error($conn), __FILE__, __LINE__);
-        }
+        $db->bind_param("ss", $password_hash, $username);
+        $db->execute();
 
         $_SESSION["password_date"] = new DateTime("now");
-        $query->close();
-        mysqli_close($conn);
     }
 
-    // @return string|null
-    static private function load_from_db($username)
+    /**
+     * Get a users name
+     *
+     * @param string $username of the user
+     * @return string users display name
+     * @throws UserException if current user is not logged in
+     * @throws UserException if user is not found
+     */
+    static public function get_name(string $username): string
     {
-        global $access_control;
-        $sql = "SELECT name, passwd, last_password FROM users WHERE username=?";
-
-        $conn = connect("web");
-
-        $query = $conn->prepare($sql);
-        if (!$query) {
-            log::die("Could not prepare query " . mysqli_error($conn), __FILE__, __LINE__);
+        if(!Authenticator::is_logged_in()){
+            throw UserException::LoginRequired();
         }
-
-        $query->bind_param("s", $username);
-        if (!$query) {
-            log::die("Could not bind params " . mysqli_error($conn), __FILE__, __LINE__);
+        $db = new DB("web");
+        $db->prepare("SELECT name FROM users WHERE username=?");
+        $db->bind_param("s", $username);
+        $db->execute();
+        $name = "";
+        $db->stmt->bind_result($name);
+        if ($db->fetch() === null) {
+            throw UserException::NotFound();
         }
+        return $name;
+    }
 
-        $query->execute();
-        if (!$query) {
-            log::die("Could not execute query " . mysqli_error($conn), __FILE__, __LINE__);
-        }
-
+    /**
+     * Get credentials
+     * Side effects:
+     * - Refresh global access control
+     * - update session variables
+     *
+     * @param string $username
+     * @return string password_hash of @param username
+     */
+    static private function load_from_db(string $username): string
+    {
+        // get credentials
+        $db = new DB("web");
+        $db->prepare("SELECT name, passwd, last_password FROM users WHERE username=?");
+        $db->bind_param("s", $username);
+        $db->execute();
         $password_hash = "";
         $password_date = "";
         $name = "";
-
-        $query->bind_result($name, $password_hash, $password_date);
-        if (!$query) {
-            log::die("Could not bind results " . mysqli_error($conn), __FILE__, __LINE__);
+        $db->stmt->bind_result($name, $password_hash, $password_date);
+        if ($db->fetch() === null) {
+            throw UserException::NotFound();
         }
 
-        $result = $query->fetch();
-
-        if ($result === false) {
-            log::die("Could not fetch results " . mysqli_error($conn), __FILE__, __LINE__);
-        }
-
-        $query->close();
-        mysqli_close($conn);
-
-        if ($result === null) {
-            log::message("username $username is not found", __FILE__, __LINE__);
-            return null;
-        }
-
-        // refresh access
+        // refresh access control
+        global $access_control;
         $access_control = new AccessControl($username);
 
+        // update session variables
         $_SESSION["password_date"] = $password_date;
         $_SESSION["name"] = $name;
+
         return $password_hash;
     }
 
-    static public function create_user(string $username, string $password)
-    {
-        global $access_control;
-        $conn = connect("web");
 
+    /**
+     * Create a new user
+     * Side effects:
+     * - log action
+     * 
+     * @param string $name Full name
+     * @param string $username unique username
+     * @param string $password strong and complicated password
+     * @return bool true if created successfully. False if username is taken.
+     */
+    static public function create_user(string $name, string $username, string $password)
+    {
         if (Authenticator::username_exists($username)) {
-            log::message("username: $username already exists", __FILE__, __LINE__);
+            log::message("Info: username: $username already exists", __FILE__, __LINE__);
             return false;
         }
-        $sql = "INSERT INTO users (username, name, passwd) VALUES(?, ?, ?)";
-        $query = $conn->prepare($sql);
-        if(!$query){
-            log::die("Failed to prepare statement", __FILE__, __LINE__);
-        }
+
+        // create user
+        $db = new DB("web");
+        $db->prepare("INSERT INTO users (name, username, passwd) VALUES(?, ?, ?)");
         $password_hash = password_hash($password, PASSWORD_DEFAULT);
-        $query->bind_param("sss", $username, $name, $password_hash);
-        if (!$query) {
-            log::die("could not bind params " . mysqli_error($conn), __FILE__, __LINE__);
-        }
-        if (!$query->execute()) {
-            log::die("Could not execute query", __FILE__, __LINE__);
-        }
-        $query->close();
+        $db->bind_param("sss", $name, $username, $password_hash);
+        $db->execute();
+
+        // log create user
+        global $access_control;
         $access_control->log("admin/users", "create user", $username);
+
         return true;
     }
 
-    static public function username_exists(string $username)
-    {
-        $conn = connect("web");
 
-        $sql = "SELECT COUNT(*) FROM users WHERE username=?";
-        $query = $conn->prepare($sql);
-        if (!$query) {
-            log::die("Could not execute query", __FILE__, __LINE__);
-        }
-        $query->bind_param("s", $username);
-        if (!$query) {
-            log::die("Could not bind params", __FILE__, __LINE__);
-        }
+    /**
+     * Check if a username exits
+     *
+     * @param string $username
+     * @return bool true if @param $username exists. False otherwise.
+     */
+    static public function username_exists(string $username): bool
+    {
+        $db = new DB("web");
+        $db->prepare("SELECT COUNT(*) FROM users WHERE username=?");
+        $db->bind_param("s", $username);
         $result = 0;
-        if (!$query->execute()) {
-            log::die("Could not execute query", __FILE__, __LINE__);
-        }
-        if (!$query->bind_result($result)) {
+        $db->execute();
+        if (!$db->stmt->bind_result($result)) {
             log::die("Could not bind results", __FILE__, __LINE__);
         }
-        $query->fetch();
-        $query->close();
+        $db->fetch();
         return (bool)$result;
     }
 
-    // need testing
-    static public function auth_API(string $page, string $action, string $FILE = __FILE__, int $LINE = __LINE__){
+
+    /**
+     * Undocumented function
+     *
+     * @param string $page
+     * @param string $action
+     * @param string $FILE
+     * @param int $LINE
+     * @return void
+     */
+    static public function auth_API(string $page, string $action, string $FILE = __FILE__, int $LINE = __LINE__)
+    {
         $access_control = new AccessControl(argsURL("SESSION", "username"));
-        if (!Authenticator::is_logged_in()){
+        if (!Authenticator::is_logged_in()) {
             log::forbidden("Access denied", $FILE, $LINE);
         }
-        
+
         if (!$access_control->can_access($page, $action = "")) {
-            log::message("Access denied for " . Authenticator::get_username() . "performing action: " . $action, $FILE, $LINE);
+            log::message("Info: Access denied for " . Authenticator::get_username() . "performing action: " . $action, $FILE, $LINE);
             log::forbidden("Access denied", $FILE, $LINE);
         }
     }

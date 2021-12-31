@@ -1,3 +1,4 @@
+"use strict";
 function register(username) {
     fetch(BASEURL + "/api/friday_beer?register=" + username)
         .then((response) => response.json())

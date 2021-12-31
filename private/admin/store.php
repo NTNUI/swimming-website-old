@@ -1,33 +1,30 @@
 <?php
 global $settings;
+require_once("library/templates/modal.php");
 // TODO: remove unused html classes
-// TODO: add as much php code to storeadmin.php and rewrite calls to backend in js
 // TODO: implement translations
-// TODO: on load get items from db
-// TODO: on double click on item, hide all items, get purchases, show purchases box, enable a back link or button
-// TODO: on set delivered send a POST request to backend.
-// TODO: add drag & drop support for image uploads
 ?>
 
 <link href="<?php print($settings['baseurl']); ?>/css/admin/store.css" />
 <link href="https://unpkg.com/tabulator-tables@4.5.3/dist/css/tabulator.min.css" rel="stylesheet" />
-<script type="text/javascript" src="https://unpkg.com/tabulator-tables@4.5.3/dist/js/tabulator.min.js"></script>
-<script type="text/javascript" src="https://momentjs.com/downloads/moment.min.js"></script>
-<script type="text/javascript" src="<?php print($settings['baseurl']); ?>/js/admin/store.js"></script>
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
+<script defer type="text/javascript" src="https://unpkg.com/tabulator-tables@4.5.3/dist/js/tabulator.min.js"></script>
+<script defer type="text/javascript" src="https://momentjs.com/downloads/moment.min.js"></script>
+<script type="module" src="<?php print($settings['baseurl']); ?>/js/admin/store.js"></script>
 
 <div class="hidden">
 	<div class="box">
-		<h3>Purchases</h3>
+		<h3>Orders</h3>
 	</div>
-	<div id="purchases_list"></div>
+	<div id="order_list"></div>
 </div>
 
 <div class="box">
 	<h3>
 		Store selection
 	</h3>
-	<label for="">Double click to see purchases</label>
-	<div id="items"></div>
+	<label for="">Double click to see orders</label>
+	<div id="products"></div>
 </div>
 
 <div id="add_container">
@@ -35,7 +32,7 @@ global $settings;
 		<h3>Price Calculator</h3>
 		<div>
 			<label for="">Price without fees</label>
-			<input type="number" name="" value="0" id="price-input" style="width: 50%;">
+			<input type="number" name="" value="0" id="price-input">
 		</div>
 		<div>
 			<label for="">Price with fees</label>
@@ -43,8 +40,8 @@ global $settings;
 		</div>
 	</div>
 	<div class="box">
-		<h3>Add an item to the store</h3>
-		<form id="form-add-store-item" action="<?php print $settings["baseurl"]; ?>/api/storeadmin" method="POST">
+		<h3>Add a product to the store</h3>
+		<form id="form-add-product" action="<?php print $settings["baseurl"]; ?>/api/store" method="POST">
 			<div>
 				<label for="name_no">Title in Norwegian</label>
 				<input name="name_no" type="text" required />
@@ -68,13 +65,13 @@ global $settings;
 				<div class="form-row">
 					<div>
 						from
-						<input type="date" name="date_start" placeholder="mm-dd-yyyy" style="width: unset" />
-						<input type="time" name="time_start" placeholder="13:00" style="width: unset" />
+						<input type="date" name="date_start" placeholder="mm-dd-yyyy"/>
+						<input type="time" name="time_start" placeholder="13:00"/>
 					</div>
 					<div>
 						to
-						<input type="date" name="date_end" placeholder="mm-dd-yyyy" style="width: unset" />
-						<input type="time" name="time_end" placeholder="13:00" style="width: unset" />
+						<input type="date" name="date_end" placeholder="mm-dd-yyyy"/>
+						<input type="time" name="time_end" placeholder="13:00"/>
 					</div>
 				</div>
 			</div>
@@ -103,7 +100,7 @@ global $settings;
 			<label class="purchase-row-comment">Comment</label>
 		</div>
 		<div>
-			<button class="purchase-row-button-deliver">Deliver / Delivered</button>
+			<button class="purchase-row-button-deliver">Deliver</button>
 
 		</div>
 	</div>

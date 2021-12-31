@@ -2,7 +2,7 @@
 class Translator
 {
 	private $page; 			// page name
-	private $language; 		// language code. Currently supportig "no" and "en"
+	private $language; 		// language code. Currently supporting "no" and "en"
 	private $directory;		// path to translation directory
 	private $translations; 	// global array of all translations
 
@@ -83,8 +83,8 @@ class Translator
 
 	public function get_url($url)
 	{
-		global $base_url;
-		$ret = $base_url . "/";
+		global $settings;
+		$ret = $settings["baseurl"] . "/";
 		if ($this->language != "no") $ret .= $this->language . "/";
 		return $ret . ($url == "mainpage" ? "" : $url);
 	}

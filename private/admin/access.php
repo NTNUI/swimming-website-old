@@ -1,107 +1,98 @@
 <?php
-
-
-$conn = connect("web");
+// Fuck this mess...
+require_once("library/util/db.php");
 
 // get roles
-$roles = array();
-$sql = "SELECT id, name FROM roles";
-$query = $conn->prepare($sql);
-$query->execute();
-$query->bind_result($id, $role);
-while ($query->fetch()) {
-	$roles[$id] = $role;
+$roles = array(); {
+	$db = new DB("web");
+	$roles = array();
+	$db->prepare("SELECT id, name FROM roles");
+	$db->execute();
+	$role_id = 0;
+	$role_name = "";
+	$db->stmt->bind_result($role_id, $role_name);
+	while ($db->fetch()) {
+		$roles[$role_id] = $role_name;
+	}
 }
-$query->close();
 
 // get users
-$users = array();
-$sql = "SELECT id, username FROM users";
-$query = $conn->prepare($sql);
-$query->execute();
-$query->bind_result($id, $name);
-while ($query->fetch()) {
-	$users[$id] = $name;
+$users = array(); {
+	$db = new DB("web");
+	$sql = "SELECT id, username FROM users";
+	$db->prepare($sql);
+	$db->execute();
+	$user_id = 0;
+	$username = "";
+	$db->stmt->bind_result($user_id, $username);
+	while ($db->fetch()) {
+		$users[$user_id] = $username;
+	}
 }
-$query->close();
 
-$rolerules = array();
-$userrules = array();
+$role_rules = array();
 
-$roleId = intval(argsURL("REQUEST", "role"));
-$userId = intval(argsURL("REQUEST", "user"));
+$role_id = intval(argsURL("REQUEST", "role"));
+$user_id = intval(argsURL("REQUEST", "user"));
 $type = argsURL("REQUEST", "type");
 
-if ($type != "") {
+if ($type !== "") {
 	$table = "";
-	$id = $_REQUEST["key"];
 
-	$ruleType = $_REQUEST["ruleType"];
-	$page = $_REQUEST["page"];
+	$id = argsURL("REQUEST", "key");
+	$ruleType = argsURL("REQUEST", "ruleType");
+	$page = argsURL("REQUEST", "page");
 
-	if ($type == "addRole") {
-		if ($ruleType == "" || $page == "") die("Wrong request format");
-		$sql = "INSERT INTO role_access (role, type, page) VALUE (?, ?, ?)";
-		$query = $conn->prepare($sql);
-		$query->bind_param("iss", $roleId, $ruleType, $page);
-		if ($query->execute()) { ?>
+	if ($type === "addRole") {
+		if ($ruleType === "" || $page === "") die("Wrong request format");
+		$db = new DB("web");
+		$db->prepare("INSERT INTO role_access (role, type, page) VALUE (?, ?, ?)");
+		$db->bind_param("iss", $role_id, $ruleType, $page);
+		if ($db->execute()) { ?>
 			<h1 class="box">Record created</h1>
-		<?php		} else { ?>
+		<?php
+		} else { ?>
 			<h1 class="box error">Something went wrong...</h1>
 		<?php
 		}
-		$query->close();
-		$access_control->log("admin/access", "add " . $page . " rule for g[" . $roleId . "] ", $ruleType);
-	} else if ($type == "editRole") {
-		$query = NULL;
-		if ($_REQUEST["delete"] == 1) {
-			$sql = "DELETE FROM role_access WHERE id=?";
-			$query = $conn->prepare($sql);
-			$query->bind_param("i", $id);
-			$access_conrol->log("admin/access", "delete rule", $ruleId);
+		$access_control->log("admin/access", "add " . $page . " rule for g[" . $role_id . "] ", $ruleType);
+	} else if ($type === "editRole") {
+		$db = new DB("web");
+		if ($_REQUEST["delete"] === 1) {
+
+			$db->prepare("DELETE FROM role_access WHERE id=?");
+			$db->bind_param("i", $id);
+			$access_control->log("admin/access", "delete rule", $ruleId);
 		} else {
-			$sql = "UPDATE role_access SET type=?, page=? WHERE id=?";
-			if ($ruleType == "" || $page == "") die("Wrong request format");
-			$query = $conn->prepare($sql);
-			$query->bind_param("ssi", $ruleType, $page, $id);
-			$access_control->log("admin/access", "change " . $page . " rule for g[" . $roleId . "]", $ruleType);
+			if ($ruleType === "" || $page === "") die("Wrong request format");
+			$db->prepare("UPDATE role_access SET type=?, page=? WHERE id=?");
+			$db->bind_param("ssi", $ruleType, $page, $id);
+			$access_control->log("admin/access", "change " . $page . " rule for g[" . $role_id . "]", $ruleType);
 		}
-		if ($query->execute()) { ?>
+		if ($db->execute()) { ?>
 			<h1 class="box">Record updated</h1>
-		<?php		} else { ?>
+		<?php
+		} else {
+		?>
 			<h1 class="box error">Something went wrong...</h1>
 <?php
 		}
-		$query->close();
 	}
 }
 
-if ($roleId == 0 && $userId == 0) $roleId = 1;
+if ($role_id === 0 && $user_id === 0) $role_id = 1;
 
-if ($roleId != 0) {
-	$sql = "SELECT id, type, page FROM role_access WHERE role=?";
-	$query = $conn->prepare($sql);
-	$query->bind_param("i", $roleId);
-	$query->execute();
-	$query->bind_result($id, $type, $page);
-	while ($query->fetch()) {
-		$rolerules[] = array("id" => $id, "type" => $type, "page" => $page);
+if ($role_id !== 0) {
+	$db = new DB("web");
+	$db->prepare("SELECT id, type, page FROM role_access WHERE role=?");
+	$db->bind_param("i", $role_id);
+	$db->execute();
+	$db->stmt->bind_result($role_access_id, $type, $page);
+	while ($db->fetch()) {
+		$role_rules[] = array("id" => $role_access_id, "type" => $type, "page" => $page);
 	}
-	$query->close();
-}
-if ($userId != 0) {
-	$sql = "SELECT id, type, page FROM user_access WHERE role=?";
-	$query = $conn->prepare($sql);
-	$query->bind_param("i", $userId);
-	$query->execute();
-	$query->bind_result($id, $type, $page);
-	while ($query->fetch()) {
-		$userrules[] = array("id" => $id, "type" => $type, "page" => $page);
-	}
-	$query->close();
 }
 
-$conn->close();
 ?>
 
 <div class="box">
@@ -114,38 +105,38 @@ $conn->close();
 	<form method="GET">
 		<select name="role" style="width: 50%">
 			<?php foreach ($roles as $i => $role) {
-				print("<option value=$i" . ($roleId == $i ? " selected" : "") . ">$role</option>");
+				print("<option value=$i" . ($role_id === $i ? " selected" : "") . ">$role</option>");
 			} ?>
 		</select>
-		<button type="submit">Vis</button>
+		<button type="submit">Show</button>
 	</form>
 </div>
 
 <div class="box">
 	<label for="">Rules</label>
 
-	<?php if (sizeof($rolerules) > 0) { ?>
+	<?php if (sizeof($role_rules) > 0) { ?>
 		<table style="width: 100%">
 			<tr>
 				<th>Type</th>
 				<th>Page</th>
 				<th>Actions</th>
 			</tr>
-			<?php foreach ($rolerules as $rule) {
+			<?php foreach ($role_rules as $rule) {
 			?>
-				<form method="POST" action="?role=<?php print $roleId ?>&type=editRole">
+				<form method="POST" action="?role=<?php print $role_id ?>&type=editRole">
 					<input name="key" type="hidden" value="<?php print $rule["id"] ?>" />
 					<tr>
 						<td><select name="ruleType">
-								<option value="ALLOW" <?php if ($rule["type"] == "ALLOW") {
+								<option value="ALLOW" <?php if ($rule["type"] === "ALLOW") {
 															print "selected";
 														} ?>>ALLOW</option>
-								<option value="DENY" <?php if ($rule["type"] == "DENY") {
+								<option value="DENY" <?php if ($rule["type"] === "DENY") {
 															print "selected";
 														} ?>>DENY</option>
 							</select></td>
 						<td><input name="page" value="<?php print $rule["page"] ?>" /></td>
-						<td><button type="submit">Lagre</button><button name="delete" value="1" type="submit">Slett</button></td>
+						<td><button type="submit">Save</button><button name="delete" value="1" type="submit">Delete</button></td>
 					</tr>
 				</form>
 			<?php	}
@@ -156,28 +147,15 @@ $conn->close();
 
 <div class="box">
 	<label for="">Create new rule</label>
-	<form method="POST" action="?role=<?php print $roleId ?>&type=addRole">
+	<form method="POST" action="?role=<?php print $role_id ?>&type=addRole">
 		<label for="ruleType">Type:</label>
 		<select name="ruleType">
 			<option value="ALLOW">ALLOW</option>
 			<option value="DENY">DENY</option>
 		</select>
-		<label for="page">Side:</label>
+		<label for="page">Page:</label>
 		<input name="page" type="text" placeholder="admin/translations.php" />
-		<button type="submit">Legg til</button>
-	</form>
-</div>
-
-<div class="box">
-	<label for="">User access rules</label>
-	<h3 class="box error">Ikke implementert enda</h3>
-	<form method="GET">
-		<select name="user" style="width: 50%">
-			<?php foreach ($users as $i => $user) {
-				print("<option value=$i" . ($userId == $i ? " selected" : "") . ">$user</option>");
-			} ?>
-		</select>
-		<button type="submit">Vis</button>
+		<button type="submit">Add</button>
 	</form>
 </div>
 <?php

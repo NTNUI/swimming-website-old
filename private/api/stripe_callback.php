@@ -1,8 +1,8 @@
 <?php
 // Documentation: https://stripe.com/docs/webhooks
-include_once("library/util/store_helper.php");
+require_once("library/util/store.php");
 
-$store = new StoreHelper("en");
+$store = new Store("en");
 
 $secret = $settings["stripe"]["signing_key"];
 
@@ -28,15 +28,15 @@ try {
 	switch ($event["type"]) {
 		case "source.canceled":
 		case "charge.failed":
-			log::message("[INFO]: Charge failed", __FILE__, __LINE__);
+			log::message("Info: Charge failed", __FILE__, __LINE__);
 			$store->fail_order($event["data"]["object"]);
 			break;
 		case "charge.succeeded":
-			log::message("[INFO]: Charge succeeded", __FILE__, __LINE__);
+			log::message("Info: Charge succeeded", __FILE__, __LINE__);
 			$store->finalize_order($event["data"]["object"]["payment_intent"]);
 			if ($event["data"]["object"]["amount"] == 76500 && $event["data"]["object"]["description"] == "Licence in the NSF") {
 				// temporary hardcoded member approval
-				log::message("Approving member with email:" . $event["data"]["object"]["receipt_email"]);
+				log::message("Info: Approving member with email:" . $event["data"]["object"]["receipt_email"]);
 				$store->approve_member($event["data"]["object"]["receipt_email"]);
 			}
 			break;

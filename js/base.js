@@ -1,10 +1,15 @@
-// Deprecated: Use fetch()
-var getJSON = function(url, callback) {
-    var xhr = new XMLHttpRequest();
+"use strict";
+/**
+ * @deprecated use fetch instead
+ * @param {*} url 
+ * @param {*} callback 
+ */
+let getJSON = function(url, callback) {
+    let xhr = new XMLHttpRequest();
     xhr.open('GET', url, true);
     xhr.responseType = 'json';
     xhr.onload = function() {
-        var status = xhr.status;
+        let status = xhr.status;
         if (status === 200) {
             callback(null, xhr.response);
         } else {
@@ -16,7 +21,7 @@ var getJSON = function(url, callback) {
 
 // Add onLoad handlers to queue
 function addLoadEvent(func) {
-    var old_onload = window.onload;
+    let old_onload = window.onload;
     if (typeof window.onload != `function`) {
         window.onload = func;
     } else {

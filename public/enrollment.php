@@ -1,27 +1,11 @@
 <?php
+require_once("library/templates/content.php");
+require_once("library/templates/modal.php");
+require_once("library/templates/store.php");
+require_once("library/util/enrollment.php");
+require_once("library/util/store.php");
 
-/* DESCRIPTION OF FILE:
-
-This file is used for new member registration.
-
-This file is supposed to:
-
-1. Display fields for registration
-2. Client-side validate the inputfields
-3. Pass values on to "enrollment_reception.php" for server-side input validation
-
-*/
-
-?>
-
-<script src='https://www.google.com/recaptcha/api.js'></script>
-
-<?php
-/* Local settings */
-$manual_close = false;
-$close_date = $settings["registration_close"];
-$close_date = strtotime("${close_date['date']} ${close_date['month']} this year");
-$registatin_open = $close_date - strtotime("now") > 0 and !$manual_close;
+$store = new Store($language);
 $tabindex = 0;
 
 function print_textBox($title, $type, $name, $extra = "")
@@ -29,88 +13,72 @@ function print_textBox($title, $type, $name, $extra = "")
 	global $tabindex, $t;
 	++$tabindex;
 ?>
-	<div class="enrollment">
-		<div>
-			<label><?php print $t->get_translation("${title}_label"); ?></label>
-			<?php
-			print("<input type='${type}' name='${name}' placeholder='" . $t->get_translation("${title}_placeHolder") . "'");
-			++$tabindex;
-			print(" ${extra} " . " tabindex='${tabindex}' " . " />"); ?>
-		</div>
+	<div class="box">
+		<label><?php print $t->get_translation("${title}_label"); ?></label>
+		<?php
+		print("<input type='${type}' name='${name}'");
+		++$tabindex;
+		print(" ${extra} " . " tabindex='${tabindex}' " . " />"); ?>
 	</div>
 <?php
 }
 ?>
 
 <?php
-function print_radio($title, $input_name, $opt1_value, $opt2_value, $required = "")
+function print_selectBox(string $title, string $name, array $options, string $extra = "")
 {
-	//example : print_radio("Kjønn","sex", "Mann", "Kvinne", "Male", "Female", "required")
 	global $tabindex, $t;
 	++$tabindex;
 ?>
-	<div class="enrollment">
+	<div class="box">
+		<label><?php print $t->get_translation("${title}_label") . " $extra"; ?></label>
+		<?php
+		++$tabindex;
+		print("<select class='${title}' tabindex='${tabindex}' name='${name}'/>");
+		print("<option value=''></option>");
+		print("<option value='NTNUI Triatlon'>NTNUI Triatlon</option>");
+		foreach ($options as $el) {
+			print("<option value='$el'>$el</option>");
+		}
+		print("</select>"); ?>
+
+	</div>
+<?php
+}
+?>
+
+<?php
+function print_radio(string $title, string $input_name, string $opt1_value, string $opt2_value, string $extra = "")
+{
+	global $tabindex, $t;
+	++$tabindex;
+?>
+	<div class="box">
 		<label> <?php print $t->get_translation("${title}_label"); ?></label>
-		<label class="container"> <?php print $t->get_translation("${title}_opt1"); ?>
-			<input type="radio" <?php print($required . " tabindex=' " . $tabindex . " ' " . "name='" . "${input_name}" . "' " . "value= '" . "${opt1_value}" . "' ") ?>>
-			<span class="checkmark"></span>
+		<label class="radio_container"> <?php print $t->get_translation("${title}_opt1"); ?>
+			<input type="radio" <?php print($extra . " tabindex='" . $tabindex . "' " . "name='" . "${input_name}" . "' " . "value= '" . "${opt1_value}" . "' ") ?>>
+			<span class="check_mark"></span>
 		</label>
 
 		<?php ++$tabindex ?>
-		<label class="container"> <?php print $t->get_translation("${title}_opt2"); ?>
-			<input type="radio" <?php print($required . "tabindex=' " . $tabindex . " ' " . "name='" . "${input_name}" . "' " . "value= '" . "${opt2_value}" . "'") ?>>
-			<span class="checkmark"></span>
+		<label class="radio_container"> <?php print $t->get_translation("${title}_opt2"); ?>
+			<input type="radio" <?php print($extra . " tabindex='" . $tabindex . "' " . "name='" . "${input_name}" . "' " . "value= '" . "${opt2_value}" . "'") ?>>
+			<span class="check_mark"></span>
 		</label>
 
 	</div>
 <?php
 }
 
-function print_checkBox($title, $input_name, $required = "")
+function print_recaptcha()
 {
-	global $tabindex, $t;
-	++$tabindex;
-?>
-	<div class="enrollment">
-		<label> <?php print($t->get_translation("{$title}_label")) ?> </label>
-		<label class="container"> <?php print($t->get_translation("{$title}_answer")) ?>
-			<input type="checkbox" value="Yes" <?php print($required . " tabindex=' " . $tabindex . " ' " . "name='" . $input_name . "' ") ?>>
-			<span class="checkmark_box tickkmark"></span>
-		</label>
-	</div>
-<?php
-}
-
-function print_textArea()
-{
-	global $tabindex, $t;
-	++$tabindex;
-	$title = "comments";
-?>
-	<div class="enrollment">
-		<label>
-			<?php print($t->get_translation("{$title}_header")) ?>
-		</label>
-
-		<label>
-			<?php print($t->get_translation("{$title}_content")) ?>
-		</label>
-		<textarea type="textarea" name="beskjed" rows="5" cols="95" style="width: 100%; border: 1px solid #ccc; padding: 14px 20px; margin: 8px 0; border-radius: 4px;"></textarea>
-	</div>
-
-<?php
-}
-?>
-<?php
-function print_recaptia()
-{
-	print('<div class="enrollment" style=" text-align: center;"><div style="display: inline-block;" class="g-recaptcha center" data-sitekey="6LdrnW8UAAAAAJa67cSTnwyho53uTJRJlwf9_B9W"></div></div>');
+	// print('<div class="enrollment box"><div style="display: inline-block;" class="g-recaptcha center" data-sitekey="6LdrnW8UAAAAAJa67cSTnwyho53uTJRJlwf9_B9W"></div></div>');
 }
 
 function print_reset_and_submit_buttons()
 {
 	global $t;
-	print('<input name="utfylt" type="submit" value="' . $t->get_translation("submit") . '" style="float: right;">');
+	print('<input type="submit" value="' . $t->get_translation("submit") . '">');
 	print('<input type="reset" value="' . $t->get_translation("clear") . '">');
 }
 function print_infoBox($key = "")
@@ -125,60 +93,55 @@ function print_infoBox($key = "")
 // Functions END //
 
 // Web page content below: //
-?>
-
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/css/intlTelInput.css" />
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/js/intlTelInput.js"></script>
-
-<div class="box">
-	<h1>
-		<?php print $t->get_translation("mainHeader"); ?>
-	</h1>
-	<p><?php print $t->get_translation("mainBody"); ?></p>
-</div>
-
-<?php
+print_content_header(
+	$t->get_translation("mainHeader"),
+	$t->get_translation("mainBody")
+);
 
 // Start Content
-
-if (!$registatin_open) { ?>
-	<div class="box">
-		<h1><?php print $t->get_translation("registration_closed_header"); ?></h1>
-		<p><?php print $t->get_translation("registration_closed_content"); ?></p>
-	</div>
-<?php
+if (!enrollment_is_active()) {
+	print_content_block(
+		$t->get_translation("registration_closed_header"),
+		$t->get_translation("registration_closed_content"),
+		"",
+		""
+	);
 	return;
 }
 ?>
 
-<form action="enrollment_reception" method="post">
+<form id="enrollment_form" autocomplete="on">
 	<?php
-	print_textBox("firstName", "text", "fornavn", "required");
-	print_textBox("lastName", "text", "etternavn", "required");
+	print_textBox("name", "text", "name", "required, id='input_name'");
 	print_radio("gender", "gender", "Male", "Female", "required");
-	print_textBox("phoneNumber", "tel", "phoneNumber", "required");
-	print_textBox("birthDate", "date", "fodselsdato", "required pattern='([12]\d|0?\d|3[01])-(1[0-2]|0?\d)-\d{4}'");
-	print_infoBox("birthDate_not_supported");
-	print_textBox("zip", "nuber", "zip", "required min='1000' max='9999' ");
-	print_textBox("adress", "text", "adresse", "required");
+	print_textBox("phone", "tel", "phone", "required");
+	print_textBox("birthDate", "date", "birthDate", "required pattern='([12]\d|0?\d|3[01])-(1[0-2]|0?\d)-\d{4}'");
+	print_textBox("zip", "number", "zip", "required min='1000' max='9999' ");
+	print_textBox("address", "text", "address", "required");
 	print_textBox("email", "email", "email", "required");
-	print_checkBox("canSwim", "dyktig", "required");
-	print_checkBox("acceptVoulentaryWork", "dugnad", "required");
-	print_textBox("oldClub", "text", "gammelKlubb");
-	print_textArea();
-	if ($settings["baseurl"] !== "https://127.0.0.1") {
-		print_recaptia();
+	$path = "assets/clubs.json";
+	print_selectBox("licensee", "Licensee", json_decode(file_get_contents($path)), "<a style='text-decoration: none;'href='FAQ'><span class='emoji'>❓</span></a>");
+	if ($settings["baseurl"] == "https://org.ntnu.no/svommer") {
+		print_recaptcha();
 	}
 	print "<div class='box'><p>" . $t->get_translation("gdpr_notice") . "</p></div>";
 	print_reset_and_submit_buttons();
 	?>
-
 </form>
-<script type="text/javascript">
-	var input = document.querySelector("input[name=phoneNumber]");
-	var itl = window.intlTelInput(input, {
-		initialCountry: "no",
-		separateDialCode: true,
-		utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/js/utils.js"
+</div>
+
+<script defer type="text/javascript">
+	let license_product;
+	addLoadEvent(async () => {
+		license_product = await fetch(BASEURL + "/api/store?request_type=get_product&product_hash=" + "<?php global $settings; print $settings["license_product_hash"]; ?>").then(response => response.json());
+		license_product.image = BASEURL + "/img/store/" + license_product.image;
 	});
 </script>
+<script defer type="text/javascript" src="https://js.stripe.com/v3/"></script>
+<script defer type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/js/intlTelInput.js"></script>
+<script defer type="text/javascript" src="https://www.google.com/recaptcha/api.js"></script>
+<script type='module' src='<?php print $settings["baseurl"];?>/js/enrollment.js'></script>
+<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/css/intlTelInput.css" />
+<?php 
+// style_and_script(__FILE__);
+?>

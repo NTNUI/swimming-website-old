@@ -1,33 +1,24 @@
+"use strict";
+import { display_modal } from "../modules/modal.js";
 function getMembers() {
+    const container = document.getElementById("members");
+
     getJSON(BASEURL + "/api/get_members_without_kid", function(err, json) {
-        if (err != null) {
-            alert("Error: " + err);
-            console.log(err);
-            title_status.innerHTML = "Det har oppstått en feil";
+        if (err !== null) {
+            display_modal("Error", err, "Accept", "", "failure");
             return;
         }
-        let container = document.getElementById("members");
-        members = appendMembers(json, container);
-        title_status = document.getElementById("title-status");
+        const members = appendMembers(json, container);
 
-        if (members == 0) {
-            title_status.innerHTML = "Ingen medlemmer funnet";
+        if (members === 0) {
+            display_modal("Success", "All members have a valid CIN number", "Accept", "", "success");
             return;
         }
-
-        if (members) {
-            title_status.innerHTML = "Følgende medlemmer har ikke KID registrert i medlemsdatabasen";
-            return;
-        }
-
-        title_status.innerHTML = "Alle medlemmer har gyldig KID nummer i databasen";
-
     });
 }
 
 function appendMembers(json, container) {
     let members = 0;
-    console.log(json);
     for (let i in json) {
         members++;
         let member = json[i];
@@ -37,17 +28,17 @@ function appendMembers(json, container) {
         node.querySelector(".name").innerText = member.name;
         node.querySelector(".email").innerText = member.email;
         node.querySelector(".email").href = "mailto:" + member.email;
-        node.querySelector(".phone-number").innerText = member.phone;
+        node.querySelector(".phone").innerText = member.phone;
         node.querySelector(".name").innerText = member.name;
         node.querySelector(".save").onclick = function(e) {
-            var kid_number = e.srcElement.parentNode.previousElementSibling.children[0].value;
+            let kid_number = e.srcElement.parentNode.previousElementSibling.children[0].value;
             if (valid_kid(kid_number)) {
                 save_kid_number(member.id, kid_number);
                 e.srcElement.parentNode.parentElement.remove();
                 return;
             }
             console.log("that input is not a valid KID number");
-            e.originalTarget.parentElement.previousElementSibling.children[0].classList.add("error");
+            e.target.parentElement.previousElementSibling.children[0].classList.add("error");
         };
         container.appendChild(node);
     }
@@ -68,7 +59,7 @@ function valid_kid(kid) {
 }
 
 function save_kid_number(id, kid) {
-    var url = BASEURL + "/api/update_kid?";
+    let url = BASEURL + "/api/update_kid?";
     url += "ID=" + id;
     url += "&";
     url += "KID=" + kid;
@@ -80,3 +71,5 @@ function save_kid_number(id, kid) {
     });
 
 }
+
+addLoadEvent(getMembers);

@@ -1,5 +1,4 @@
-<?php 
-global $settings;
+<?php
 // TODO: Move styling to css file
 // TODO: Add translations
 // TODO: change key 'id' in database to 'user_id' and to 'role_id'
@@ -22,9 +21,7 @@ $user_id = argsURL("REQUEST", "user_id");
 $new_role_name = argsURL("REQUEST", "new_role_name");
 $update_type = argsURL("REQUEST", "update_type");
 
-$conn = connect("web");
-
-// FIX ME
+// FIXME
 if ($update_type === "Delete") {
 	if ($action === "update_user") {
 		$action = "delete_user";
@@ -48,19 +45,19 @@ switch ($action) {
 		create_user($name, $username, $email);
 		break;
 	case 'update_user':
-		update_user($conn, $name, $username, $user_id, $role_id);
+		update_user($name, $username, $user_id, $role_id);
 		break;
 	case 'delete_user':
-		delete_user($conn, $user_id);
+		delete_user($user_id);
 		break;
 	case 'create_role':
-		create_role($conn, $new_role_name);
+		create_role($new_role_name);
 		break;
 	case 'update_role':
 		log::alert("action: $action is not yet implemented", __FILE__, __LINE__);
 		break;
 	case 'delete_role':
-		delete_role($conn, role_string_to_id($conn, $role_id));
+		delete_role(role_string_to_id($role_id));
 		break;
 	default:
 		log::alert("action: $action is not implemented", __FILE__, __LINE__);
@@ -68,15 +65,24 @@ switch ($action) {
 }
 
 // print menus and quit
-print_user_matrix($conn);
+print_user_matrix();
 print_forms();
-$conn->close();
+return;
 
-// User functions
+
+/**
+ * Create a new user
+ * Side effects:
+ * - function call logged
+ * - Sends a mail with password to given email address
+ *
+ * @param string $name
+ * @param string $username
+ * @param string $email
+ * @return void
+ */
 function create_user(string $name, string $username, string $email)
 {
-	global $settings, $access_control, $action;
-
 	if (!$email || !$username || !$name) {
 		log::die("parameters are not set", __FILE__, __LINE__);
 	}
@@ -88,412 +94,361 @@ function create_user(string $name, string $username, string $email)
 
 	// create user with random password
 	$random_password = substr(md5(mt_rand()), 0, 7);
-	if (!Authenticator::create_user($username, $random_password)) {
-		log::alert("Could not create user with $username", __FILE__, __LINE__);
-		return;
-	}
+	Authenticator::create_user($name, $username, $random_password);
+
+	// log action
+	global $access_control, $action;
+	$access_control->log("users", $action, $username);
 
 	// Send mail
+	// TODO: move content to settings
+	global $settings;
 	$email_title = "NTNUI Swimming: New user";
-	$email_content = "Your user account has been created.\n" .
-		"Username: $username\n" .
-		"Password: $random_password\n" .
-		"You will be forced to change password on first login.\n";
-	$email_from = "From: " . $settings["emails"]["bot-general"];
+	$message = "Your user account has been created.\n";
+	$message .=	"Username: $username\n";
+	$message .=	"Password: $random_password\n";
+	$message .=	"You will be forced to change password on first login.\n";
 
 	mail(
 		$email,
 		$email_title,
-		$email_content,
-		$email_from
+		$message
 	);
-	$access_control->log("users", $action, $username);
 }
 
-function update_user(mysqli $conn, string $name, string $username, int $user_id, int $role_id)
-{
-	global $access_control, $action;
 
-	// check for valid request
+/**
+ * Update user information. All parameters need to be set
+ * Side effects:
+ * - function call logged
+ * - User alert()ed with success message
+ * 
+ * @param string $name Full name of the user
+ * @param string $username username used to log in
+ * @param integer $user_id static user id used to login
+ * @param integer $role_id connected role
+ * @return void
+ */
+function update_user(string $name, string $username, int $user_id, int $role_id)
+{
 	if (!$user_id || !$role_id || !$username || !$name) {
 		log::die("parameters are not set", __FILE__, __LINE__);
 	}
 
 	// TODO: if username is updated, check that it does not collide with others
+	$db = new DB("web");
+	$db->prepare("UPDATE users SET username=?, name=?, role=? WHERE id=?");
+	$db->bind_param("ssii", $username, $name, $role_id, $user_id);
+	$db->execute();
 
-	$sql = "UPDATE users SET username=?, name=?, role=? WHERE id=?";
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("could not prepare query " . mysqli_error($conn), __FILE__, __LINE__);
-	}
-	$query->bind_param("ssii", $username, $name, $role_id, $user_id);
-	if (!$query) {
-		log::die("could not bind params " . mysqli_error($conn), __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query " . mysqli_error($conn), __FILE__, __LINE__);
-	}
+	// log action
+	global $access_control, $action;
+	$access_control->log("admin/users", $action, user_id_to_name($user_id));
+
 	log::alert("Record updated successfully");
-	$access_control->log("admin/users", $action, user_id_to_name($conn, $user_id));
-	$query->close();
 }
 
-function delete_user(mysqli $conn, int $user_id)
-{
-	global $access_control, $action;
 
+/**
+ * Delete a user
+ * Side effects:
+ * - function call logged
+ * 
+ * @param integer $user_id of user to be deleted
+ * @return void
+ */
+function delete_user(int $user_id)
+{
 	if (!$user_id) {
 		log::die("Parameters are not correct", __FILE__, __LINE__);
 	}
-
-	$name_user = user_id_to_name($conn, $user_id);
-	if (role_id_to_string($conn, user_id_to_user_role($conn, $user_id)) === "admin") {
+	if (role_id_to_string(user_id_to_user_role($user_id)) === "admin") {
 		log::alert("Admins cannot be deleted", __FILE__, __LINE__);
 		return;
 	}
+	// TODO: if attempting to delete last user abort.
+	// TODO: use transactions
 
-	$sql = "DELETE FROM users WHERE id=?"; // id is user_id
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->bind_param("i", $user_id);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->close();
+	// Delete user
+	$db = new DB("web");
+	$db->prepare("DELETE FROM users WHERE id=?");
+	$db->bind_param("i", $user_id);
+	$db->execute();
+
+	// log action
+	global $access_control, $action;
+	$name_user = user_id_to_name($user_id);
 	$access_control->log("admin/users", $action, $name_user);
 }
 
-// Role functions
-function create_role(mysqli $conn, string $new_role_name)
-{
-	global $access_control, $action;
 
-	if (role_exists($conn, $new_role_name)) {
+/**
+ * Create a new role.
+ * Side effect:
+ * - function call logged
+ * 
+ * @param string $new_role_name name of the role
+ * @return void
+ */
+function create_role(string $new_role_name)
+{
+	if (role_exists($new_role_name)) {
 		log::alert("Role $new_role_name already exists", __FILE__, __LINE__);
 		return;
 	}
 
-	$sql = "INSERT INTO roles (name) VALUES (?)";
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->bind_param("s", $new_role_name);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	log::alert("Role created successfully", __FILE__, __LINE__);
+	// create new role
+	$db = new DB("web");
+	$db->prepare("INSERT INTO roles (name) VALUES (?)");
+	$db->bind_param("s", $new_role_name);
+	$db->execute();
 
-	$query->close();
+	// log action
+	global $access_control, $action;
 	$access_control->log("admin/users", $action, $new_role_name);
 }
 
-function delete_role(mysqli $conn, int $role_id)
-{
-	global $access_control, $action;
-	$name_role = role_id_to_string($conn, $role_id);
 
-	if (role_id_to_string($conn, $role_id) === "admin") {
+/**
+ * Delete role and all associated users connected to that role
+ * Side effects:
+ * - Log action
+ * 
+ * @param integer $role_id
+ * @return void
+ */
+function delete_role(int $role_id)
+{
+	if (role_id_to_string($role_id) === "admin") {
 		log::alert("Cannot delete admin role", __FILE__, __LINE__);
 		return;
 	}
 
 	// delete users with the role
-	$users = get_users_with_role_id($conn, $role_id);
+	$users = get_users_with_role_id($role_id);
 	foreach ($users as $user) {
-		delete_user($conn, $user);
+		delete_user($user);
 	}
 
 	// delete role
-	$sql = "DELETE FROM roles WHERE id=?"; // id is role_id
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not prepare query", __FILE__, __LINE__);
-	}
-	$query->bind_param("i", $role_id);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->close();
+	$db = new DB("web");
+	$db->prepare("DELETE FROM roles WHERE id=?");
+	$db->bind_param("i", $role_id);
+	$db->execute();
+
+	// log action
+	global $access_control, $action;
+	$name_role = role_id_to_string($role_id);
 	$access_control->log("admin/users", $action, $name_role);
 }
 
-// db functions
-function get_users_with_role_id(mysqli $conn, int $role_id)
+
+/**
+ * Get users with a @param role_id
+ * 
+ * @param integer $role_id
+ * @return array of ints containing user_id's
+ */
+function get_users_with_role_id(int $role_id): array
 {
-	$sql = "SELECT id FROM users WHERE role=?";
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not prepare statement", __FILE__, __LINE__);
-	}
-	$query->bind_param("i", $role_id);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	$query->execute();
-	if (!$query) {
-		log::die("Could not execute statement", __FILE__, __LINE__);
-	}
+	$db = new DB("web");
+	$db->prepare("SELECT id FROM users WHERE role=?");
+	$db->bind_param("i", $role_id);
+	$db->execute();
 	$user_id = 0;
-	$query->bind_result($user_id);
-	if (!$query) {
-		log::die("Could not bind result", __FILE__, __LINE__);
+	$db->stmt->bind_result($user_id);
+	$result = array();
+	while ($db->fetch()) {
+		array_push($result, $user_id);
 	}
-	$result = new arrayObject();
-	while ($query->fetch()) {
-		$result->append($user_id);
-	}
-	$query->close();
 	return $result;
 }
 
-function get_roles(mysqli $conn)
+
+/**
+ * get all available roles
+ *
+ * @return array of strings containing role name indexed by role_id
+ * @note @return array array values are indexed by role_id.
+ */
+function get_roles(): array
 {
-	$sql = "SELECT id, name FROM roles"; // id is role_id
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not prepare statement", __FILE__, __LINE__);
-	}
-	$query->execute();
-	if (!$query) {
-		log::die("Could not execute statement", __FILE__, __LINE__);
-	}
+	$db = new DB("web");
+	$db->prepare("SELECT id, name FROM roles");
+	$db->execute();
 	$user_id = "";
 	$role = "";
-	$query->bind_result($user_id, $role);
-	if (!$query) {
-		log::die("Could not bind result", __FILE__, __LINE__);
-	}
+	$db->stmt->bind_result($user_id, $role);
 	$roles = array();
-	while ($query->fetch()) {
+	while ($db->fetch()) {
 		$roles[$user_id] = $role;
 	}
-	$query->close();
 	return $roles;
 }
 
-function role_exists(mysqli $conn, string $name_role)
+/**
+ * Check if a role exists
+ *
+ * @param string $name_role
+ * @return bool true if role exists. False otherwise.
+ */
+function role_exists(string $name_role): bool
 {
-	$sql = "SELECT COUNT(*) FROM roles WHERE name=?";
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->bind_param("s", $name_role);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
+	// count number of roles with a given name
+	$db = new DB("web");
+	$db->prepare("SELECT COUNT(*) FROM roles WHERE name=?");
+	$db->bind_param("s", $name_role);
+	$db->execute();
 	$result = 0;
-	if (!$query->bind_result($result)) {
-		log::die("Could not bind results", __FILE__, __LINE__);
-	}
-	$query->fetch();
-	$query->close();
+	$db->stmt->bind_result($result);
+	$db->fetch();
+	// convert amount to a boolean
 	return (bool)$result;
 }
 
-function role_id_to_usernames(mysqli $conn, int $role_id)
+/**
+ * Get all usernames with @param $role_id
+ * 
+ * @param integer $role_id
+ * @return array of strings with usernames
+ */
+function role_id_to_usernames(int $role_id): array
 {
-	$sql = "SELECT username FROM users WHERE role=?"; // role is role_id
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->bind_param("i", $role_id);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$temp = "";
-	if (!$query->bind_result($result)) {
-		log::die("Could not bind results", __FILE__, __LINE__);
-	}
+	$db = new DB("web");
+	$db->prepare("SELECT username FROM users WHERE role=?");
+	$db->bind_param("i", $role_id);
+	$db->execute();
 	$result = array();
-	$i = 0;
-	while ($query->fetch()) {
-		$result[$i] = $temp;
-		++$i;
-	}
-	$query->close();
+	$db->stmt->bind_result($result);
+	$db->fetch();
 	return $result;
 }
 
-function role_id_to_string(mysqli $conn, int $role_id)
+/**
+ * Get the role name given its @param role_id
+ *
+ * @param integer $role_id of the role
+ * @return string role name / title
+ */
+function role_id_to_string(int $role_id): string
 {
-	$sql = "SELECT name from roles WHERE id=?"; // id is role_id
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->bind_param("i", $role_id);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
+	$db = new DB("web");
+	$db->prepare("SELECT name from roles WHERE id=?");
+	$db->bind_param("i", $role_id);
+	$db->execute();
 	$result = "";
-	if (!$query->bind_result($result)) {
-		log::die("Could not bind results", __FILE__, __LINE__);
-	}
-	$query->fetch();
-	$query->close();
+	$db->stmt->bind_result($result);
+	$db->fetch();
 	return $result;
 }
 
-function role_string_to_id(mysqli $conn, string $role_name)
+/**
+ * Get role id given role name / title
+ *
+ * @param string $role_name
+ * @return string
+ */
+function role_string_to_id(string $role_name): string
 {
-	$sql = "SELECT id FROM roles WHERE name=?"; // id is role_id
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->bind_param("s", $role_name);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
+	$db = new DB("web");
+	$db->prepare("SELECT id FROM roles WHERE name=?");
+	$db->bind_param("s", $role_name);
+	$db->execute();
 	$result = 0;
-	if (!$query->bind_result($result)) {
-		log::die("Could not bind results", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->fetch();
-	$query->close();
+	$db->stmt->bind_result($result);
+	$db->fetch();
 	return $result;
 }
 
-function username_to_user_id(mysqli $conn, string $username)
+/**
+ * Get user id given @param username
+ *
+ * @param string $username
+ * @return integer user id
+ */
+function username_to_user_id(string $username): int
 {
-	$sql = "SELECT id FROM users WHERE username=?"; // id is user_id
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->bind_param("s", $username);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
+	$db = new DB("web");
+	$db->prepare("SELECT id FROM users WHERE username=?");
+	$db->bind_param("s", $username);
+	$db->execute();
 	$result = 0;
-	if (!$query->bind_result($result)) {
-		log::die("Could not bind results", __FILE__, __LINE__);
-	}
-	$query->close();
+	$db->stmt->bind_result($result);
 	return $result;
 }
 
-function user_id_to_username(mysqli $conn, int $user_id)
+/**
+ * get username given a @param user_id
+ *
+ * @param integer $user_id
+ * @return string username
+ */
+function user_id_to_username(int $user_id): string
 {
-	$sql = "SELECT username FROM users WHERE id=?"; // id is user_id
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->bind_param("i", $user_id);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
+	$db = new DB("web");
+	$db->prepare("SELECT username FROM users WHERE id=?");
+	$db->bind_param("i", $user_id);
+	$db->execute();
 	$result = "";
-	if (!$query->bind_result($result)) {
-		log::die("Could not bind results", __FILE__, __LINE__);
-	}
-	$query->close();
+	$db->stmt->bind_result($result);
 	return $result;
 }
 
-function user_id_to_name(mysqli $conn, int $user_id)
+/**
+ * get name of the user with a give @param user_id
+ *
+ * @param integer $user_id
+ * @return string name of the user
+ */
+function user_id_to_name(int $user_id): string
 {
-	$sql = "SELECT name from users WHERE id=?"; // id is user_id
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->bind_param("i", $user_id);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
+	$db = new DB("web");
+	$db->prepare("SELECT name from users WHERE id=?");
+	$db->bind_param("i", $user_id);
+	$db->execute();
 	$result = "";
-	if (!$query->bind_result($result)) {
-		log::die("Could not bind results", __FILE__, __LINE__);
-	}
-	$query->fetch();
-	$query->close();
+	$db->stmt->bind_result($result);
+	$db->fetch();
 	return $result;
 }
 
-function user_id_to_user_role(mysqli $conn, int $user_id)
+/**
+ * get role id given user id
+ *
+ * @param integer $user_id
+ * @return integer role_id
+ */
+function user_id_to_user_role(int $user_id): int
 {
-	$sql = "SELECT role FROM users WHERE id=?"; // id is user_id
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
-	$query->bind_param("i", $user_id);
-	if (!$query) {
-		log::die("Could not bind params", __FILE__, __LINE__);
-	}
-	if (!$query->execute()) {
-		log::die("Could not execute query", __FILE__, __LINE__);
-	}
+	$db = new DB("web");
+	$db->prepare("SELECT role FROM users WHERE id=?");
+	$db->bind_param("i", $user_id);
+	$db->execute();
 	$result = 0;
-	if (!$query->bind_result($result)) {
-		log::die("Could not bind results", __FILE__, __LINE__);
-	}
-	$query->close();
+	$db->stmt->bind_result($result);
 	return $result;
 }
 
-// print functions
-function print_user_matrix(mysqli $conn)
-{
-	global $access_control;
 
-	$sql = "SELECT id, username, name, role FROM users"; // id is user_id
-	$query = $conn->prepare($sql);
-	if (!$query) {
-		log::die("Could not prepare statement", __FILE__, __LINE__);
-	}
-	$query->execute();
-	if (!$query) {
-		log::die("Could not execute statement", __FILE__, __LINE__);
-	}
+/**
+ * Prints out rows of available users
+ * prints out html content.
+ * 
+ * @return void
+ */
+function print_user_matrix()
+{
+	// get user info
+	$db = new DB("web");
+	$db->prepare("SELECT id, username, name, role FROM users");
+	$db->execute();
 	$name = "";
 	$user_id = "";
 	$username = "";
 	$role_id = "";
-	$query->bind_result($user_id, $username, $name, $role_id);
-	if (!$query) {
-		log::die("Could not bind result", __FILE__, __LINE__);
-	}
+	$db->stmt->bind_result($user_id, $username, $name, $role_id);
+
+	// create a row with actions for each user. 
 ?>
 	<div class="box">
 		<table style="width: 100%;">
@@ -504,13 +459,14 @@ function print_user_matrix(mysqli $conn)
 				<th>Actions</th>
 			</tr>
 			<?php
-			while ($query->fetch()) { ?>
+			while ($db->fetch()) { ?>
 				<tr>
 					<form method="POST" action="?users_action=update_user">
-						<?php print_user_entry($user_id, $username, $name, $role_id, get_roles(connect("web"))); ?>
+						<?php print_user_entry($user_id, $username, $name, $role_id, get_roles()); ?>
 						<td><input type="submit" name="update_type" value="Save" style="width:49%;" />
 							<?php
-							if (role_id_to_string(connect("web"), $role_id) != "admin" && $access_control->can_access("users", "delete")) {
+							global $access_control;
+							if (role_id_to_string($role_id) != "admin" && $access_control->can_access("users", "delete")) {
 								print("<input type='submit' class='red' name='update_type' value='Delete' style='width:49%;'/>");
 							}
 							?>
@@ -521,9 +477,21 @@ function print_user_matrix(mysqli $conn)
 		</table>
 	</div>
 <?php
-	$query->close();
 }
 
+
+/**
+ * Print out a row with user management actions
+ *
+ * @param integer $user_id
+ * @param string $username
+ * @param string $name
+ * @param string $role_id current role.
+ * @param array $roles list of available rows
+ * @return void
+ * 
+ * TODO: role_id should be an int not string. Investigate
+ */
 function print_user_entry(int $user_id, string $username, string $name, string $role_id, array $roles)
 { ?>
 	<input name="user_id" type="hidden" value="<?php print $user_id ?>" />
@@ -532,6 +500,7 @@ function print_user_entry(int $user_id, string $username, string $name, string $
 	<td>
 		<select name="role_id">
 			<?php foreach ($roles as $i => $r) {
+				// print available roles
 				print "<option value='$i'" . ($i == $role_id ? " selected" : "") . ">$r</option>";
 			} ?>
 		</select>
@@ -539,6 +508,15 @@ function print_user_entry(int $user_id, string $username, string $name, string $
 <?php
 }
 
+
+/**
+ * Prints out three forms in html.
+ * - Add new role
+ * - Modify role
+ * - Add new user
+ * 
+ * @return void
+ */
 function print_forms()
 { ?>
 	<div class="box">
@@ -556,7 +534,7 @@ function print_forms()
 					<th>Action</th>
 				</tr>
 				<?php
-				$roles = get_roles(connect("web"));
+				$roles = get_roles();
 				foreach ($roles as $i => $r) {
 					print_role_entry($i);
 				} ?>
@@ -581,20 +559,29 @@ function print_forms()
 <?php
 }
 
+
+/**
+ * Prints out a row for role editing.
+ * Change name and delete.
+ *
+ * @param integer $role_id role to modify
+ * @return void
+ */
 function print_role_entry(int $role_id)
 {
+	global $settings;
 ?>
 	<tr>
 		<td>
-			<input name="role_id" type="text" value="<?php print role_id_to_string(connect("web"), $role_id); ?>" />
+			<input name="role_id" type="text" value="<?php print role_id_to_string($role_id); ?>" />
 		</td>
 		<td>
 			<input type="submit" name="update_type" value="Save" style="width:49%;" />
 			<input type="submit" name="update_type" value="Delete" style="width:49%;" />
 		</td>
 	</tr>
-<link href="<?php global $settings; print $settings['baseurl'];?>/css/admin/users.css">
-<script type="text/javascript" src="<?php global $settings; print $settings['baseurl'];?>/js/admin/users.js"></script>
+	<link href="<?php print $settings['baseurl']; ?>/css/admin/users.css">
+	<script type="text/javascript" src="<?php print $settings['baseurl']; ?>/js/admin/users.js"></script>
 
 <?php
 }

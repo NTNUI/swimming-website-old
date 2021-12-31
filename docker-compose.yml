@@ -39,7 +39,7 @@ services:
         volumes:
             - log:/var/log/
             - ./storage/mariadb:/var/lib/mysql
-            - ./docker/mariadb:/docker-entrypoint-initdb.d
+            - ./docker/mariadb/databases:/docker-entrypoint-initdb.d
             - ./docker/mariadb/conf.d/:/etc/mysql/
         networks:
             - epstein-didnt-kill-himself
