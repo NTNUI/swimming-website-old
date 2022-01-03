@@ -35,6 +35,7 @@ global $t;
 			<div class="card">
 				<img id="checkout_img" alt="Image">
 				<p id="checkout_title"></p>
+				<p id="checkout_price"></p>
 			</div>
 		</div>
 		<div class="modal_content box">
