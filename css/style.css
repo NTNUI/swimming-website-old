@@ -61,16 +61,17 @@ https://dev.to/cadienvan/the-unsolvable-z-index-auto-increment-3l77
     display: none;
 }
 
-html {
+body {
     font-family: cantarell, roboto, serif;
     text-rendering: optimizeLegibility;
     background: var(--background);
     background-size: cover;
-}
-
-body {
     /* push content further down as menu bar grows */
     padding-top: calc(2vh + 1.3vw);
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
 }
 
 h1, h2, h3, h4, h5, h6, a, span, p, li, label {
@@ -82,9 +83,10 @@ a, span, p, li, label {
     font-weight: 500;
 }
 
-.content{
+.content {
     max-width: 1000px;
     margin: auto;
+    min-height: 100vh;
 }
 
 /*TODO: remove this class and make it somehow work */
@@ -102,6 +104,40 @@ h1, h2, p {
 
 h1, h2, h3, h4, p, .email {
     margin-left: 20px;
+}
+
+footer {
+    background-color: var(--NTNUI-grey);
+    color: white;
+    margin-top: auto;
+    text-align: center;
+}
+
+footer a {
+    display: inline-block;
+    margin: 0 10px;
+    color: white;
+}
+
+footer div p {
+    /* Copyright */
+    color: white;
+}
+
+footer div a {
+    /* Sponsor logos */
+    overflow: hidden;
+    display: inline;
+}
+
+footer div a:hover {
+    color: var(--accent-color-hover);
+}
+
+footer div a img.img-sponsor {
+    max-height: 20vh;
+    filter: brightness(100);
+    /* make all logos white */
 }
 
 .email {
