@@ -41,7 +41,7 @@ export default class Store {
     /**
      * Display checkout modal 
      * @param {object} product to be purchased
-     * @param {object | null} customer if set then modal will have customer info being read only 
+     * @param {object | null} customer if set, then customer info will be read only
      * @returns a Promise for an Order object. Gets resolved when user commits to a purchase or rejected when user cancels or quits.
      */
     checkout(product, customer) {
@@ -55,6 +55,7 @@ export default class Store {
             this.overlay.querySelector("#product_hash").value = product.product_hash;
             this.overlay.querySelector("#checkout_description").innerHTML = product.description;
             this.overlay.querySelector("#checkout_img").src = product.image;
+            this.overlay.querySelector("#checkout_price").textContent = product.price/100 + " NOK";
 
             if (customer != null) {
                 // lock user from editing personal info
