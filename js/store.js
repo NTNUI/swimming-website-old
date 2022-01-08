@@ -15,10 +15,12 @@ function handle_order(store, order) {
             }
             await display_modal("Success", serverResponse, "Accept", "", "success");
         }).catch((error) => {
+            console.error(error);
             if (typeof (error === "object")) {
                 error = error.message;
             }
             display_modal("Failure", error, "Accept", "", "failure");
+            console.error(error);
         });
 }
 
@@ -63,6 +65,9 @@ store.init(BASEURL + "/api/inventory").then(async () => {
             .then((order) => {
                 handle_order(store, order);
             })
-            .catch(() => { });
+            .catch((error) => {
+                display_modal("Failure", error, "Accept", "", "failure");
+                console.error(error);
+            });
     }
 });

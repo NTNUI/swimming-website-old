@@ -129,6 +129,9 @@ export default class Store {
                         billing_details: customer
                     }
                 );
+                if (payment.error !== undefined) {
+                    throw payment.error;
+                }
                 // absolute path is required because of dynamic document root
                 const chargeResponse = await fetch(BASEURL + "/api/charge", {
                     method: "POST",
