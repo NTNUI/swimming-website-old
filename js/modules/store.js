@@ -55,9 +55,9 @@ export default class Store {
             this.overlay.querySelector("#product_hash").value = product.product_hash;
             this.overlay.querySelector("#checkout_description").innerHTML = product.description;
             this.overlay.querySelector("#checkout_img").src = product.image;
-            this.overlay.querySelector("#checkout_price").textContent = product.price/100 + " NOK";
+            this.overlay.querySelector("#checkout_price").textContent = product.price / 100 + " NOK";
 
-            if (customer != null) {
+            if (customer !== undefined) {
                 // lock user from editing personal info
                 this.overlay.querySelector("#checkout_name").value = customer.name;
                 this.overlay.querySelector("#checkout_email").value = customer.email;
@@ -86,16 +86,25 @@ export default class Store {
                     return;
                 }
 
-                // grab order info
-                if (customer === null) {
+                // cannot create a new customer object inside a scope and use in resolve()
+                // This is why following block looks somewhat duplicated
+
+                if (customer === undefined) {
+                    // get customer info from checkout overlay
+                    const customer = {};
                     customer.name = this.overlay.querySelector("#checkout_name").value;
                     customer.email = this.overlay.querySelector("#checkout_email").value;
                     customer.phone = this.overlay.querySelector("#checkout_phone").value;
-                }
 
-                // close checkout modal and return new order
-                this.overlay.style.display = "none";
-                resolve({ product: product, customer: customer });
+                    // close checkout modal and return new order
+                    this.overlay.style.display = "none";
+                    resolve({ product: product, customer: customer });
+                } else {
+
+                    // close checkout modal and return new order
+                    this.overlay.style.display = "none";
+                    resolve({ product: product, customer: customer });
+                }
             });
         });
     }

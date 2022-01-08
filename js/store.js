@@ -43,7 +43,10 @@ store.init(BASEURL + "/api/inventory").then(async () => {
                 .then((order) => {
                     handle_order(store, order);
                 })
-                .catch(() => { });
+                .catch((error) => {
+                    display_modal("Failure", error, "Accept", "", "failure");
+                    console.error(error);
+                });
         }
         productEntry.querySelector(".store_button").addEventListener("click", purchaseButtonHandler);
         // append product entry to DOM
