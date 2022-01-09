@@ -53,8 +53,10 @@ global $t;
 				<input id="checkout_phone" name="phone" type="number" />
 				
 				<?php
-					// <label for="comment"><?php print $t->get_translation("kommentar", "store"); ?></label>
-					// <textarea id="checkout_comment" name="comment"></textarea>
+					/*
+					<label for="comment"><?php print $t->get_translation("kommentar", "store"); ?></label>
+					<textarea id="checkout_comment" name="comment"></textarea>
+					*/
 				?>
 
 				<div class="form-row">
