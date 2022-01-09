@@ -42,18 +42,18 @@ global $t;
 			<h2><?php print $t->get_translation("overlay_checkout", "store"); ?></h2>
 			<form id="payment-form">
 				<input id="product_hash" name="product_hash" type="hidden" />
+				
 				<label for="name"><?php print $t->get_translation("navn", "store") ?></label>
-
 				<input id="checkout_name" id="checkout_name" name="name" type="text" required />
+
 				<label for="email"><?php print $t->get_translation("epost", "store"); ?></label>
-
 				<input id="checkout_email" name="email" type="email" required />
+
 				<label for="phone"><?php print $t->get_translation("telefon", "store"); ?></label>
-
 				<input id="checkout_phone" name="phone" type="number" />
-				<label for="comment"><?php print $t->get_translation("kommentar", "store"); ?></label>
-
+				
 				<?php
+					// <label for="comment"><?php print $t->get_translation("kommentar", "store"); ?></label>
 					// <textarea id="checkout_comment" name="comment"></textarea>
 				?>
 
