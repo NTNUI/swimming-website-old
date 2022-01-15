@@ -65,7 +65,7 @@ export default class Store {
                 this.overlay.querySelector("#checkout_name").disabled = true;
                 this.overlay.querySelector("#checkout_email").disabled = true;
                 this.overlay.querySelector("#checkout_phone").disabled = true;
-                this.overlay.querySelector("#checkout_comment").style.display = "none";
+                // this.overlay.querySelector("#checkout_comment").style.display = "none";
             }
 
             // reject promise if user cancels or closes
