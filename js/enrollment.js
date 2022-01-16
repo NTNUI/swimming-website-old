@@ -45,8 +45,8 @@ addLoadEvent(() => {
         const member = get_form_data();
         // if licensed confirm with modal
         if (member.get("licensee")) {
-            const licenseQuestion = await display_modal("Do you have a valid license?", "You've selected that you have a valid license.\nPlease make sure you see your entry on https:\/\/medley.no\nIf you're not on the list you'll not be manually approved. You can either wait until you appear on the list and we see it ot you can continue to purchase an NSF license now.", "Continue", "Cancel");
-            if (licenseQuestion == "Cancel") {
+            const licenseQuestion = await display_modal("Do you have a valid license?", "You've selected that you have a valid license.\nPlease make sure you see your entry on https:\/\/medley.no\nIf you're not on the list you'll not be manually approved. You can either wait until you appear on the list and we see it ot you can continue to purchase an NSF license now.", "Purchase license", "Wait");
+            if (licenseQuestion == "Wait") {
                 return;
             }
         }
@@ -64,8 +64,8 @@ addLoadEvent(() => {
         if (enrollResponse.error) {
             switch (enrollResponse.membership_status) {
                 case "pending":
-                    const user_response = await display_modal("Warning", "It seems like you already have a pending membership. We need to manually review your request. This might take some time. You can either wait or, if you wish, continue to purchase a license and get a active membership instantly.", "Continue", "Cancel");
-                    if (user_response === "Cancel") {
+                    const user_response = await display_modal("Warning", "It seems like you already have a pending membership. We need to manually review your request. This might take some time. You can either wait or, if you wish, continue to purchase a license and get a active membership instantly.", "Purchase license", "Wait");
+                    if (user_response === "Wait") {
                         return;
                     }
                     break;
