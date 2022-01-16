@@ -17,7 +17,7 @@ $db = new DB("member");
 
 global $settings;
 // get all approved members without CIN number
-$sql = "SELECT id, first_name, surname, phone, email FROM member WHERE licensee = '' AND approved_date IS NOT NULL AND CIN = 0 AND license_forwarded = 0";
+$sql = "SELECT id, first_name, surname, phone, email FROM member WHERE licensee = '' AND approved_date IS NOT NULL AND CIN IS NULL AND license_forwarded = 0";
 
 $db->prepare($sql);
 $db->execute();
