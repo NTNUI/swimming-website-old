@@ -3,12 +3,11 @@ import Store from "./modules/store.js";
 import { display_modal } from "./modules/modal.js";
 
 // phone validation
-// I don't know how it works but if you remove it, client side phone validation will not work 🤷
-const input = document.querySelector("input[name=phone]");
-let itl = window.intlTelInput(input, {
+const enrollmentPhoneInput = document.querySelector("form#enrollment_form input[name=phone]");
+window.intlTelInput(enrollmentPhoneInput, {
     initialCountry: "no",
     separateDialCode: true,
-    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/js/utils.js"
+    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/intlTelInput.min.js"
 });
 
 function get_form_data() {
@@ -24,8 +23,8 @@ function get_form_data() {
     }
     return form_data;
 }
+
 /**
- * 
  * @param {formData} formData with member enrollment information
  * @returns Promise enrollment response
  */
@@ -56,7 +55,7 @@ addLoadEvent(() => {
         try {
             enrollResponse = await enroll(member);
         } catch (err) {
-            display_modal("Error", "Something unexpected happened. Developers are alerted 👷", "Accept" ,"", "failure");
+            display_modal("Error", "Something unexpected happened. Developers are alerted 👷\nI think...", "Accept", "", "failure");
             console.error(err);
             return;
         }
@@ -75,12 +74,11 @@ addLoadEvent(() => {
                     // window.location.href = BASEURL;
                     return;
                 default:
-                    display_modal("Error", enrollResponse.message, "Accept" ,"", "failure");
+                    display_modal("Error", enrollResponse.message, "Accept", "", "failure");
                     console.error(enrollResponse);
                     return;
             }
         }
-
 
         // purchase license
         const customer = {

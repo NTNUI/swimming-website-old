@@ -2,6 +2,10 @@
     position: relative;
 }
 
+#checkout_overlay .box{
+    overflow: auto;
+}
+
 #checkout_overlay>box {
     background-color: unset;
 }

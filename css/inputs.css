@@ -1,9 +1,20 @@
 /* input fields */
-.intl-tel-input {
+.iti {
     width: 100%;
-    color: var(--primary-foreground-color);
     margin: 8px 0px;
     /* makes spacing consistent with other inputs */
+}
+
+span.iti__country-name{
+    color: black;
+}
+span.iti__dial-code{
+    color: black;
+}
+
+/* Workaround for country selection in phone input inside enrollment */
+#enrollment_form > .box:nth-child(3){
+    overflow: unset;
 }
 
 input, select, textarea, .StripeElement {

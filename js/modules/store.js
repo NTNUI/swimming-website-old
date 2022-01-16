@@ -25,6 +25,15 @@ export default class Store {
         this.card = this.elements.create('card');
         this.card.mount("#card-element");
 
+        // phone input
+        const checkoutPhoneInput = this.overlay.querySelector("input[name=phone]");
+        window.intlTelInput(checkoutPhoneInput, {
+            initialCountry: "no",
+            separateDialCode: true,
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/intlTelInput.min.js"
+        });
+
+
         this.card.addEventListener('change', this.card_validation_handler.bind(this));
     }
 
@@ -42,38 +51,43 @@ export default class Store {
      * Display checkout modal 
      * @param {object} product to be purchased
      * @param {object | null} customer if set, then customer info will be read only
-     * @returns a Promise for an Order object. Gets resolved when user commits to a purchase or rejected when user cancels or quits.
+     * @returns a Promise for an Order object. Gets resolved when user commits to a purchase
      */
     checkout(product, customer) {
         if (Store.lock) return;
         Store.lock = true;
-        return new Promise((resolve, reject) => {
-            // Create checkout modal
+        return new Promise((resolve) => {
+            // Update checkout modal
             this.displayed_product = product;
-            this.overlay.style.display = "block";
             this.overlay.querySelector("#checkout_title").textContent = product.name;
             this.overlay.querySelector("#product_hash").value = product.product_hash;
             this.overlay.querySelector("#checkout_description").innerHTML = product.description;
             this.overlay.querySelector("#checkout_img").src = product.image;
             this.overlay.querySelector("#checkout_price").textContent = product.price / 100 + " NOK";
+            
+            this.overlay.style.display = "block";
 
+            // lock user from editing personal info if customer is defined
             if (customer !== undefined) {
-                // lock user from editing personal info
-                this.overlay.querySelector("#checkout_name").value = customer.name;
-                this.overlay.querySelector("#checkout_email").value = customer.email;
-                this.overlay.querySelector("#checkout_phone").value = customer.phone;
-                this.overlay.querySelector("#checkout_name").disabled = true;
-                this.overlay.querySelector("#checkout_email").disabled = true;
-                this.overlay.querySelector("#checkout_phone").disabled = true;
+                const inputName = this.overlay.querySelector("#checkout_name");
+                const inputEmail = this.overlay.querySelector("#checkout_email");
+                const inputPhone = this.overlay.querySelector("#checkout_phone");
+
+                inputName.value = customer.name;
+                inputEmail.value = customer.email;
+                window.intlTelInput(inputPhone).setNumber(customer.phone);
+                
+                inputName.disabled = true;
+                inputEmail.disabled = true;
+                inputPhone.disabled = true;
                 // this.overlay.querySelector("#checkout_comment").style.display = "none";
             }
 
-            // reject promise if user cancels or closes
+            // abort listener
             this.overlay.querySelectorAll("span.close, button.locked").forEach(element => {
                 element.addEventListener("click", () => {
                     Store.lock = false;
                     this.overlay.style.display = "none";
-                    reject();
                 });
             });
 

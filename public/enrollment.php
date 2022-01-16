@@ -137,11 +137,8 @@ if (!enrollment_is_active()) {
 		license_product.image = BASEURL + "/img/store/" + license_product.image;
 	});
 </script>
-<script defer type="text/javascript" src="https://js.stripe.com/v3/"></script>
-<script defer type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/js/intlTelInput.js"></script>
-<script defer type="text/javascript" src="https://www.google.com/recaptcha/api.js"></script>
+<!-- <script defer type="text/javascript" src="https://www.google.com/recaptcha/api.js"></script> -->
 <script type='module' src='<?php print $settings["baseurl"];?>/js/enrollment.js'></script>
-<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/14.0.6/css/intlTelInput.css" />
 <?php 
 // style_and_script(__FILE__);
 ?>

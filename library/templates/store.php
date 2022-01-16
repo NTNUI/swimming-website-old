@@ -1,6 +1,10 @@
 <?php
 global $t;
 ?>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/css/intlTelInput.css" integrity="sha512-gxWow8Mo6q6pLa1XH/CcH8JyiSDEtiwJV78E+D+QP0EVasFs8wKXq16G8CLD4CJ2SnonHr4Lm/yY2fSI2+cbmw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/intlTelInput.min.js" integrity="sha512-L3moecKIMM1UtlzYZdiGlge2+bugLObEFLOFscaltlJ82y0my6mTUugiz6fQiSc5MaS7Ce0idFJzabEAl43XHg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script defer type="text/javascript" src="https://js.stripe.com/v3/"></script>
+
 <template id="store_dummy">
 	<div class="product_container box">
 		<span class="store_availability"></span>
@@ -50,7 +54,7 @@ global $t;
 				<input id="checkout_email" name="email" type="email" required />
 
 				<label for="phone"><?php print $t->get_translation("telefon", "store"); ?></label>
-				<input id="checkout_phone" name="phone" type="number" />
+				<input id="checkout_phone" name="phone" type="tel" />
 				
 				<?php
 					/*
