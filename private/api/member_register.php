@@ -1,5 +1,5 @@
 <?php
-if (!$access_control->can_access("api", "memberregister")) {
+if (!$access_control->can_access("api", "member_register")) {
 	log::message("Info: Access denied for " . Authenticator::get_username(), __FILE__, __LINE__);
 	log::forbidden("Access denied", __FILE__, __LINE__);
 }
