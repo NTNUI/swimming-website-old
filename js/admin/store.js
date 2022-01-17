@@ -73,7 +73,7 @@ async function show_orders(data) {
         row.querySelector(".purchase-row-phone").innerText = order.phone;
         row.querySelector(".purchase-row-comment").innerText = order.comment;
         row.querySelector(".purchase-row-button-deliver").setAttribute("id", "button-deliver-" + order.id);
-        row.querySelector(".purchase-row-button-deliver").setAttribute("onclick", "deliverHandler(event)");
+        row.querySelector(".purchase-row-button-deliver").addEventListener("click", deliverHandler);
         if (order.status == "DELIVERED") {
             row.querySelector(".purchase-row-button-deliver").disabled = true;
         }
