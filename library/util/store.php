@@ -40,10 +40,25 @@ class Store
 		if (!$phone) {
 			throw new InvalidArgumentException("phone is required");
 		}
-		$db = new DB("member");
-		$db->prepare("UPDATE member SET approved_date=NOW() WHERE phone=?");
-		$db->bind_param("s", $phone);
-		$db->execute();
+		// approve member
+		{
+			$db = new DB("member");
+			$db->prepare("UPDATE member SET approved_date=NOW() WHERE phone=?");
+			$db->bind_param("s", $phone);
+			$db->execute();
+		}
+		// log success
+		{
+			$db = new DB("member");
+			$db->prepare("SELECT first_name, surname FROM member WHERE phone = ?");
+			$db->bind_param("s", $phone);
+			$db->execute();
+			$first_name = "";
+			$surname = "";
+			$db->stmt->bind_result($first_name, $surname);
+			$db->fetch();
+			log::message("Info: New member $first_name $surname auto approved", __FILE__, __LINE__);
+		}
 	}
 
 
