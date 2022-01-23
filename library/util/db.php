@@ -128,13 +128,15 @@ class DB
 	public function  __destruct()
 	{
 		// close statement if present
-		if ($this->stmt) {
+		if (isset($this->stmt)) {
 			if (!$this->stmt->close()) {
 				throw new mysqli_sql_exception("Could not close prepared statement");
 			}
 		}
-		if (!$this->conn->close()) {
-			throw new mysqli_sql_exception("Could not close connection to db");
+		if (isset($this->conn)) {
+			if (!$this->conn->close()) {
+				throw new mysqli_sql_exception("Could not close connection to db");
+			}
 		}
 	}
 }

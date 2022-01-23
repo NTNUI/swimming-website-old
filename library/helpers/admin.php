@@ -99,9 +99,8 @@ function print_section($section)
 	switch ($section) {
 		case "member":
 			access_link("member_register", $inline);
-			access_link("autopay", $inline);
 			access_link("volunteer", $inline);
-			access_link("kid", $inline);
+			access_link("cin", $inline);
 			access_link("isMember", $inline);
 			break;
 		case "web":
