@@ -134,7 +134,7 @@ if (!strpos($input["name"], " ")) {
 }
 
 if (filter_var($input["isMale"], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === null) {
-    log::message("Warning: Parameter isMale accepts only strings", __FILE__, __LINE__);
+    log::message("Warning: Parameter isMale accepts only boolean", __FILE__, __LINE__);
     http_response_code(HTTP_INVALID_REQUEST);
     print(json_encode($input));
     return;

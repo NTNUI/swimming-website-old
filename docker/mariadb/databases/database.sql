@@ -37,7 +37,9 @@ CREATE TABLE IF NOT EXISTS `member_CIN` (
   `hash` text NOT NULL COMMENT 'Hashed sum of stable personal data',
   `NSF_CIN` bigint(11) NOT NULL COMMENT 'Customer Identification number for norwegian swimming federation',
   `last_used` date NOT NULL COMMENT 'Last time this row was an active member',
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `hash` (`hash`),
+  UNIQUE KEY `NSF_CIN` (`NSF_CIN`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `member_statistics` (
