@@ -23,18 +23,7 @@ export default class Store {
         this.stripe = Stripe(publishable_key);
         this.elements = this.stripe.elements();
         this.card = this.elements.create('card');
-        this.card.mount("#card-element");
-
-        // phone input
-        this.checkoutPhoneInput = this.overlay.querySelector("#checkout_phone");
-        window.checkoutPhone = window.intlTelInput(this.checkoutPhoneInput, {
-            initialCountry: "no",
-            separateDialCode: true,
-            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/utils.min.js"
-        });
-
-
-        this.card.addEventListener('change', this.card_validation_handler.bind(this));
+        // this.card.mount("#card-element");
     }
 
     /**
@@ -55,7 +44,7 @@ export default class Store {
      */
     checkout(product, customer) {
         return new Promise((resolve) => {
-            // Update checkout modal
+            // Update product description
             this.displayed_product = product;
             this.overlay.querySelector("#checkout_title").textContent = product.name;
             this.overlay.querySelector("#product_hash").value = product.product_hash;
@@ -63,7 +52,25 @@ export default class Store {
             this.overlay.querySelector("#checkout_img").src = product.image;
             this.overlay.querySelector("#checkout_price").textContent = product.price / 100 + " NOK";
 
+            // unhide the overlay
             this.overlay.style.display = "block";
+
+            // Recreate the node to clear out old event listeners
+            // If old event listeners are not cleared out multiple
+            // charges might occur for one click.
+            this.form = document.querySelector('#payment-form');
+            let old_element = this.form;
+            let new_element = old_element.cloneNode(true);
+            old_element.parentNode.replaceChild(new_element, old_element);
+
+            // remount validated input fields
+            this.card.mount("#card-element");
+            this.checkoutPhoneInput = this.overlay.querySelector("#checkout_phone");
+            window.checkoutPhone = window.intlTelInput(this.checkoutPhoneInput, {
+                initialCountry: "no",
+                separateDialCode: true,
+                utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/utils.min.js"
+            });
 
             // lock user from editing personal info if customer is defined
             if (customer !== undefined) {
@@ -79,7 +86,7 @@ export default class Store {
                 this.checkoutPhoneInput.disabled = true;
                 // this.overlay.querySelector("#checkout_comment").style.display = "none";
             }
-
+            
             function submitHandler(event) {
                 event.preventDefault();
 
@@ -98,32 +105,21 @@ export default class Store {
                     // close checkout modal and return new order
                     this.overlay.style.display = "none";
                     resolve({ product: product, customer: customer });
-                } else {
-
-                    // close checkout modal and return new order
-                    this.overlay.style.display = "none";
-                    resolve({ product: product, customer: customer });
+                    return;
                 }
-
+                // close checkout modal and return new order
+                this.overlay.style.display = "none";
+                resolve({ product: product, customer: customer });
             }
 
-            // replace old eventListener whenever new product is shown
-            // this shit is required otherwise the event listener will
-            // be added on top of the old one each time the checkout overlay is opened
-            this.form = document.querySelector('#payment-form');
-            let old_element = this.form;
-            let new_element = old_element.cloneNode(true);
-            old_element.parentNode.replaceChild(new_element, old_element);
+            // Attach event listeners
             document.querySelector('#payment-form').addEventListener("submit", submitHandler.bind(this));
-
-            // abort listener
+            this.card.addEventListener('change', this.card_validation_handler.bind(this));
             this.overlay.querySelectorAll("span.close, button.locked").forEach(element => {
                 element.addEventListener("click", () => {
                     this.overlay.style.display = "none";
                 });
             });
-            // remount stripe card element
-            this.card.mount("#card-element");
         });
     }
 
