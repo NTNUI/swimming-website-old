@@ -54,8 +54,6 @@ export default class Store {
      * @returns a Promise for an Order object. Gets resolved when user commits to a purchase
      */
     checkout(product, customer) {
-        if (Store.checkoutLock) return;
-        Store.checkoutLock = true;
         return new Promise((resolve) => {
             // Update checkout modal
             this.displayed_product = product;
@@ -81,14 +79,6 @@ export default class Store {
                 this.checkoutPhoneInput.disabled = true;
                 // this.overlay.querySelector("#checkout_comment").style.display = "none";
             }
-
-            // abort listener
-            this.overlay.querySelectorAll("span.close, button.locked").forEach(element => {
-                element.addEventListener("click", () => {
-                    Store.checkoutLock = false;
-                    this.overlay.style.display = "none";
-                });
-            });
 
             function submitHandler(event) {
                 event.preventDefault();
@@ -118,8 +108,22 @@ export default class Store {
             }
 
             // replace old eventListener whenever new product is shown
-            this.form.removeEventListener("submit", submitHandler);
-            this.form.addEventListener("submit", submitHandler.bind(this));
+            // this shit is required otherwise the event listener will
+            // be added on top of the old one each time the checkout overlay is opened
+            this.form = document.querySelector('#payment-form');
+            let old_element = this.form;
+            let new_element = old_element.cloneNode(true);
+            old_element.parentNode.replaceChild(new_element, old_element);
+            document.querySelector('#payment-form').addEventListener("submit", submitHandler.bind(this));
+
+            // abort listener
+            this.overlay.querySelectorAll("span.close, button.locked").forEach(element => {
+                element.addEventListener("click", () => {
+                    this.overlay.style.display = "none";
+                });
+            });
+            // remount stripe card element
+            this.card.mount("#card-element");
         });
     }
 
@@ -130,13 +134,15 @@ export default class Store {
      * @returns a promise that get fulfilled when successful request from server is received.
      */
     charge(product, customer) {
-        if (Store.chargeLock) return;
-        Store.chargeLock = true;
-        if (product == null || customer == null) {
-            throw "Cannot commit to checkout without a customer or a product";
-        }
+        console.log("charge called");
         return new Promise(async (resolve, reject) => {
             try {
+                if (Store.chargeLock) reject("Lock not acquired");
+                Store.chargeLock = true;
+                console.log("Lock acquired");
+                if (product == null || customer == null) {
+                    reject("Cannot commit to checkout without a customer or a product");
+                }
                 // TODO: replace with something that returns a paymentIntent instead
                 const payment = await this.stripe.createPaymentMethod(
                     {
@@ -170,12 +176,10 @@ export default class Store {
                 }
                 const response = await chargeResponse.json();
                 if (response.success) {
-                    Store.chargeLock = false;
                     resolve(response.message)
                 }
 
                 if (response.error) {
-                    Store.chargeLock = false;
                     reject(response.error);
                 }
 
@@ -183,7 +187,6 @@ export default class Store {
                     // 3d secure authentication
                     const cardHandlerResponse = await this.stripe.handleCardAction(response.payment_intent_client_secret)
                     if (cardHandlerResponse.error) {
-                        Store.chargeLock = false;
                         reject(cardHandlerResponse.error.message);
                     }
 
@@ -201,17 +204,17 @@ export default class Store {
                     const chargeResponseJSON = (await chargeResponse).json();
 
                     if (!(await chargeResponseJSON).success) {
-                        Store.chargeLock = false;
                         reject((await chargeResponseJSON).message);
                     }
-                    Store.chargeLock = false;
+
                     resolve((await chargeResponseJSON).message);
                 }
 
             } catch (error) {
                 reject(error);
             } finally {
-                Store.checkoutLock = false;
+                console.log("lock released");
+                Store.chargeLock = false;
             }
         });
     }
