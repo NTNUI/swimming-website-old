@@ -74,7 +74,7 @@ global $t;
 					<!-- Used to display form errors. -->
 					<div id="card-errors" role="alert"></div>
 				</div>
-				<button class="locked" style="float: left; width: 45%"><?php print $t->get_translation("cancel", "store"); ?></button>
+				<button type="button" class="locked" style="float: left; width: 45%"><?php print $t->get_translation("cancel", "store"); ?></button>
 				<button type="submit" style="float: right; width: 45%"><?php print $t->get_translation("kjop", "store"); ?></button>
 			</form>
 		</div>

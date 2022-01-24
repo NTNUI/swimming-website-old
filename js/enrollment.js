@@ -4,10 +4,10 @@ import { display_modal } from "./modules/modal.js";
 
 // phone validation
 const enrollmentPhoneInput = document.querySelector("form#enrollment_form input[name=phone]");
-window.intlTelInput(enrollmentPhoneInput, {
+window.enrollmentPhone = window.intlTelInput(enrollmentPhoneInput, {
     initialCountry: "no",
     separateDialCode: true,
-    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/intlTelInput.min.js"
+    utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/utils.min.js"
 });
 
 function get_form_data() {
@@ -17,10 +17,11 @@ function get_form_data() {
     form_data.append("isMale", document.querySelector('#enrollment_form input[name="gender"]:checked').value == "Male" ? 1 : 0);
     form_data.append("licensee", document.querySelector(".licensee").value);
 
-    const inputs = ["phone", "birthDate", "zip", "address", "email"];
+    const inputs = ["birthDate", "zip", "address", "email"];
     for (const i in inputs) {
         form_data.append(inputs[i], document.querySelector(`#enrollment_form input[name=${inputs[i]}]`).value);
     }
+    form_data.append("phone", window.enrollmentPhone.getNumber());
     return form_data;
 }
 
@@ -97,7 +98,7 @@ addLoadEvent(() => {
             }
             display_modal("Loading", "Attempting to empty your bank account", "", "", "wait");
             const chargeResponse = await store.charge(order.product, order.customer);
-            await display_modal("Success", chargeResponse.message, "Accept", "", "success");
+            await display_modal("Success", chargeResponse, "Accept", "", "success");
             await display_modal("Welcome as a new member!", "Together we will make Norwegian swimming more fun.\nSprut nice 💦💦", "Accept", "", "success");
             // window.location.href = BASEURL;
         } catch (error) {
