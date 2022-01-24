@@ -12,9 +12,12 @@ function handle_order(store, order) {
         .then(async (serverResponse) => {
             await display_modal("Success", serverResponse, "Accept", "", "success");
         }).catch((error) => {
-            console.log(new Error().stack);
             console.error(error);
-            display_modal("Failure", error, "Accept", "", "failure");
+            if (error.message === undefined) {
+                display_modal("Failure", error, "Accept", "", "failure");
+                return;
+            }
+            display_modal("Failure", error.message, "Accept", "", "failure");
         });
 }
 
@@ -40,9 +43,12 @@ store.init(BASEURL + "/api/inventory").then(async () => {
                     handle_order(store, order);
                 })
                 .catch((error) => {
-                    console.log(new Error().stack);
                     console.error(error);
-                    display_modal("Failure", error, "Accept", "", "failure");
+                    if (error.message === undefined) {
+                        display_modal("Failure", error, "Accept", "", "failure");
+                        return;
+                    }
+                    display_modal("Failure", error.message, "Accept", "", "failure");
                 });
         }
         productEntry.querySelector(".store_button").addEventListener("click", purchaseButtonHandler);
@@ -61,9 +67,12 @@ store.init(BASEURL + "/api/inventory").then(async () => {
                 handle_order(store, order);
             })
             .catch((error) => {
-                console.log(new Error().stack);
                 console.error(error);
-                display_modal("Failure", error, "Accept", "", "failure");
+                if (error.message === undefined) {
+                    display_modal("Failure", error, "Accept", "", "failure");
+                    return;
+                }
+                display_modal("Failure", error.message, "Accept", "", "failure");
             });
     }
 });
