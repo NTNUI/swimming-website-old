@@ -34,6 +34,12 @@
     display: block;
 }
 
+/* 
+    Bug on safari, iOS 
+    https://bugs.webkit.org/show_bug.cgi?id=141822
+*/
+.iti__arrow { border: none; }
+
 /* STRIPE STUFF */
 
 .StripeElement--focus {

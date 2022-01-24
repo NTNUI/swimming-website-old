@@ -1,7 +1,7 @@
 "use strict";
 export default class Store {
-    static lock = false; // internal state for performing one purchase at a time.
-
+    static CheckoutLock = false; // internal state for performing one purchase at a time.
+    static ChargeLock = false;
     /**
      * Store class opens up the possibility to perform checkouts, list inventories and perform charges.
      * @param {string} publishable_key Stripe publishable API key
@@ -26,11 +26,11 @@ export default class Store {
         this.card.mount("#card-element");
 
         // phone input
-        const checkoutPhoneInput = this.overlay.querySelector("input[name=phone]");
-        window.intlTelInput(checkoutPhoneInput, {
+        this.checkoutPhoneInput = this.overlay.querySelector("#checkout_phone");
+        window.checkoutPhone = window.intlTelInput(this.checkoutPhoneInput, {
             initialCountry: "no",
             separateDialCode: true,
-            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/intlTelInput.min.js"
+            utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/utils.min.js"
         });
 
 
@@ -54,8 +54,8 @@ export default class Store {
      * @returns a Promise for an Order object. Gets resolved when user commits to a purchase
      */
     checkout(product, customer) {
-        if (Store.lock) return;
-        Store.lock = true;
+        if (Store.checkoutLock) return;
+        Store.checkoutLock = true;
         return new Promise((resolve) => {
             // Update checkout modal
             this.displayed_product = product;
@@ -64,35 +64,33 @@ export default class Store {
             this.overlay.querySelector("#checkout_description").innerHTML = product.description;
             this.overlay.querySelector("#checkout_img").src = product.image;
             this.overlay.querySelector("#checkout_price").textContent = product.price / 100 + " NOK";
-            
+
             this.overlay.style.display = "block";
 
             // lock user from editing personal info if customer is defined
             if (customer !== undefined) {
                 const inputName = this.overlay.querySelector("#checkout_name");
                 const inputEmail = this.overlay.querySelector("#checkout_email");
-                const inputPhone = this.overlay.querySelector("#checkout_phone");
 
                 inputName.value = customer.name;
                 inputEmail.value = customer.email;
-                window.intlTelInput(inputPhone).setNumber(customer.phone);
-                
+                window.checkoutPhone.setNumber(customer.phone);
+
                 inputName.disabled = true;
                 inputEmail.disabled = true;
-                inputPhone.disabled = true;
+                this.checkoutPhoneInput.disabled = true;
                 // this.overlay.querySelector("#checkout_comment").style.display = "none";
             }
 
             // abort listener
             this.overlay.querySelectorAll("span.close, button.locked").forEach(element => {
                 element.addEventListener("click", () => {
-                    Store.lock = false;
+                    Store.checkoutLock = false;
                     this.overlay.style.display = "none";
                 });
             });
 
-            // resolve with an order on submit
-            this.form.addEventListener('submit', (event) => {
+            function submitHandler(event) {
                 event.preventDefault();
 
                 // disable charge button when cards validation errors are present
@@ -100,15 +98,12 @@ export default class Store {
                     return;
                 }
 
-                // cannot create a new customer object inside a scope and use in resolve()
-                // This is why following block looks somewhat duplicated
-
                 if (customer === undefined) {
                     // get customer info from checkout overlay
                     const customer = {};
                     customer.name = this.overlay.querySelector("#checkout_name").value;
                     customer.email = this.overlay.querySelector("#checkout_email").value;
-                    customer.phone = this.overlay.querySelector("#checkout_phone").value;
+                    customer.phone = window.checkoutPhone.getNumber();
 
                     // close checkout modal and return new order
                     this.overlay.style.display = "none";
@@ -119,7 +114,12 @@ export default class Store {
                     this.overlay.style.display = "none";
                     resolve({ product: product, customer: customer });
                 }
-            });
+
+            }
+
+            // replace old eventListener whenever new product is shown
+            this.form.removeEventListener("submit", submitHandler);
+            this.form.addEventListener("submit", submitHandler.bind(this));
         });
     }
 
@@ -130,6 +130,8 @@ export default class Store {
      * @returns a promise that get fulfilled when successful request from server is received.
      */
     charge(product, customer) {
+        if (Store.chargeLock) return;
+        Store.chargeLock = true;
         if (product == null || customer == null) {
             throw "Cannot commit to checkout without a customer or a product";
         }
@@ -144,7 +146,7 @@ export default class Store {
                     }
                 );
                 if (payment.error !== undefined) {
-                    throw payment.error;
+                    reject(payment.error);
                 }
                 // absolute path is required because of dynamic document root
                 const chargeResponse = await fetch(BASEURL + "/api/charge", {
@@ -164,13 +166,52 @@ export default class Store {
                     case 500:
                         throw "server error";
                     default:
-                        throw await chargeResponse.json();
+                        reject(await chargeResponse.json());
                 }
-                resolve(await chargeResponse.json());
+                const response = await chargeResponse.json();
+                if (response.success) {
+                    Store.chargeLock = false;
+                    resolve(response.message)
+                }
+
+                if (response.error) {
+                    Store.chargeLock = false;
+                    reject(response.error);
+                }
+
+                if (response.requires_action) {
+                    // 3d secure authentication
+                    const cardHandlerResponse = await this.stripe.handleCardAction(response.payment_intent_client_secret)
+                    if (cardHandlerResponse.error) {
+                        Store.chargeLock = false;
+                        reject(cardHandlerResponse.error.message);
+                    }
+
+                    const chargeResponse = fetch("api/charge", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({
+                            payment_intent_id: cardHandlerResponse.paymentIntent.id,
+                            product_hash: product.hash,
+                            owner: customer
+                        }),
+                    });
+                    const chargeResponseJSON = (await chargeResponse).json();
+
+                    if (!(await chargeResponseJSON).success) {
+                        Store.chargeLock = false;
+                        reject((await chargeResponseJSON).message);
+                    }
+                    Store.chargeLock = false;
+                    resolve((await chargeResponseJSON).message);
+                }
+
             } catch (error) {
                 reject(error);
             } finally {
-                Store.lock = false;
+                Store.checkoutLock = false;
             }
         });
     }

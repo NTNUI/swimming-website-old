@@ -10,17 +10,10 @@ function handle_order(store, order) {
     display_modal("Loading", "Attempting to empty your bank account", "", "", "wait");
     store.charge(order.product, order.customer)
         .then(async (serverResponse) => {
-            if (typeof (serverResponse === "object")) {
-                serverResponse = serverResponse.message;
-            }
             await display_modal("Success", serverResponse, "Accept", "", "success");
         }).catch((error) => {
             console.error(error);
-            if (typeof (error === "object")) {
-                error = error.message;
-            }
             display_modal("Failure", error, "Accept", "", "failure");
-            console.error(error);
         });
 }
 
