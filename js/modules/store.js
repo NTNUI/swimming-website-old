@@ -168,7 +168,8 @@ export default class Store {
                     case 500:
                         throw "server error";
                     default:
-                        reject(await chargeResponse.json());
+                        const response = chargeResponse.json();
+                        reject((await response).message);
                 }
                 const response = await chargeResponse.json();
                 if (response.success) {
