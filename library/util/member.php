@@ -41,7 +41,7 @@ function approve_member(string $phone): void
         $headers = "Confirmation of registration<br>";
         $headers .= "<br>";
         $headers .= "Congratulations, you have now a valid membership in NTNUI Swimming<br>";
-        $headers .= "Find information by visiting <a href='https://ntnui.slab.com/posts/welcome-to-ntnui-swimming-%F0%9F%92%A6-44w4p9pv'>this</a> link:<br>";
+        $headers .= "Find information by visiting <a href='https://ntnui.slab.com/posts/welcome-to-ntnui-swimming-%F0%9F%92%A6-44w4p9pv'>this</a> link<br>";
         $headers .= "<br>";
         $headers .= "<br>";
         $headers .= "Love from NTNUI Swimming";
