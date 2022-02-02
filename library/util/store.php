@@ -2,6 +2,7 @@
 // TODO: split this class into product and order
 require_once("library/util/db.php");
 require_once("library/exceptions/store.php");
+require_once("library/util/member.php");
 
 class Store
 {
@@ -27,40 +28,6 @@ class Store
 	{
 		return \Stripe\PaymentIntent::retrieve($paymentIntent_id);
 	}
-
-
-	/**
-	 * Approve a member 
-	 *
-	 * @param string $phone
-	 * @return void
-	 */
-	function approve_member(string $phone)
-	{
-		if (!$phone) {
-			throw new InvalidArgumentException("phone is required");
-		}
-		// approve member
-		{
-			$db = new DB("member");
-			$db->prepare("UPDATE member SET approved_date=NOW() WHERE phone=?");
-			$db->bind_param("s", $phone);
-			$db->execute();
-		}
-		// log success
-		{
-			$db = new DB("member");
-			$db->prepare("SELECT first_name, surname FROM member WHERE phone = ?");
-			$db->bind_param("s", $phone);
-			$db->execute();
-			$first_name = "";
-			$surname = "";
-			$db->stmt->bind_result($first_name, $surname);
-			$db->fetch();
-			log::message("Info: New member $first_name $surname auto approved", __FILE__, __LINE__);
-		}
-	}
-
 
 	// Section products
 
@@ -397,7 +364,7 @@ class Store
 
 		// Member registration hook
 		if ($this->get_product_hash($product_id) == $this->license_key) {
-			$this->approve_member($phone);
+			approve_member($phone);
 		}
 	}
 
