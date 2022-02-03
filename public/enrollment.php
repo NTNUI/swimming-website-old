@@ -75,12 +75,6 @@ function print_recaptcha()
 	// print('<div class="enrollment box"><div style="display: inline-block;" class="g-recaptcha center" data-sitekey="6LdrnW8UAAAAAJa67cSTnwyho53uTJRJlwf9_B9W"></div></div>');
 }
 
-function print_reset_and_submit_buttons()
-{
-	global $t;
-	print('<input type="submit" value="' . $t->get_translation("submit") . '">');
-	print('<input type="reset" value="' . $t->get_translation("clear") . '">');
-}
 function print_infoBox($key = "")
 {
 	global $t;
@@ -125,7 +119,7 @@ if (!enrollment_is_active()) {
 		print_recaptcha();
 	}
 	print "<div class='box'><p>" . $t->get_translation("gdpr_notice") . "</p></div>";
-	print_reset_and_submit_buttons();
+	print('<input type="submit" disabled value="' . $t->get_translation("submit") . '">');
 	?>
 </form>
 </div>
