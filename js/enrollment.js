@@ -123,4 +123,6 @@ addLoadEvent(() => {
             document.querySelector("input[type=submit]").className = "";
         }
     })
+    // enable submit when all event listeners has been fully loaded.
+    document.querySelector("input[type=submit]").removeAttribute("disabled");
 })
