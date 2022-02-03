@@ -25,7 +25,6 @@ print_content_header(
 </script>
 <script type="module" src="<?php print $settings['baseurl']?>/js/store.js"></script>
 <link rel="stylesheet" href="<?php print $settings["baseurl"]?>/css/store.css" class="css">
-<script src="https://js.stripe.com/v3/"></script>
 
 <?php
 // style_and_script(__FILE__);

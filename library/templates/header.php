@@ -23,8 +23,6 @@ if ($title == "") $title = ucwords($page);
 	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/inputs.css" type="text/css" />
 	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/admin.css" type="text/css" />
 	<link rel="stylesheet" href="<?php print($settings['baseurl']); ?>/css/smallscreen.css" type="text/css" media="screen and (max-width: 1000px)" />
-	<!-- Stripe fraud stuff recommends this on all pages hmmm -->
-	<!-- <script src="https://js.stripe.com/v3/"></script> -->
 	<script><?php
 		if (isset($_SESSION['name'])) {
 			print("const NAME_USER = '" . $_SESSION['name'] . "';");

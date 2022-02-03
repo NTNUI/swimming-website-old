@@ -25,4 +25,3 @@ print("<script type='module' src='${settings['baseurl']}/js/admin/test.js'></scr
 
     </div>
 </div>
-<script src="https://js.stripe.com/v3/"></script>
