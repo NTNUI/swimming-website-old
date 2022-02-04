@@ -7,10 +7,10 @@ $response = new Response();
 $json = file_get_contents("php://input");
 $input = json_decode($json);
 
-// if (!$access_control->can_access("api", "cin")) {
-//     log::message("Info: Access denied. " . Authenticator::get_username() || "User not logged in.", __FILE__, __LINE__);
-//     log::forbidden("Access denied", __FILE__, __LINE__);
-// }
+if (!$access_control->can_access("api", "cin")) {
+    log::message("Info: Access denied. " . Authenticator::get_username() || "User not logged in.", __FILE__, __LINE__);
+    log::forbidden("Access denied", __FILE__, __LINE__);
+}
 
 try {
     switch ($_SERVER['REQUEST_METHOD']) {
@@ -91,7 +91,7 @@ function patch_cin(int $member_id, int $cin): void
     $db->bind_param("ii", $cin, $member_id);
     $db->execute();
     $db->stmt->close();
-  
+
     // Get data to generate hash
     $db->prepare("SELECT birth_date, phone, gender FROM member WHERE id=?");
     $db->bind_param("i", $member_id);
