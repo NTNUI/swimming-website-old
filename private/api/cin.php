@@ -86,32 +86,35 @@ try {
 function patch_cin(int $member_id, int $cin): void
 {
     $db = new DB("member");
-    // save CIN to user
-    $db->prepare("UPDATE member SET cin = ? WHERE id = ?");
-    $db->bind_param("ii", $cin, $member_id);
-    $db->execute();
-    $db->stmt->close();
-
     // Get data to generate hash
     $db->prepare("SELECT birth_date, phone, gender FROM member WHERE id=?");
     $db->bind_param("i", $member_id);
     $db->execute();
-    $birth_date = 0;
-    $phone = "";
-    $gender = "";
+    $birth_date = NULL;
+    $phone = NULL;
+    $gender = NULL;
     $db->stmt->bind_result($birth_date, $phone, $gender);
     $db->stmt->close();
+    if ($birth_date === NULL || $phone === NULL || $gender === NULL) {
+        throw new Exception("Could not retrieve personal info");
+    }
 
     // save CIN to users hash
     $hash = hash("sha256", $birth_date . $phone . strval($gender ? 1 : 0));
     $db->prepare("INSERT INTO member_CIN (hash, NSF_CIN, last_used) VALUES (?, ?, NOW())");
     $db->bind_param("si", $hash, $cin);
     $db->execute();
+
+    // save CIN to user
+    $db->prepare("UPDATE member SET cin = ? WHERE id = ?");
+    $db->bind_param("ii", $cin, $member_id);
+    $db->execute();
+    $db->stmt->close();
 }
 
 
 /**
- * Undocumented function
+ * Set license_forwarded to true for a user with @param CIN
  *
  * @param integer $cin_number
  * @return void
