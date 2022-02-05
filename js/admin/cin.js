@@ -1,5 +1,5 @@
 "use strict";
-import { display_modal } from "/js/modules/modal.js";
+import { display_modal } from "../modules/modal.js";
 
 function createCommand(command, target = "", value = "") {
     return {
