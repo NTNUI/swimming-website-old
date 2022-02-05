@@ -191,7 +191,7 @@ async function save_cin_number(node, id, cin) {
         node.parentElement.remove();
     } catch (response) {
         console.log(response)
-        display_modal(response.statusText, (await response.json()).message, "Accept", "", "failure");
+        display_modal(response.statusText, (await response.json()).error, "Accept", "", "failure");
     }
 }
 
