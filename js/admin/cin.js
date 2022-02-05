@@ -249,6 +249,7 @@ addLoadEvent(async () => {
             }
             cin_numbers.textContent = "";
             document.getElementById("output").innerText = "";
+            document.querySelector("#paymentsGenerated").innerText = 0;
             display_modal(response.statusText, (await response.json()).message, "Accept", "", "success");
         } catch (response) {
             console.log(response);
