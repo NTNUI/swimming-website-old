@@ -12,18 +12,19 @@ function generateNavigator() {
     return [
         createCommand("open", document.getElementById("url").value),
         createCommand("selectFrame", "id=payments"),
-        createCommand("selectFrame", "id=inhold"), // remove this comment if this line works fine
+        createCommand("selectFrame", "id=indhold"), // Yes "indhold" is correct :/
     ];
 }
 
 function generateCIN(cin) {
     return [
         createCommand("click", "name=txiFraTxt"),
-        createCommand("type", "name=txiFraTxt", document.getElementById("label").value),
-        createCommand("type", "name=txiTilKto", document.getElementById("account_number").value),
-        createCommand("type", "name=txiOCRRef", "" + cin),
-        createCommand("type", "name=txiBetBel", "" + document.getElementById("amount").value),
-        createCommand("clickAndWait", "id=lblBTSaveID"),
+        createCommand("type", "name=txiFraTxt", document.getElementById("label").value), // transaction label. Max 20 chars
+        // TODO: transaction label include CIN and name.
+        createCommand("type", "name=txiTilKto", document.getElementById("account_number").value), // senders account number
+        createCommand("type", "name=txiOCRRef", "" + cin), // CIN number
+        createCommand("type", "name=txiBetBel", "" + document.getElementById("amount").value), // amount
+        createCommand("clickAndWait", "id=lblBTSaveID"), // OK
         createCommand("pause", document.getElementById("sleep_duration").value),
     ];
 }
