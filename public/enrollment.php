@@ -119,7 +119,7 @@ if (!enrollment_is_active()) {
 		print_recaptcha();
 	}
 	print "<div class='box'><p>" . $t->get_translation("gdpr_notice") . "</p></div>";
-	print('<input type="submit" disabled value="' . $t->get_translation("submit") . '">');
+	print('<input class="submit" type="submit" disabled value="' . $t->get_translation("submit") . '">');
 	?>
 </form>
 </div>
