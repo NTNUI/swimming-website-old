@@ -12,3 +12,4 @@ cgi-bin/
 .htaccess
 storage/
 composer.pahr
+.DS_Store
