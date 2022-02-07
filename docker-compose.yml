@@ -1,13 +1,9 @@
 version: "3.9"
 services:
-    # web is the web site application
-    # TODO: split web into apache and php
-    # TODO: make image directory writable and put it in gitignore
-    # TODO: move mariadb->volumes to env file. That is host system dependent.
-    # TODO: tons of warnigs while running docker-compose up. Fix those
-    web:
+    # Web server
+    apache:
         build: .
-        container_name: web
+        container_name: apache
         ports:
             - 80:80
             - 443:443
@@ -16,16 +12,15 @@ services:
         networks:
             - epstein-didnt-kill-himself
         volumes:
-            - log:/var/log
-            - ./private:/srv/http/private
-            - ./public:/srv/http/public
-            - ./js:/srv/http/js
-            - ./translations:/srv/http/translations
-            - ./css:/srv/http/css
-            - ./img:/srv/http/img
-            - ./assets:/srv/http/assets
-            - ./library:/srv/http/library
-    # MariaDB is the database
+            - ./private:/var/www/localhost/htdocs/private
+            - ./public:/var/www/localhost/htdocs/public
+            - ./js:/var/www/localhost/htdocs/js
+            - ./translations:/var/www/localhost/htdocs/translations
+            - ./css:/var/www/localhost/htdocs/css
+            - ./img:/var/www/localhost/htdocs/img
+            - ./assets:/var/www/localhost/htdocs/assets
+            - ./library:/var/www/localhost/htdocs/library
+    # Database
     mariadb:
         image: mariadb
         container_name: mariadb
@@ -37,13 +32,12 @@ services:
             - MYSQL_USER=svommer_web
             - MYSQL_PASSWORD=testing_password
         volumes:
-            - log:/var/log/
             - ./storage/mariadb:/var/lib/mysql
             - ./docker/mariadb/databases:/docker-entrypoint-initdb.d
             - ./docker/mariadb/conf.d/:/etc/mysql/
         networks:
             - epstein-didnt-kill-himself
-    # phpmyadmin can manange the database visually
+    # Database frontend
     phpmyadmin:
         image: phpmyadmin
         container_name: phpmyadmin
@@ -64,6 +58,5 @@ networks:
                 - subnet: 172.24.0.0/24
 
 volumes:
-    log: null
     sessions: null
     storage: null
