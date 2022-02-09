@@ -13,7 +13,7 @@ $entries = [
 	"trial",
 	"level",
 	"mandatory",
-	//"paid_license",
+	"paid_license",
 	"other_club",
 	"outside_training_hours",
 	"equipment"
