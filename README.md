@@ -106,6 +106,9 @@ When this docker-compose is running the website and it's database are accessible
 
 ## Project guidelines
 
+### Commits
+[Read this random commit convention guide](https://karma-runner.github.io/6.3/dev/git-commit-msg.html) and try following it. If there are issues following this convention, create an issue and we'll discuss it's weaknesses.
+
 ### Content
 Content is data that fills the web site. It's paragraphs, titles, images and in different languages. Content change while the source stays the same. All content should be stored in db and retrieved through API endpoints. Assets that cannot be stored in the db like images will be stored inside assets folder as a sort of temporary storage. When content is added / uploaded it gets a random hash name and gets stored in there. 
 TODO: Create db for storing translations, add API endpoint and remove translations.php and translations dir.
