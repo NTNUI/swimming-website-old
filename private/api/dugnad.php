@@ -38,7 +38,7 @@ function search($name)
 {
 	// Search(string name)
 	$db = new DB("member");
-	$sql = "SELECT id, first_name, surname, phone, email, `have_volunteered` FROM member WHERE CONCAT(first_name, ' ', surname) LIKE CONCAT('%', ?, '%')";
+	$sql = "SELECT id, first_name, surname, phone, email, `have_volunteered` FROM member WHERE CONCAT(first_name, ' ', surname) LIKE CONCAT('%', ?, '%') AND approved_date > 0";
 
 	$db->prepare($sql);
 	$db->bind_param("s", $name);
@@ -62,7 +62,7 @@ $approve_id = argsURL("GET", "approve");
 $reject_id = argsURL("GET", "reject");
 $search = argsURL("GET", "search");
 
-// @return string|null
+// @return string|NULL
 function getAction($getRandom = 0, $approve_id = 0, $reject_id = 0, $search = "")
 {
 	if ($getRandom) {
@@ -77,7 +77,7 @@ function getAction($getRandom = 0, $approve_id = 0, $reject_id = 0, $search = ""
 	if ($search) {
 		return "search";
 	}
-	return null;
+	return NULL;
 }
 
 $action = getAction($getRandom, $approve_id, $reject_id, $search);
