@@ -300,7 +300,7 @@ class Store
 	 * @param integer $product_id
 	 * @return string product hash
 	 */
-	function get_product_hash(int &$product_id): string
+	public static function get_product_hash(int &$product_id): string
 	{
 		$db = new DB("web");
 		$db->prepare("SELECT hash FROM products WHERE id=?");
@@ -364,8 +364,8 @@ class Store
 		Store::set_order_status($order_id, "FINALIZED");
 
 		// Member registration hook
-		if ($this->get_product_hash($product_id) == $this->license_key) {
-			approve_member($phone);
+		if (Store::get_product_hash($product_id) === $this->license_key) {
+			Member::approve($phone);
 		}
 	}
 
@@ -422,7 +422,6 @@ class Store
 	}
 
 
-	// TODO: new signature: get_order_status
 	/**
 	 * Get order status
 	 *
@@ -430,7 +429,7 @@ class Store
 	 * @return string only 'FINALIZED' | 'DELIVERED' | 'FAILED'
 	 * @throws StoreException::OrderNotFound if order is not found.
 	 */
-	function get_status(string $paymentIntent_id): string
+	function get_order_status(string $paymentIntent_id): string
 	{
 		$db = new DB("web");
 		$db->prepare("SELECT order_status FROM orders WHERE source_id=?");

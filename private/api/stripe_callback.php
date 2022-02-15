@@ -37,7 +37,8 @@ try {
 			if ($event["data"]["object"]["amount"] == 76500 && $event["data"]["object"]["description"] == "License in the NSF") {
 				// temporary hardcoded member approval
 				log::message("Info: Approving member with email:" . $event["data"]["object"]["receipt_email"]);
-				$store->approve_member($event["data"]["object"]["receipt_email"]);
+				// FIXME: Member requires phone not email
+				Member::approve($event["data"]["object"]["receipt_email"]);
 			}
 			break;
 		default:
