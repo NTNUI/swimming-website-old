@@ -16,6 +16,7 @@ $comment = $_POST["kommentar"];
 $t->load_translation("store");
 
 try {
+	// TODO: refactor create_order to accept one argument object $order
 	$src = $store->create_order($hash, $source, $comment);
 	if ($src["status"] == "chargeable") {
 		$charge = $store->charge($src);
@@ -45,5 +46,3 @@ try {
 	handle_error($hash, $t->get_translation($e->getMessage(), "store"));
 	exit();
 }
-
-*/

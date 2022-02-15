@@ -65,7 +65,11 @@ export default class Store {
 
             // remount validated input fields
             this.card.mount("#card-element");
-            this.checkoutPhoneInput = this.overlay.querySelector("#checkout_phone");
+
+            this.checkoutPhoneInput = this.checkoutPhoneInput || this.overlay.querySelector("#checkout_phone");
+            if (window.checkoutPhone !== undefined) {
+                window.checkoutPhone.destroy();
+            }
             window.checkoutPhone = window.intlTelInput(this.checkoutPhoneInput, {
                 initialCountry: "no",
                 separateDialCode: true,
@@ -162,22 +166,16 @@ export default class Store {
                         owner: customer,
                     })
                 });
-                switch (chargeResponse.status) {
-                    case 200:
-                        break;
-                    case 500:
-                        throw "server error";
-                    default:
-                        const response = chargeResponse.json();
-                        reject((await response).message);
-                }
                 const response = await chargeResponse.json();
+                if (!chargeResponse.ok) {
+                    reject(await response);
+                }
                 if (response.success) {
-                    resolve(response.message)
+                    resolve(response)
                 }
 
                 if (response.error) {
-                    reject(response.error);
+                    reject(response);
                 }
 
                 if (response.requires_action) {
@@ -187,7 +185,7 @@ export default class Store {
                         reject(cardHandlerResponse.error.message);
                     }
 
-                    const chargeResponse = fetch("api/charge", {
+                    const chargeResponse = fetch(BASEURL + "/api/charge", {
                         method: "POST",
                         headers: {
                             "Content-Type": "application/json",
@@ -197,14 +195,13 @@ export default class Store {
                             product_hash: product.hash,
                             owner: customer
                         }),
-                    });
-                    const chargeResponseJSON = (await chargeResponse).json();
+                    }).then((response) => { return response.json() });
 
-                    if (!(await chargeResponseJSON).success) {
-                        reject((await chargeResponseJSON).message);
+                    if (!(await chargeResponse).success) {
+                        reject(await chargeResponse);
                     }
 
-                    resolve((await chargeResponseJSON).message);
+                    resolve(await chargeResponse);
                 }
 
             } catch (error) {
@@ -261,7 +258,7 @@ export default class Store {
         let node = document.importNode(t.content, true);
         let productContainer = node.querySelector(".product_container");
         let bottom = node.querySelector(".bottom");
-        productContainer.id = product_hash; // todo: change for .id to .hash
+        productContainer.id = product_hash; // todo: change .id to .hash
         node.querySelector(".store_header").textContent = header;
         node.querySelector(".store_description").innerHTML = description;
         node.querySelector(".store_price").textContent = this.formatCurrency(price);

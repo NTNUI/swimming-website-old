@@ -33,12 +33,12 @@ if ($update_type === "Delete") {
 // Log action if user have access, otherwise
 if (!$access_control->can_access("users", $action)) {
 	log::alert("You don't have access to $action", __FILE__, __LINE__);
-	$action = null;
+	$action = NULL;
 }
 
 // if action is set do it
 switch ($action) {
-	case null:
+	case NULL:
 		// ignore no action
 		break;
 	case 'create_user':

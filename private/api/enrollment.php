@@ -133,7 +133,7 @@ if (!strpos($input["name"], " ")) {
     return;
 }
 
-if (filter_var($input["isMale"], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === null) {
+if (filter_var($input["isMale"], FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) === NULL) {
     log::message("Warning: Parameter isMale accepts only boolean", __FILE__, __LINE__);
     http_response_code(HTTP_INVALID_REQUEST);
     print(json_encode($input));
@@ -159,7 +159,7 @@ try {
 }
 
 // email
-if ($input["email"] === null) {
+if ($input["email"] === NULL) {
     log::message("Email validation failed", __FILE__, __LINE__);
     http_response_code(HTTP_INVALID_REQUEST);
     $input["message"] = "Failed to validate email";
@@ -178,7 +178,7 @@ if ($input["age"] < 18) {
 }
 
 // Address and zip
-if ($input["zip"] === null) {
+if ($input["zip"] === NULL) {
     log::message("Warning: Could not decode zip", __FILE__, __LINE__);
     http_response_code(HTTP_INVALID_REQUEST);
     $input["message"] = "Could not decode parameter zip";
@@ -207,10 +207,10 @@ if (!value_exists($input["licensee"], $clubs) && $input["licensee"] !== "NTNUI T
 }
 
 // sanitize against injections
-$input["name"] = filter_var($input["name"], FILTER_SANITIZE_STRING);
+$input["name"] = htmlspecialchars($input["name"]);
 $input["email"] = filter_var($input["email"], FILTER_SANITIZE_EMAIL);
-$input["address"] = filter_var($input["address"], FILTER_SANITIZE_STRING);
-$input["licensee"] = filter_var($input["licensee"], FILTER_SANITIZE_STRING);
+$input["address"] = htmlspecialchars($input["address"]);
+$input["licensee"] = htmlspecialchars($input["licensee"]);
 $input["first_name"] = get_first_name($input["name"]);
 $input["surname"] = get_surname($input["name"]);
 

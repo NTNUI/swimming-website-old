@@ -20,13 +20,13 @@ class Store
 	 * retrieve Payment Intent given its id
 	 *
 	 * @see \Stripe\PaymentIntent::retrieve()
-	 * @param string $paymentIntent_id of the PaymentIntent to retrieve
+	 * @param string $payment_intent_id of the PaymentIntent to retrieve
 	 * @throws \Stripe\Exception\ApiErrorException — if the request fails
 	 * @return \Stripe\PaymentIntent
 	 */
-	function get_intent_by_id(string $paymentIntent_id): \Stripe\PaymentIntent
+	function get_intent_by_id(string $payment_intent_id): \Stripe\PaymentIntent
 	{
-		return \Stripe\PaymentIntent::retrieve($paymentIntent_id);
+		return \Stripe\PaymentIntent::retrieve($payment_intent_id);
 	}
 
 	// Section products
@@ -40,7 +40,7 @@ class Store
 			$db = new DB("web");
 			$db->prepare("UPDATE products SET available_from=? WHERE hash=?");
 			$val = $date_from->format("Y-m-d H:i:s");
-			log::message("Attempting to save timestamp: " . $val, __FUNCTION__, __LINE__);
+			log::message("Attempting to save timestamp: " . $val, __FILE__, __LINE__);
 			$db->bind_param("ss", $val, $product_hash);
 			$db->execute();
 		}
@@ -48,7 +48,7 @@ class Store
 			$db = new DB("web");
 			$db->prepare("UPDATE products SET available_until=? WHERE hash=?");
 			$val = $date_to->format("Y-m-d H:i:s");
-			log::message("Attempting to save timestamp: " . $val, __FUNCTION__, __LINE__);
+			log::message("Attempting to save timestamp: " . $val, __FILE__, __LINE__);
 			$db->bind_param("ss", $val, $product_hash);
 			$db->execute();
 		}
@@ -157,7 +157,8 @@ class Store
 		$language = $this->language;
 		while ($db->fetch()) {
 			if (!$rawData) {
-				// documentation needed
+				// Unpack json into array.
+				// Can this be done client side?
 				$name = json_decode($name);
 				if (property_exists($name, $language)) $name = $name->$language;
 				else if (array_key_exists("no", $name)) $name = $name->no;
@@ -305,10 +306,10 @@ class Store
 		$db->prepare("SELECT hash FROM products WHERE id=?");
 		$db->bind_param("i", $product_id);
 		$db->execute();
-		$res = "";
-		$db->stmt->bind_result($res);
+		$product_hash = "";
+		$db->stmt->bind_result($product_hash);
 		$db->fetch();
-		return $res;
+		return $product_hash;
 	}
 
 
@@ -346,21 +347,21 @@ class Store
 	 * Side effects:
 	 * - if order was used to purchase a license then member is approved. Following it's side effects.
 	 * 
-	 * @see Store_helper::approve_member()
-	 * @param string $intent_id
+	 * @see Store_helper::approve_member() FIXME
+	 * @param string $payment_intent_id
 	 * @return void
 	 */
-	function finalize_order(string $intent_id)
+	function finalize_order(string $payment_intent_id)
 	{
 		$db = new DB("web");
 		$db->prepare("SELECT id, products_id, phone AS products_id FROM orders WHERE source_id=?");
-		$db->bind_param("s", $intent_id);
+		$db->bind_param("s", $payment_intent_id);
 		$db->execute();
 		$db->stmt->bind_result($order_id, $product_id, $phone);
 
 		if (!$db->fetch()) throw \StoreException::ProductNotFound();
 
-		$this->set_order_status($order_id, "FINALIZED");
+		Store::set_order_status($order_id, "FINALIZED");
 
 		// Member registration hook
 		if ($this->get_product_hash($product_id) == $this->license_key) {
@@ -378,7 +379,7 @@ class Store
 	function fail_order(\Stripe\Charge $charge_event)
 	{
 		$db = new DB("web");
-		$db->prepare("UPDATE orders SET order_status='FAILED' WHERE source_id=? OR charge_id=?");
+		$db->prepare("UPDATE orders SET order_status='FAILED' WHERE source_id=?");
 		$db->bind_param("ss", $charge_event["payment_intent"], $charge_event["id"]);
 		$db->execute();
 	}
@@ -393,7 +394,7 @@ class Store
 	 * @return void
 	 * @note @param int $order_id should not be confused with stripe id system witch uses strings as identifier.
 	 */
-	function set_order_status(int $order_id, string $status)
+	static function set_order_status(int $order_id, string $status)
 	{
 		if ($status !== "FINALIZED" && $status !== "DELIVERED" && $status !== "FAILED") {
 			throw new \InvalidArgumentException($status . " is not one of 'FINALIZED' | 'DELIVERED' | 'FAILED'");

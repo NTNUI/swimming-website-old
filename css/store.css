@@ -2,7 +2,7 @@
     position: relative;
 }
 
-#checkout_overlay .box{
+#checkout_overlay .box {
     overflow: auto;
 }
 
@@ -38,7 +38,9 @@
     Bug on safari, iOS 
     https://bugs.webkit.org/show_bug.cgi?id=141822
 */
-.iti__arrow { border: none; }
+.iti__arrow {
+    border: none;
+}
 
 /* STRIPE STUFF */
 

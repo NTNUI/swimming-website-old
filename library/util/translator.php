@@ -18,7 +18,7 @@ class Translator
 	{
 		$file = "$this->directory/$page.json";
 
-		if($page == "api"){
+		if ($page == "api") {
 			return;
 		}
 
@@ -35,7 +35,7 @@ class Translator
 		$this->translations[$page] = $decoded;
 	}
 
-	public function get_translation($key, $page = "")
+	public function get_translation($key, $page = ""): string
 	{
 		$ret = "";
 

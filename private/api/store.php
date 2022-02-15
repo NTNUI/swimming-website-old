@@ -173,14 +173,14 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			if (property_exists($input_json->{"params"}, "date_start")) {
 				$date_start = DateTime::createFromFormat($format, $input_json->{"params"}->{"date_start"}, new DateTimeZone("Europe/Oslo"));
 			} else {
-				$date_start = null;
+				$date_start = NULL;
 			}
 
 			$date_end = new DateTime;
 			if (property_exists($input_json->{"params"}, "date_end")) {
 				$date_end = DateTime::createFromFormat($format, $input_json->{"params"}->{"date_end"}, new DateTimeZone("Europe/Oslo"));
 			} else {
-				$date_end = null;
+				$date_end = NULL;
 			}
 			// save result and return
 			Store::update_product_date($product_hash, $date_start, $date_end);
@@ -236,7 +236,7 @@ function handle_patch(Store &$store, string $input, Response &$response)
 function handle_post(Response &$response)
 {
 	Authenticator::auth_API("api/store", "", __FILE__, __LINE__);
-	// get these arguments, ignore rest
+	// Get these arguments, throw on unexpected arguments
 	$args = [];
 	foreach ($_POST as $key => $value) {
 		switch ($key) {
@@ -253,7 +253,11 @@ function handle_post(Response &$response)
 				$args["$key"] = ("$value" ? "$value" : NULL);
 				break;
 			default:
-				break;
+
+				$response->code = HTTP_INVALID_REQUEST;
+				$response->data = ["error" => true, "success" => false, "message" => "Unknown argument: $key has been passed in"];
+				$response->send();
+				return;
 		}
 	}
 
@@ -264,6 +268,7 @@ function handle_post(Response &$response)
 			$response->code = HTTP_INVALID_REQUEST;
 			$response->data = [
 				"error" => true,
+				"success" => false,
 				"message" => "parameter $entry has not been set"
 			];
 			return;
@@ -281,9 +286,9 @@ function handle_post(Response &$response)
 	$start = $args["date_start"] . " " . $args["time_start"];
 	$end = $args["date_end"] . " " . $args["time_end"];
 	if ($start != " " && strtotime($start) !== false) $start = date("Y-m-d H:i:s", strtotime($start));
-	else $start = null;
+	else $start = NULL;
 	if ($end != " " && strtotime($end) !== false) $end = date("Y-m-d H:i:s", strtotime($end));
-	else $end = null;
+	else $end = NULL;
 
 	// generate a random hash for new product
 	$product_hash = "";
@@ -291,7 +296,7 @@ function handle_post(Response &$response)
 		$product_hash = substr(md5(time()), 0, 20);
 	} while (Store::product_exists($product_hash));
 
-	// upload image, set file name to be the same as the hash
+	// upload image, set file name to be the same as the product hash
 	if (validateUploadImage("image")) {
 		$extension = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
 		$image_name = $product_hash . "." . $extension;
@@ -315,15 +320,14 @@ function handle_post(Response &$response)
 	];
 	try {
 		Store::add_product($new_product);
-		global $access_control;
-		$access_control->log("api/store", "add product", $new_product["hash"]);
+		log::message("Info: New product " . $new_product["name"]["en"] . " added to store", __FILE__, __LINE__);
 	} catch (mysqli_sql_exception $th) {
-		$response->data = ["success" => false, "message" => "Could not add new product to store"];
+		$response->data = ["success" => false, "error" => true, "message" => "Could not add new product to store"];
 		$response->code = HTTP_INTERNAL_SERVER_ERROR;
 		throw $th;
 	}
 
-	$response->data = ["success" => true];
+	$response->data = ["success" => true, "error" => false];
 	$response->code = HTTP_OK;
 	return;
 }
