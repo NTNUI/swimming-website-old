@@ -215,48 +215,46 @@ $input["first_name"] = get_first_name($input["name"]);
 $input["surname"] = get_surname($input["name"]);
 
 // check if phone number has been registered
-{
-    $db = new DB("member");
-    $sql = "SELECT approved_date, count(*) AS count FROM member WHERE phone=? GROUP BY approved_date";
-    $db->prepare($sql);
-    $db->bind_param("s", $input["phone"]);
-    $db->execute();
-    $result = 0;
-    $approved_date;
-    $db->stmt->bind_result($approved_date, $result);
-    $db->fetch();
-    $input["user_exists"] = (bool)$result;
-    $input["approved_date"] = isset($approved_date) ? $approved_date : null;
-    $input["membership_status"] = $approved_date ? "active" : "pending";
-    if ($result) {
-        log::message("Warning: User already registered", __FILE__, __LINE__);
-        http_response_code(HTTP_INVALID_REQUEST);
-        $input["message"] = "User is already registered with " . ($input["membership_status"] === "active" ? "an active" : "a pending") . " membership";
-        print(json_encode($input));
-        return;
-    }
+
+$db = new DB("member");
+$sql = "SELECT approved_date, count(*) AS count FROM member WHERE phone=? GROUP BY approved_date";
+$db->prepare($sql);
+$db->bind_param("s", $input["phone"]);
+$db->execute();
+$result = 0;
+$approved_date;
+$db->stmt->bind_result($approved_date, $result);
+$db->fetch();
+$input["user_exists"] = (bool)$result;
+$input["approved_date"] = isset($approved_date) ? $approved_date : NULL;
+$input["membership_status"] = $approved_date ? "active" : "pending";
+if ($result) {
+    log::message("Warning: User already registered", __FILE__, __LINE__);
+    http_response_code(HTTP_INVALID_REQUEST);
+    $input["message"] = "User is already registered with " . ($input["membership_status"] === "active" ? "an active" : "a pending") . " membership";
+    print(json_encode($input));
+    return;
 }
+$db->reset();
 
 // check for excising CIN number
-{
-    $db = new DB("member");
-    $sql = "SELECT NSF_CIN FROM member_CIN WHERE hash=?";
-    $db->prepare($sql);
-    $input["CIN_hash"] = hash("sha256", $input["birthDate"] . $input["phone"] . $input["isMale"]);
-    $db->bind_param("s", $input["CIN_hash"]);
+$sql = "SELECT NSF_CIN FROM member_CIN WHERE hash=?";
+$db->prepare($sql);
+$input["CIN_hash"] = hash("sha256", $input["birthDate"] . $input["phone"] . $input["isMale"]);
+$db->bind_param("s", $input["CIN_hash"]);
+$db->execute();
+$CIN = 0;
+$db->stmt->bind_result($CIN);
+$db->fetch();
+$input["CIN"] = $CIN;
+if ($CIN && !$input["dryrun"]) {
+    // update last valid date for CIN number
+    $db->stmt->close();
+    $db->prepare("UPDATE member_CIN SET last_used=NOW() WHERE NSF_CIN=?");
+    $db->bind_param("i", $CIN);
     $db->execute();
-    $CIN = 0;
-    $db->stmt->bind_result($CIN);
-    $db->fetch();
-    $input["CIN"] = $CIN;
-    if ($CIN && !$input["dryrun"]) {
-        // update last valid date for CIN number
-        $db->stmt->close();
-        $db->prepare("UPDATE member_CIN SET last_used=NOW() WHERE NSF_CIN=?");
-        $db->bind_param("i", $CIN);
-        $db->execute();
-    }
 }
+$db->reset();
 
 // don't perform destructive actions on dryrun
 if ($input["dryrun"]) {
@@ -272,21 +270,18 @@ if (!enrollment_is_active()) {
 }
 
 // register
-{
-    $db = new DB("member");
-    $sql = "INSERT INTO member (first_name, surname, gender, birth_date, phone, email, address, zip, licensee, registration_date) VALUES (?,?,?,?,?,?,?,?,?,NOW())";
-    $db->prepare($sql);
-    $gender = $input["isMale"] ? "Male" : "Female";
-    $first_name = get_first_name($input["name"]);
-    $surname = get_surname($input["name"]);
-    $birthDate = date("Y-m-d", strtotime($input["birthDate"]));
-    $db->bind_param("sssssssis", $first_name, $surname, $gender, $birthDate, $input["phone"], $input["email"], $input["address"], $input["zip"], $input["licensee"]);
-    $db->execute();
-}
+
+$sql = "INSERT INTO member (first_name, surname, gender, birth_date, phone, email, address, zip, licensee, registration_date) VALUES (?,?,?,?,?,?,?,?,?,NOW())";
+$db->prepare($sql);
+$gender = $input["isMale"] ? "Male" : "Female";
+$first_name = get_first_name($input["name"]);
+$surname = get_surname($input["name"]);
+$birthDate = date("Y-m-d", strtotime($input["birthDate"]));
+$db->bind_param("sssssssis", $first_name, $surname, $gender, $birthDate, $input["phone"], $input["email"], $input["address"], $input["zip"], $input["licensee"]);
+$db->execute();
 
 // update CIN number if found
 if ($input["CIN"]) {
-    $db = new DB("member");
     $sql = "UPDATE member SET CIN=? WHERE phone=?";
     $db->prepare($sql);
     $db->bind_param("is", $input["CIN"], $input["phone"]);

@@ -98,14 +98,14 @@ function patch_cin(int $member_id, int $cin): void
     if ($birth_date === NULL || $phone === NULL || $gender === NULL) {
         throw new Exception("Could not retrieve personal info");
     }
-    $db->stmt->reset();
+    $db->reset();
 
     // save CIN to users hash
     $hash = hash("sha256", $birth_date . $phone . strval($gender ? 1 : 0));
     $db->prepare("INSERT INTO member_CIN (hash, NSF_CIN, last_used) VALUES (?, ?, NOW())");
     $db->bind_param("si", $hash, $cin);
     $db->execute();
-    $db->stmt->reset();
+    $db->reset();
 
     // save CIN to user
     $db->prepare("UPDATE member SET cin = ? WHERE id = ?");

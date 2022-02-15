@@ -122,6 +122,20 @@ class DB
 		return $ret;
 	}
 
+	public function inserted_id()
+	{
+		return $this->conn->insert_id;
+	}
+
+	public function reset()
+	{
+		$ret = $this->stmt->reset();
+		if ($ret === false) {
+			throw new mysqli_sql_exception("Could not reset statement");
+		}
+		return $ret;
+	}
+
 	/**
 	 * Disconnect from the database when DB class gets out of scope.
 	 */

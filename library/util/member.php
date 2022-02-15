@@ -15,27 +15,24 @@ function approve_member(string $phone): void
         throw new InvalidArgumentException("phone is required");
     }
     // approve member
-    {
         $db = new DB("member");
         $db->prepare("UPDATE member SET approved_date=NOW() WHERE phone=?");
         $db->bind_param("s", $phone);
         $db->execute();
-    }
-    $email = "";
+        $db->reset();
+
     // log success
-    {
-        $db = new DB("member");
         $db->prepare("SELECT first_name, surname, email FROM member WHERE phone = ?");
         $db->bind_param("s", $phone);
         $db->execute();
         $first_name = "";
         $surname = "";
+        $email = "";
         $db->stmt->bind_result($first_name, $surname, $email);
         $db->fetch();
         log::message("Info: New member $first_name $surname approved", __FILE__, __LINE__);
-    }
+
     // send email
-    {
         $subject = "NTNUI Swimming - membership approved";
 
         $headers = "Confirmation of registration<br>";
@@ -48,7 +45,7 @@ function approve_member(string $phone): void
 
         // send mail
         $mail_send_success = mail($email, $subject, $headers, "Content-type: text/html; charset=utf-8");
-        if (!$mail_send_success){
+        if (!$mail_send_success) {
             // throw new Exception("Could not send email");
             // local testing cannot (and shouldn't) send random emails
             log::message("[Warning]: failed sending approval mail", __FILE__, __LINE__);
