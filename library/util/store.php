@@ -36,16 +36,16 @@ class Store
 		if (!isset($date_from) && !isset($date_to)) {
 			throw new InvalidArgumentException("one of the date arguments must be set");
 		}
+		$db = new DB("web");
 		if (isset($date_from)) {
-			$db = new DB("web");
 			$db->prepare("UPDATE products SET available_from=? WHERE hash=?");
 			$val = $date_from->format("Y-m-d H:i:s");
 			log::message("Attempting to save timestamp: " . $val, __FILE__, __LINE__);
 			$db->bind_param("ss", $val, $product_hash);
 			$db->execute();
+			$db->reset();
 		}
 		if (isset($date_to)) {
-			$db = new DB("web");
 			$db->prepare("UPDATE products SET available_until=? WHERE hash=?");
 			$val = $date_to->format("Y-m-d H:i:s");
 			log::message("Attempting to save timestamp: " . $val, __FILE__, __LINE__);
@@ -287,7 +287,7 @@ class Store
 				throw StoreException::RemoveProductFailed();
 			}
 		}
-		$db->stmt->close();
+		$db->reset();
 		$db->prepare("DELETE FROM products WHERE hash=?");
 		$db->bind_param("s", $product_hash);
 		$db->execute();
