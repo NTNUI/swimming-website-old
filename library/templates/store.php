@@ -14,7 +14,12 @@ global $t;
 		</div>
 		<div class="card">
 			<img alt="Some image">
-			<p class="store_price"><?php print $t->get_translation("pris", "store") ?></p>
+			<p style="display: block;">
+				<label><?php print($t->get_translation("pris", "store") . ": "); ?></label><label class="store_price"></label>
+			</p>
+			<p style="display: block;" class="store_price_member_label">
+				<label><?php print($t->get_translation("price_member", "store") . ": "); ?></label><label class="store_price_member"></label>
+			</p>
 		</div>
 		<div class="bottom">
 			<button class="purchase_button store_button"><?php print $t->get_translation("kjop", "store"); ?></button>
@@ -39,29 +44,34 @@ global $t;
 			<div class="card">
 				<img id="checkout_img" alt="Image">
 				<p id="checkout_title"></p>
-				<p id="checkout_price"></p>
+
+				<p>
+					<label><?php print($t->get_translation("pris", "store") . ": "); ?></label>
+					<label id="checkout_price"></label>
+				</p>
+				<p id="checkout_price_member_label">
+					<label><?php print($t->get_translation("price_member", "store") . ": "); ?></label>
+					<label id="checkout_price_member"></label>
+				</p>
+
 			</div>
 		</div>
 		<div class="modal_content box">
 			<h2><?php print $t->get_translation("overlay_checkout", "store"); ?></h2>
 			<form id="payment-form">
 				<input id="product_hash" name="product_hash" type="hidden" />
-				
+
 				<label for="name"><?php print $t->get_translation("navn", "store") ?></label>
 				<input id="checkout_name" id="checkout_name" name="name" type="text" required />
 
 				<label for="email"><?php print $t->get_translation("epost", "store"); ?></label>
-				<input id="checkout_email" name="email" type="email" required />
+				<input id="checkout_email" name="email" type="email" />
 
 				<label for="phone"><?php print $t->get_translation("telefon", "store"); ?></label>
 				<input id="checkout_phone" name="phone" type="tel" />
-				
-				<?php
-					/*
-					<label for="comment"><?php print $t->get_translation("kommentar", "store"); ?></label>
-					<textarea id="checkout_comment" name="comment"></textarea>
-					*/
-				?>
+
+				<label id="checkout_comment_label" for="checkout_comment"><?php print($t->get_translation("comment", "store")); ?></label>
+				<textarea id="checkout_comment" name="comment"></textarea>
 
 				<div class="form-row">
 					<label for="card-element">

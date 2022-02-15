@@ -29,8 +29,8 @@ store.init(BASEURL + "/api/inventory?language=" + LANGUAGE).then(async () => {
     const empty_store = document.querySelector("#storeEmpty");
 
     for (let i = 0; i < inventory.length; ++i) {
-        // don't display hidden elements
-        if (!inventory[i].visibility) {
+        // don't display hidden or disabled elements
+        if (!inventory[i].visibility || !inventory[i].enabled) {
             continue;
         }
         // Create a product entry

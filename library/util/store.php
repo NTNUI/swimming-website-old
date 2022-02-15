@@ -55,7 +55,7 @@ class Store
 	}
 
 	/**
-	 * Undocumented function
+	 * Return products
 	 *
 	 * @param integer $start how many products to skip. Defaults to 0.
 	 * @param integer $limit max amount of products to return. Defaults to 30
@@ -73,23 +73,33 @@ class Store
 		}
 
 		// wtf is going on here?
+		// TODO: replace this mess with SELECT * ...
 		if ($product_hash == "") {
-			// get 10 variables
-			$sql = "SELECT 
-			id, 
-			hash, 
-			name, 
-			description, 
-			price, 
-			available_from, 
-			available_until, 
-			require_phone, 
+			$sql = "SELECT
+			id,
+			hash,
+			name,
+			description,
+			price,
+			price_member,
+			available_from,
+			available_until,
+			max_orders_per_customer_per_year,
+			require_phone,
+			require_email,
+			require_comment,
+			require_active_membership,
 			visible,
+			enabled, 
 			(	/* count completed orders */
-				SELECT COUNT(*) FROM orders
-				WHERE orders.products_id = products.id
-				AND (orders.order_status='FINALIZED'
-				OR orders.order_status='DELIVERED')
+				SELECT COUNT(*) FROM orders WHERE
+				orders.products_id = products.id
+				AND
+				(
+					orders.order_status='FINALIZED'
+					OR
+					orders.order_status='DELIVERED'
+				)
 			) AS amount_sold,
 			amount_available,
 			image,
@@ -100,17 +110,22 @@ class Store
 			$db->bind_param("ii", $limit, $start);
 		} else {
 			// Select every column from products, add a column called "amount_sold" given column hash (which should really be called product_hash)
-			// get 13 variables
 			$sql = "SELECT
-			id, 
-			hash, 
-			name, 
-			description, 
-			price, 
-			available_from, 
-			available_until, 
-			require_phone, 
-			visible, 
+			id,
+			hash,
+			name,
+			description,
+			price,
+			price_member,
+			available_from,
+			available_until,
+			max_orders_per_customer_per_year,
+			require_phone,
+			require_email,
+			require_comment,
+			require_active_membership,
+			visible,
+			enabled,
 			(	/* count completed orders */
 				SELECT COUNT(*) FROM orders WHERE 
 				orders.products_id = products.id
@@ -121,21 +136,16 @@ class Store
 					orders.order_status='DELIVERED'
 				)
 			) AS amount_sold,
-			amount_available, 
-			image, 
-			group_id 
+			amount_available,
+			image,
+			group_id
 			FROM products AS products WHERE hash=? ORDER BY id DESC LIMIT ? OFFSET ?";
 
 			$db->prepare($sql);
 			$db->bind_param("sii", $product_hash, $limit, $start);
 		}
 
-		try {
-			$db->execute();
-		} catch (\mysqli_sql_exception $ex) {
-			log::message($ex->getMessage());
-			return false;
-		}
+		$db->execute();
 
 		$result = array();
 		$db->stmt->bind_result(
@@ -144,10 +154,16 @@ class Store
 			$name,
 			$description,
 			$price,
+			$price_member,
 			$available_from,
 			$available_until,
+			$max_orders_per_customer_per_year,
 			$require_phone,
+			$require_email,
+			$require_comment,
+			$require_active_membership,
 			$visibility,
+			$enabled,
 			$amount_sold,
 			$amount_available,
 			$image,
@@ -180,13 +196,20 @@ class Store
 				"hash" => $product_hash,
 				"name" => $name,
 				"description" => $description,
-				"price" => intval($price),
+				"price" => intval($price) / 100,
+				"price_member" => intval($price_member) / 100,
 				"available_from" => gettype($available_from) === "NULL" ? NULL : $available_from->getTimestamp(),
 				"available_until" => gettype($available_until) === "NULL" ? NULL : $available_until->getTimestamp(),
+				"max_orders_per_customer_per_year" => $max_orders_per_customer_per_year,
 				"require_phone" => $require_phone,
+				"require_email" => $require_email,
+				"require_comment" => $require_comment,
+				"require_active_membership" => $require_active_membership,
+				"require_email" => $require_email,
 				"amount_available" => $amount_available,
 				"amount_sold" => $amount_sold,
 				"visibility" => $visibility,
+				"enabled" => $enabled,
 				"image" => $image,
 				"group_id" => $group_id
 			);
@@ -215,11 +238,12 @@ class Store
 	 * Update price for a product
 	 *
 	 * @param string $product_hash of the product
-	 * @param integer $price in Norwegian øre. 1 NOK = 100 Øre
+	 * @param integer $price in NOK
 	 * @return void
 	 */
 	static function update_price(string $product_hash, int $price)
 	{
+		$price *= 100; // convert from NOK to øre
 		$db = new DB("web");
 		$db->prepare("UPDATE products SET price=? WHERE hash=?");
 		$db->bind_param("is", $price, $product_hash);
@@ -258,9 +282,45 @@ class Store
 	static public function add_product(array $product)
 	{
 		$db = new DB("web");
-		$sql = "INSERT INTO products (hash, name, description, price, amount_available, available_from, available_until, image) VALUES(?, ?, ?, ?, ?, ?, ?, ?)";
+		$sql = "INSERT INTO products
+		(
+			hash,
+			name,
+			description,
+			image,
+			available_from,
+			available_until,
+			max_orders_per_customer_per_year,
+			require_phone,
+			require_email,
+			require_comment,
+			require_active_membership,
+			amount_available,
+			price,
+			price_member,
+			visible,
+			enabled
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		$db->prepare($sql);
-		$db->bind_param("sssiisss", $product["hash"], $product["name"], $product["description"], $product["price"], $product["amount"], $product["start"], $product["end"], $product["image_name"]);
+		$db->bind_param(
+			"ssssiiiiiiiiiiii",
+			$product["hash"],
+			$product["name"],
+			$product["description"],
+			$product["image"],
+			$product["available_from"],
+			$product["available_until"],
+			$product["max_orders_per_customer_per_year"],
+			$product["require_phone"],
+			$product["require_email"],
+			$product["require_comment"],
+			$product["require_membership"],
+			$product["amount_available"],
+			$product["price"],
+			$product["price_member"],
+			$product["visible"],
+			$product["enabled"]
+		);
 		$db->execute();
 	}
 
@@ -311,36 +371,6 @@ class Store
 		$db->fetch();
 		return $product_hash;
 	}
-
-
-	/**
-	 * Read payment intent return its status
-	 * Side effects:
-	 * - Updates copy of the status in the DB if order succeeds. 
-	 *
-	 * @param \Stripe\PaymentIntent $intent
-	 * @throws \Stripe\Exception\ApiErrorException - on illegal request
-	 * @return array
-	 */
-	function update_order(\Stripe\PaymentIntent $intent): array
-	{
-		if ($intent->status == "requires_action" && $intent->next_action->type == "use_stripe_sdk") {
-			$src = [
-				"requires_action" => true,
-				"payment_intent_client_secret" => $intent->client_secret
-			];
-		} else if ($intent->status == "succeeded") {
-			$this->finalize_order($intent["id"]);
-			$src = [
-				"success" => true,
-				"message" => "Purchase succeeded"
-			];
-		} else {
-			throw new \Stripe\Exception\ApiErrorException("stripe_error");
-		}
-		return $src;
-	}
-
 
 	/**
 	 * Update order to FINALIZED in db
@@ -467,54 +497,158 @@ class Store
 
 	// section orders
 
-	// old: function create_order(string $product_hash, string $paymentId, object $owner, string $comment)
 	/**
 	 * Create an order
+	 * TODO: change parameters to accept only object $order where
+	 * order.product, order.customer and optionally order.comment exists.
 	 *
-	 * @param string $product_hash
-	 * @param string $paymentId
-	 * @param object $owner
-	 * @return void
+	 * @param string $product_hash of the product to be purchased
+	 * @param string $payment_method_id id of the payment method for the customer
+	 * @param object $customer object containing name and optionally email and phone
+	 * @throws InvalidArgumentException if customer->phone is not a valid phone number
+	 * @throws StoreException when product cannot be sold
+	 * @throws \Stripe\Exception\ApiErrorException on unexpected internal stripe api error
+	 * @param string $comment optional argument if comment is attached with the order
+	 * @return array containing response. Should be a Response object instead tbh.
 	 */
-	function create_order(string $product_hash, string $paymentId, object $owner)
+	function create_order(string $product_hash, string $payment_method_id, object $customer, ?string $comment = NULL): array
 	{
-		$name = $owner->name;
-		$email = $owner->email;
+		$name = $customer->name;
+		$email = NULL;
+		if (!empty($customer->email)) {
+			$email = $customer->email;
+		}
 		$phone = NULL;
-		if (property_exists($owner, "phone")) {
-			$phone = $owner->phone;
+		if (!empty($customer->phone)) {
+			$phone = $customer->phone;
+			$phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
+			$parsedPhone = $phoneUtil->parse($phone);
+			$isValid = $phoneUtil->isValidNumber($parsedPhone);
+			if (!$isValid) {
+				throw new InvalidArgumentException("Could not validate phone number");
+			}
 		}
 
 		$product = $this->get_product($product_hash);
 
-		if ($product["amount_available"] != null && $product["amount_sold"] >= $product["amount_available"]) throw \StoreException::ProductSoldOut();
-		if ($product["available_from"] !== null && $product["available_from"] > time()) throw \StoreException::ProductNotAvailable("Current product is not yet available");
-		if ($product["available_until"] !== null && $product["available_until"] < time()) throw \StoreException::ProductNotAvailable("Current product is no longer available");
-		if ($name == "") throw \StoreException::MissingCustomerDetails("Missing customer name");
-		if ($email == "") throw \StoreException::MissingCustomerDetails("Missing customer email");
-		if ($phone == NULL && $product["require_phone"]) throw \StoreException::MissingCustomerDetails("Missing customer phone");
+		if (!$product["enabled"]) throw \StoreException::ProductNotEnabled("This product cannot be purchased at this time");
+		if ($product["amount_available"] !== NULL && $product["amount_sold"] >= $product["amount_available"]) throw \StoreException::ProductSoldOut();
+		if ($product["available_from"] !== NULL && $product["available_from"] > time()) throw \StoreException::ProductNotAvailable("Current product is not yet available");
+		if ($product["available_until"] !== NULL && $product["available_until"] < time()) throw \StoreException::ProductNotAvailable("Current product is no longer available");
+		if (empty($name)) throw \StoreException::MissingCustomerDetails("Missing customer name");
+		if (empty($phone) && $product["require_phone"]) throw \StoreException::MissingCustomerDetails("A phone number is required for this purchase");
+		if (empty($email) && $product["require_email"]) throw \StoreException::MissingCustomerDetails("An email is required for this purchase");
+		if (empty($comment) && $product["require_comment"]) throw \StoreException::MissingOrderDetails("A comment is required for this purchase");
+
+		// Note: Only checking purchases for current year
+		if ($product["max_orders_per_customer_per_year"] !== NULL) {
+			if (empty($phone)) {
+				throw \StoreException::MissingCustomerDetails("A phone number is required for this purchase");
+			}
+			if ($product["max_orders_per_customer_per_year"] < Store::completed_orders($product_hash, $phone)) {
+				throw \StoreException::MaxOrdersExceeded();
+			}
+		}
+
+		if ($product["require_active_membership"]) {
+			if (empty($phone)) {
+				throw new \StoreException("A phone number is required for this purchase");
+			}
+
+			if (!Member::is_active($phone)) {
+				throw \StoreException::CustomerIsNotMember();
+			}
+		}
+
+		// charge member price if customer has an active membership
+		$price = $product["price"];
+		if (!empty($product["price_member"]) && Member::is_active($phone)) {
+			$price = min($product["price_member"], $product["price"]);
+		}
+
+		if ($price <= 3) { // 3 NOK - minimum chargeable amount
+			throw \StoreException::PriceError("Cannot charge below minimum charge amount");
+		}
+
+		if ($price >= 2000) { // 2000 NOK failsafe
+			global $settings;
+			mail($settings["email"]["developer"], "Charge blocked", "A charge of $price NOK has been blocked. Check the logs");
+			throw \StoreException::PriceError("Cannot charge this amount. Contact developers if this is a mistake");
+		}
 
 		//Perform a 3D secure checkout
 		$intent = \Stripe\PaymentIntent::create([
-			"payment_method" => $paymentId,
-			"amount" => $product["price"],
+			"payment_method" => $payment_method_id,
+			"amount" => $price * 100, // convert from Norwegian krone to Norwegian øre
 			"currency" => "nok",
 			"confirmation_method" => "manual",
 			"confirm" => true,
 			"receipt_email" => $email,
 			"description" => $product["name"],
+			"metadata" => [
+				"comment" => $comment,
+				"product_hash" => $product_hash,
+				"product_name" => $product["name"],
+				"is_member" => Member::is_active($phone)
+			]
 		]);
 
-		// Save payment intent. Wait for callback
+		// Save order
 		$db = new DB("web");
-		//$sql = "INSERT INTO orders (products_id, name, email, phone, source_id, comment) VALUES (?, ?, ?, ?, ?, ?)";
-		$sql = "INSERT INTO orders (products_id, name, email, phone, source_id) VALUES (?, ?, ?, ?, ?)";
+		$sql = "INSERT INTO orders (products_id, name, email, phone, source_id, comment) VALUES (?, ?, ?, ?, ?, ?)";
 		$db->prepare($sql);
 		$intent_id = $intent["id"];
-		//$db->bind_param("isssss", $product["id"], $name, $email, $phone, $intent_id, $comment);
-		$db->bind_param("issss", $product["id"], $name, $email, $phone, $intent_id);
+		$db->bind_param("isssss", $product["id"], $name, $email, $phone, $intent_id, $comment);
 		$db->execute();
 
-		return $this->update_order($intent);
+		\Stripe\PaymentIntent::update($intent["id"], ["metadata" => ["order_id" => $db->inserted_id()]]);
+
+		if ($intent->status === "requires_action" && $intent->next_action->type === "use_stripe_sdk") {
+			return [
+				"requires_action" => true,
+				"payment_intent_client_secret" => $intent->client_secret
+			];
+		} else if ($intent->status === "succeeded") {
+			$this->finalize_order($intent["id"]);
+			return [
+				"success" => true,
+				"error" => false,
+				"message" => "Purchase succeeded.\nYou've been charged " . $price . " NOK."
+			];
+		} else {
+			throw new \Stripe\Exception\ApiErrorException("stripe_error");
+		}
+	}
+
+	/**
+	 * Get number of successful orders.
+	 *
+	 * @param string $product_hash of product in question
+	 * @param string $phone of the customer
+	 * @param boolean $thisYear if true then only orders purchased current year are counted
+	 * @throws InvalidArgumentException If phone number is not a valid phone number
+	 * @note returns only completed orders this year unless @param this_year is set overwritten false
+	 * @return integer number of purchases
+	 */
+	static public function completed_orders(string $product_hash, string $phone, bool $this_year = true): int
+	{
+		$phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
+		$parsedPhone = $phoneUtil->parse($phone);
+		$isValid = $phoneUtil->isValidNumber($parsedPhone);
+		if (!$isValid) {
+			throw new InvalidArgumentException("Could not validate phone number");
+		}
+
+		$db = new DB("web");
+		$sql = "SELECT COUNT(*) FROM orders WHERE (SELECT id FROM products WHERE hash=?) AND phone=? AND (order_status='DELIVERED' OR order_status='FINALIZED')";
+		if ($this_year) {
+			$sql .= "AND EXTRACT(YEAR FROM timestamp) = YEAR(NOW())";
+		}
+		$db->prepare($sql);
+		$db->bind_param("ss", $product_hash, $phone);
+		$db->execute();
+		$db->stmt->bind_result($result);
+		$db->fetch();
+		return $result;
 	}
 }

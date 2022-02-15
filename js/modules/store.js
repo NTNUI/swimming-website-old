@@ -50,7 +50,32 @@ export default class Store {
             this.overlay.querySelector("#product_hash").value = product.product_hash;
             this.overlay.querySelector("#checkout_description").innerHTML = product.description;
             this.overlay.querySelector("#checkout_img").src = product.image;
-            this.overlay.querySelector("#checkout_price").textContent = product.price / 100 + " NOK";
+            this.overlay.querySelector("#checkout_price").textContent = this.formatCurrency(product.price);
+
+            if (product.price_member) {
+                this.overlay.querySelector("#checkout_price_member_label").style.display = "block";
+                this.overlay.querySelector("#checkout_price_member").textContent = this.formatCurrency(product.price_member);
+            } else {
+                this.overlay.querySelector("#checkout_price_member_label").style.display = "none";
+            }
+
+            if (product.require_email) {
+                this.overlay.querySelector("#checkout_email").setAttribute("required", true);
+            } else {
+                this.overlay.querySelector("#checkout_email").removeAttribute("required");
+            }
+
+            if (product.require_phone) {
+                this.overlay.querySelector("#checkout_phone").setAttribute("required", true);
+            } else {
+                this.overlay.querySelector("#checkout_phone").removeAttribute("required");
+            }
+
+            if (product.require_comment) {
+                this.overlay.querySelector("#checkout_comment").setAttribute("required", true);
+            } else {
+                this.overlay.querySelector("#checkout_comment").removeAttribute("required");
+            }
 
             // unhide the overlay
             this.overlay.style.display = "block";
@@ -90,7 +115,7 @@ export default class Store {
                 this.checkoutPhoneInput.disabled = true;
                 // this.overlay.querySelector("#checkout_comment").style.display = "none";
             }
-            
+
             function submitHandler(event) {
                 event.preventDefault();
 
@@ -99,6 +124,7 @@ export default class Store {
                     return;
                 }
 
+                const comment = this.overlay.querySelector("#checkout_comment").value;
                 if (customer === undefined) {
                     // get customer info from checkout overlay
                     const customer = {};
@@ -108,12 +134,22 @@ export default class Store {
 
                     // close checkout modal and return new order
                     this.overlay.style.display = "none";
-                    resolve({ product: product, customer: customer });
+                    const order = {
+                        "product": product,
+                        "customer": customer,
+                        "comment": comment
+                    }
+                    resolve(order);
                     return;
                 }
                 // close checkout modal and return new order
                 this.overlay.style.display = "none";
-                resolve({ product: product, customer: customer });
+                const order = {
+                    "product": product,
+                    "customer": customer,
+                    "order_comment": comment
+                }
+                resolve(order);
             }
 
             // Attach event listeners
@@ -128,27 +164,25 @@ export default class Store {
     }
 
     /**
-     * Charge a customer for a product 
-     * @param {object} product 
-     * @param {object} customer 
+     * Charge a order.customer for a order.product 
+     * @param {object} order 
      * @returns a promise that get fulfilled when successful request from server is received.
      */
-    charge(product, customer) {
-        console.log("charge called");
+    charge(order) {
         return new Promise(async (resolve, reject) => {
             try {
                 if (Store.chargeLock) reject("Lock not acquired");
                 Store.chargeLock = true;
-                console.log("Lock acquired");
-                if (product == null || customer == null) {
-                    reject("Cannot commit to checkout without a customer or a product");
+                console.log("Charge lock acquired");
+                if (order.product == null || order.customer == null) {
+                    reject("Cannot perform a charge without a customer or a product");
                 }
-                // TODO: replace with something that returns a paymentIntent instead
+                // docs: https://stripe.com/docs/js/payment_methods/create_payment_method
                 const payment = await this.stripe.createPaymentMethod(
                     {
                         type: "card",
                         card: this.card,
-                        billing_details: customer
+                        billing_details: order.customer
                     }
                 );
                 if (payment.error !== undefined) {
@@ -160,10 +194,12 @@ export default class Store {
                     headers: {
                         "Content-Type": "application/json"
                     },
+                    // TODO: refactor as one object order
                     body: JSON.stringify({
                         payment_method_id: payment.paymentMethod.id,
-                        product_hash: product.hash,
-                        owner: customer,
+                        product_hash: order.product.hash,
+                        customer: order.customer,
+                        comment: order.comment
                     })
                 });
                 const response = await chargeResponse.json();
@@ -192,8 +228,9 @@ export default class Store {
                         },
                         body: JSON.stringify({
                             payment_intent_id: cardHandlerResponse.paymentIntent.id,
-                            product_hash: product.hash,
-                            owner: customer
+                            product_hash: order.product.hash,
+                            customer: order.customer,
+                            comment: order.comment
                         }),
                     }).then((response) => { return response.json() });
 
@@ -207,7 +244,7 @@ export default class Store {
             } catch (error) {
                 reject(error);
             } finally {
-                console.log("lock released");
+                console.log("Charge lock released");
                 Store.chargeLock = false;
             }
         });
@@ -248,6 +285,7 @@ export default class Store {
         let description = product.description;
         let image = product.image;
         let price = product.price;
+        let price_member = product.price_member;
         let sold = product.amount_sold || 0;
         let available = product.amount_available;
         let startTime = product.available_from ? 1e3 * product.available_from - this.serverOffset : false;
@@ -262,6 +300,12 @@ export default class Store {
         node.querySelector(".store_header").textContent = header;
         node.querySelector(".store_description").innerHTML = description;
         node.querySelector(".store_price").textContent = this.formatCurrency(price);
+        if (price_member) {
+            node.querySelector(".store_price_member_label").style.display = "block";
+            node.querySelector(".store_price_member").textContent = this.formatCurrency(price_member);
+        } else {
+            node.querySelector(".store_price_member_label").style.display = "none";
+        }
         node.querySelector(".store_availability").textContent = available == null ? "Unlimited" : sold + " / " + available;
         node.querySelector("img").src = image;
 
@@ -330,7 +374,7 @@ export default class Store {
     }
 
     formatCurrency(price) {
-        return (price / 100).toFixed(2) + ",-";
+        return price + ",-";
     }
 
 

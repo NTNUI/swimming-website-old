@@ -6,6 +6,7 @@ import { display_modal } from "./modules/modal.js";
 const enrollmentPhoneInput = document.querySelector("form#enrollment_form input[name=phone]");
 window.enrollmentPhone = window.intlTelInput(enrollmentPhoneInput, {
     initialCountry: "no",
+    customPlaceholder: () => { return ""; },
     separateDialCode: true,
     utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/utils.min.js"
 });
