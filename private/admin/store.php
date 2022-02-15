@@ -29,17 +29,6 @@ require_once("library/templates/modal.php");
 
 <div id="add_container">
 	<div class="box">
-		<h3>Price Calculator</h3>
-		<div>
-			<label for="">Price without fees</label>
-			<input type="number" name="" value="0" id="price-input">
-		</div>
-		<div>
-			<label for="">Price with fees</label>
-			<label for="" id="price-output"></label>
-		</div>
-	</div>
-	<div class="box">
 		<h3>Add a product to the store</h3>
 		<form id="form-add-product" action="<?php print $settings["baseurl"]; ?>/api/store" method="POST">
 			<div>

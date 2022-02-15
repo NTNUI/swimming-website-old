@@ -334,9 +334,7 @@ addLoadEvent(async () => {
     const products = await (await fetch(BASEURL + "/api/store?request_type=get_products")).json();
     createTableMatrix(products, product_groups);
 
-    // fee calculator
-    document.getElementById("price-input").addEventListener("change", function() {
-        document.getElementById("price-output").innerHTML = (document.getElementById("price-input").value * 1.012 + 1.8);
+
     });
     // overload default form handler
     document.getElementById("form-add-product").addEventListener('submit', submitNewProductHandler);
