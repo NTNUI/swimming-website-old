@@ -22,7 +22,7 @@ function handle_order(store, order) {
 }
 
 const store = new Store(STRIPE_PUBLISHABLE_KEY, SERVER_TIME_OFFSET);
-store.init(BASEURL + "/api/inventory").then(async () => {
+store.init(BASEURL + "/api/inventory?language=" + LANGUAGE).then(async () => {
     const inventory = await store.inventory;
     const requested_product = inventory.find(product => product.hash === REQUESTED_PRODUCT_HASH);
     console.log(inventory);
