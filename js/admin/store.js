@@ -47,6 +47,15 @@ function submitNewProductHandler(event) {
 
     // Get content from form
     let form_data = new FormData(event.target);
+    // checked checkboxes return string "on" instead of boolean true
+    for (const pair of form_data.entries()) {
+        const key = pair[0];
+        const value = pair[1];
+        if (value == "on"){
+            form_data.set(key, true);
+        }
+    }
+
     form_data.append('file', document.getElementById("form-image"));
 
     // Send request
@@ -178,152 +187,157 @@ function createTableMatrix(products, product_groups) {
     });
     const table = new Tabulator("#products",
         {
-        layout: "fitDataStretch",
-        data: products,
-        groupBy: "group_id",
-        groupHeader: function(value, count, data, group) {
-            return product_groups[value] + " (" + count + ")";
-        },
-        columns: [{
-            title: "Name",
-            field: "name",
-            cellClick: () => {
-                display_modal("Info", "Changing the name of a product is not yet supported", "Accept", "");
-            }
-        },
-        {
-            title: "Sold",
-            field: "amount_sold"
-        },
-        {
-            title: "Available",
-            field: "amount_available",
-            formatter: function(cell, formatterParams, onRendered) {
-                return cell.getValue() === null ? "Unlimited" : cell.getValue();
+            layout: "fitDataStretch",
+            data: products,
+            groupBy: "group_id",
+            groupHeader: function(value, count, data, group) {
+                return product_groups[value] + " (" + count + ")";
             },
-            cellClick: () => {
-                display_modal("Info", "Changing the amount of available products is not yet supported", "Accept", "");
-            }
-        },
-        {
-            title: "Price",
-            field: "price",
-            editor: "number",
-            editorParams: {
-                min: 100,
-                mask: "9999999"
-            },
-            cellEdited: (cell) => {
-                const data = {
-                    "request_type": "update_price",
-                    "params": {
-                        "product_hash": cell.getRow().getData().hash,
-                        "price": cell.getValue()
-                    }
-                }
-                fetch(BASEURL + "/api/store", {
-                    method: 'PATCH',
-                    body: JSON.stringify(data),
-                })
-                    .then(async (response) => {
-                        if (!response.ok) {
-                            throw await response.json();
+            columns:
+                [
+                    {
+                        title: "Name",
+                        field: "name",
+                        cellClick: () => {
+                            display_modal("Info", "Changing the name of a product is not yet supported", "Accept", "");
                         }
-                    })
-                    .catch((err) => {
-                        console.error(err);
-                        if (typeof (err) === "object") {
-                            display_modal("Failure", err.message + "\n\n" + err.trace, "Accept", "", "failure");
-                            return;
+                    },
+                    {
+                        title: "Sold",
+                        field: "amount_sold",
+                        cellClick: (_, cell) => {
+                            const product_hash = cell.getRow().getData().hash;
+                            fetch(BASEURL + "/api/store?request_type=get_orders&product_hash=" + product_hash)
+                                .then(res => res.json())
+                                .then((orders) => {
+                                    show_orders(orders);
+                                })
+                                .catch((err) => {
+                                    display_modal("Failure", err, "Accept", "", "failure");
+                                    console.log(err);
+                                })
                         }
-                        display_modal("Failure", err, "Accept", "", "failure");
-                    });
+                    },
+                    {
+                        title: "Available",
+                        field: "amount_available",
+                        formatter: function(cell, formatterParams, onRendered) {
+                            return cell.getValue() === null ? "Unlimited" : cell.getValue();
+                        },
+                        cellClick: () => {
+                            display_modal("Info", "Changing the amount of available products is not yet supported", "Accept", "");
+                        }
+                    },
+                    {
+                        title: "Price",
+                        field: "price",
+                        editor: "number",
+                        editorParams: {
+                            min: 3,
+                            mask: "9999999"
+                        },
+                        formatter: (cell) => {
+                            return cell.getValue() + " kr";
+                        },
+                        cellEdited: (cell) => {
+                            const data = {
+                                "request_type": "update_price",
+                                "params": {
+                                    "product_hash": cell.getRow().getData().hash,
+                                    "price": cell.getValue()
+                                }
+                            }
+                            fetch(BASEURL + "/api/store", {
+                                method: 'PATCH',
+                                body: JSON.stringify(data),
+                            })
+                                .then(async (response) => {
+                                    if (!response.ok) {
+                                        throw await response.json();
+                                    }
+                                })
+                                .catch((err) => {
+                                    console.error(err);
+                                    if (typeof (err) === "object") {
+                                        display_modal("Failure", err.message + "\n\n" + err.trace, "Accept", "", "failure");
+                                        return;
+                                    }
+                                    display_modal("Failure", err, "Accept", "", "failure");
+                                });
 
-            }
-        },
-        {
-            title: "Available from",
-            field: "available_from",
-            formatter: function(cell, formatterParams, onRendered) {
-                if (cell.getValue() === null) return "Always";
-                return new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" });
-            },
-            editor: dateEditor,
-            cellEdited: function(cell) {
-                const data = {
-                    "request_type": "update_availability",
-                    "params": {
-                        "product_hash": cell.getRow().getData().hash,
-                        "date_start": new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" })
-                    }
-                }
-                update_availability(data);
-            }
-        },
-        {
-            title: "Available until",
-            field: "available_until",
-            formatter: function(cell, formatterParams, onRendered) {
-                if (cell.getValue() === null) return "Always";
-                return new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" });
-            },
-            editor: dateEditor,
-            cellEdited: function(cell) {
-                const data = {
-                    "request_type": "update_availability",
-                    "params": {
-                        "product_hash": cell.getRow().getData().hash,
-                        "date_end": new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" })
-                    }
-                }
-                update_availability(data);
-            }
+                        }
+                    },
+                    {
+                        title: "Available from",
+                        field: "available_from",
+                        formatter: function(cell, formatterParams, onRendered) {
+                            if (cell.getValue() === null) return "Always";
+                            return new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" });
+                        },
+                        editor: dateEditor,
+                        cellEdited: function(cell) {
+                            const product_data = {
+                                "request_type": "update_availability",
+                                "params": {
+                                    "product_hash": cell.getRow().getData().hash,
+                                    "date_start": new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" })
+                                }
+                            }
+                            update_availability(product_data);
+                        }
+                    },
+                    {
+                        title: "Available until",
+                        field: "available_until",
+                        formatter: function(cell, formatterParams, onRendered) {
+                            if (cell.getValue() === null) return "Always";
+                            return new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" });
+                        },
+                        editor: dateEditor,
+                        cellEdited: function(cell) {
+                            const product_data = {
+                                "request_type": "update_availability",
+                                "params": {
+                                    "product_hash": cell.getRow().getData().hash,
+                                    "date_end": new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" })
+                                }
+                            }
+                            update_availability(product_data);
+                        }
 
-        },
-        {
-            title: "Visible",
-            field: "visibility",
-            editor: true,
-            formatter: "tickCross",
-            sorter: "boolean",
-            cellEdited: function(cell) {
-                // send data to server
-                const data = cell.getData();
-                set_product_visibility(data.hash, data.visibility);
-            },
-        },
-        {
-            title: "Link NO",
-            field: "link_no",
-            formatter: (cell) => { return '<i class="fa fa-copy"></i>' },
-            editor: false,
-            cellClick: (e, cell) => {
-                navigator.clipboard.writeText(cell.getValue());
-            }
-        },
-        {
-            title: "Link EN",
-            field: "link_en",
-            formatter: (cell) => { return '<i class="fa fa-copy"></i>' },
-            editor: false,
-            cellClick: (e, cell) => {
-                navigator.clipboard.writeText(cell.getValue());
-            }
-        }
-        ],
-        rowDblClick: function(e, row) {
-            const data = row.getData();
-            fetch(BASEURL + "/api/store?request_type=get_orders&product_hash=" + data.hash)
-                .then(res => res.json())
-                .then((orders) => {
-                    show_orders(orders);
-                })
-                .catch((err) => {
-                    display_modal("Failure", err, "Accept", "", "failure");
-                    console.err(err);
-                });
-        }
-    });
+                    },
+                    {
+                        title: "Visible",
+                        field: "visibility",
+                        editor: true,
+                        formatter: "tickCross",
+                        sorter: "boolean",
+                        cellEdited: function(cell) {
+                            // send data to server
+                            const data = cell.getData();
+                            set_product_visibility(data.hash, data.visibility);
+                        },
+                    },
+                    {
+                        title: "Link NO",
+                        field: "link_no",
+                        formatter: (cell) => { return '<i class="fa fa-copy"></i>' },
+                        editor: false,
+                        cellClick: (_, cell) => {
+                            navigator.clipboard.writeText(cell.getValue());
+                        }
+                    },
+                    {
+                        title: "Link EN",
+                        field: "link_en",
+                        formatter: (cell) => { return '<i class="fa fa-copy"></i>' },
+                        editor: false,
+                        cellClick: (_, cell) => {
+                            navigator.clipboard.writeText(cell.getValue());
+                        }
+                    }
+                ]
+        });
     return table;
 }
 
@@ -335,7 +349,93 @@ addLoadEvent(async () => {
     createTableMatrix(products, product_groups);
 
 
+    class PhoneDependency {
+        // phone number is required by
+        static required_by_member_price = false;
+        static required_by_active_membership = false;
+        static required_by_max_orders = false;
+
+        constructor() {
+            this.require_phone_checkbox = document.querySelector("#form-add-product input[name='require_phone_number']");
+        }
+
+        required(new_state, caller) {
+            if (typeof (new_state) !== "boolean") {
+                throw "Expected boolean";
+            }
+            switch (caller) {
+                case "active_membership":
+                    this.required_by_active_membership = new_state;
+                    break;
+                case "member_price":
+                    this.required_by_member_price = new_state;
+                    break;
+                case "max_orders":
+                    this.required_by_max_orders = new_state;
+                    break;
+                default:
+                    throw "Caller can only be one of active_membership|member_price|max_orders";
+            }
+
+            if (this.required_by_active_membership || this.required_by_member_price || this.required_by_max_orders) {
+                this.require_phone_checkbox.disabled = true;
+                this.require_phone_checkbox.checked = true;
+            } else {
+                this.require_phone_checkbox.checked = false;
+            }
+        }
+    }
+    const phoneDependency = new PhoneDependency();
+    document.querySelector("#form-add-product input[name='require_membership']").addEventListener("change", (event) => {
+        phoneDependency.required(event.target.checked, "active_membership");
     });
-    // overload default form handler
-    document.getElementById("form-add-product").addEventListener('submit', submitNewProductHandler);
+    document.querySelector("#form-add-product input[name='price_member']").addEventListener("change", (event) => {
+        if (event.target.value === "") {
+            event.target.classList.remove("error");
+            phoneDependency.required(false, "member_price");
+            return;
+        }
+
+        // minimum stripe limit 3 NOK
+        if (parseInt(event.target.value) <= 3) {
+            event.target.classList.add("error");
+            return;
+        }
+
+        event.target.classList.remove("error");
+        phoneDependency.required(true, "member_price");
+
+    });
+    document.querySelector("#form-add-product input[name='price']").addEventListener("change", (event) => {
+        const value = parseInt(event.target.value);
+        if (value === "NaN");
+        if (value === "" || value <= 3) {
+            event.target.classList.add("error");
+        } else {
+            event.target.classList.remove("error");
+        }
+    })
+
+    document.querySelector("#form-add-product input[name='max_orders_per_customer_per_year']").addEventListener("change", (event) => {
+        if (parseInt(event.target.value) === "NaN") {
+            return;
+        }
+        if (parseInt(event.target.value) < 0) {
+            event.target.classList.add("error");
+            return;
+        }
+        event.target.classList.remove("error");
+
+        if (!!parseInt(event.target.value)) {
+            phoneDependency.required(true, "max_orders");
+            return;
+        }
+        phoneDependency.required(false, "max_orders");
+    });
+
+    // when all event listeners has been loaded without errors, enable inputs
+    document.querySelector("#form-add-product").addEventListener('submit', submitNewProductHandler);
+    document.querySelectorAll("#form-add-product input").forEach((el) => { el.disabled = false; });
+    document.querySelectorAll("#form-add-product textarea").forEach((el) => { el.disabled = false; });
+    document.querySelectorAll("#form-add-product button[type='submit']").forEach((el) => { el.disabled = false; });
 });

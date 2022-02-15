@@ -39,23 +39,38 @@ header("Content-Type", "application/json");
 try {
 	$response = "error";
 
-	if (isset($data->{"payment_intent_id"})) {
-		// Payment intent API
-
-		$intentId = $data->payment_intent_id;
-		$intent = $store->get_intent_by_id($intentId);
+	// 3D secure charge
+	if (isset($data->{"payment_intent_id"})) {	
+		$intent = $store->get_intent_by_id($data->payment_intent_id);
 		$intent->confirm();
-		$response = $store->update_order($intent);
+
+		if ($intent->status == "requires_action" && $intent->next_action->type == "use_stripe_sdk") {
+			// 3d secure step 1: give client secret	
+			$response = [
+				"requires_action" => true,
+				"payment_intent_client_secret" => $intent->client_secret
+			];
+		} else if ($intent->status == "succeeded") {
+			// 3d secure step 2: save successful order
+			$store->finalize_order($intent["id"]);
+			$response = [
+				"success" => true,
+				"error" => false,
+				"message" => "Purchase succeeded.\nYou've been charged " . $intent["amount"] / 100 . " NOK"
+			];
+		} else {
+			log::message("Error: payment intent with id: ". $intent["id"] . "returned unexpected value.", __FILE__, __LINE__);
+			throw new Exception("Unexpected payment intent status");
+		}
+
+	// non 3d secure charge
 	} elseif (isset($data->{"payment_method_id"})) {
-		// deprecated. Using old "source" and "charge" API
-		$source = $data->payment_method_id;
-		$product_hash = $data->product_hash;
-		$owner = $data->owner;
-		// $comment = isset($data->comment) ? $data->comment : "";
-		$t->load_translation("store");
-		// $response = $store->create_order($product_hash, $source, $owner, $comment);
-		$response = $store->create_order($product_hash, $source, $owner);
+		// TODO: refactor create_order to accept order object
+		$response = $store->create_order($data->product_hash, $data->payment_method_id, $data->customer, $data->comment);
+
 	} else {
+		// todo: elseif customer and product attached: create a new paymentIntent, return client secret
+
 		http_response_code(400);
 		print(json_encode([
 			"success" => false,

@@ -70,6 +70,7 @@ CREATE TABLE IF NOT EXISTS `friday_beer` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+-- TODO: add timestamp
 CREATE TABLE IF NOT EXISTS `orders` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `products_id` int(11) NOT NULL,
@@ -80,30 +81,71 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `charge_id` text COMMENT 'deprecated',
   `order_status` enum('PLACED','FINALIZED','DELIVERED','FAILED','REFUNDED') DEFAULT NULL,
   `comment` text,
+  `timestamp` date NOT NULL COMMENT 'Timestamp of last order status change' DEFAULT NOW(),
   PRIMARY KEY (`id`),
   KEY `item_id` (`products_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `products` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `hash` varchar(20) NOT NULL COMMENT 'store_item_hash',
+  `hash` varchar(20) NOT NULL COMMENT 'product_hash',
   `name` text NOT NULL,
   `description` text,
   `price` int(11) NOT NULL,
+  `price_member` int(11) DEFAULT NULL,
   `available_from` datetime DEFAULT NULL,
   `available_until` datetime DEFAULT NULL,
+  `max_orders_per_customer_per_year` int(11) DEFAULT NULL,
   `require_phone` tinyint(1) NOT NULL DEFAULT '0',
+  `require_email` tinyint(1) NOT NULL DEFAULT '0',
+  `require_comment` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Show and require comment from user',
+  `require_active_membership` tinyint(1) NOT NULL DEFAULT '0',
   `amount_available` int(11) DEFAULT NULL,
   `image` text,
-  `visible` tinyint(1) NOT NULL DEFAULT '1',
+  `visible` tinyint(1) NOT NULL DEFAULT '0',
+  `enabled` tinyint(1) NOT NULL DEFAULT '1',
   `archived` tinyint(1) NOT NULL DEFAULT '0',
   `group_id` int(11) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `api_id` (`hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-INSERT INTO `products` (`hash`, `name`, `description`, `price`, `available_from`, `available_until`, `require_phone`, `amount_available`, `image`, `visible`, `archived`, `group_id`) VALUES
-('31e61c8253b54cdde3b9', '{\"no\":\"NSF Lisens\",\"en\":\"NSF License\"}', '{\"no\":\"Lisensen gir deg adgang til nasjonsale stevner og obligatorisk treningsforsikring. Lisensen har en gyldighet i ett kalender år fra januar til desember.\",\"en\":\"Norwegian Swimming license is required for practices and national competitions. License is valid max one year from January until December.\"}', 76500, NULL, NULL, 0, NULL, '31e61c8253b54cdde3b9.jpg', 0, 0, 1);
+INSERT INTO `products` (
+  `hash`,
+  `name`,
+  `description`,
+  `price`,
+  `available_from`,
+  `available_until`,
+  `max_orders_per_customer_per_year`
+  `require_phone`,
+  `require_email`
+  `require_comment`
+  `require_active_membership`
+  `amount_available`,
+  `image`,
+  `visible`,
+  `archived`,
+  `group_id`
+) VALUES
+(
+  '31e61c8253b54cdde3b9',
+  '{\"no\":\"NSF Lisens\",\"en\":\"NSF License\"}',
+  '{\"no\":\"Lisensen gir deg adgang til nasjonsale stevner og obligatorisk treningsforsikring. Lisensen har en gyldighet i ett kalender år fra januar til desember.\",\"en\":\"Norwegian Swimming license is required for practices and national competitions. License is valid max one year from January until December.\"}',
+  76500, --price
+  NULL, -- available_from
+  NULL, -- available_until
+  1, -- max_orders_per_customer_per_year
+  1, -- require_phone
+  1, -- require_email
+  0, -- require_comment
+  0, -- require_active_membership
+  NULL, -- amount_available
+  '31e61c8253b54cdde3b9.jpg', -- image
+  0, -- visible
+  0, -- archived
+  1 -- group_id
+);
 
 CREATE TABLE IF NOT EXISTS `product_groups` (
   `id` int(11) NOT NULL AUTO_INCREMENT,

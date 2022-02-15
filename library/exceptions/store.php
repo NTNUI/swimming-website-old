@@ -2,6 +2,14 @@
 
 class StoreException extends \Exception
 {
+    public static function PriceError($message = "Price is wrong. Contact admin")
+    {
+        return new static($message);
+    }
+    public static function ProductNotEnabled($message = "Product is disabled")
+    {
+        return new static($message);
+    }
     public static function ProductSoldOut()
     {
         return new static("Product is sold out");
@@ -18,7 +26,18 @@ class StoreException extends \Exception
     {
         return new static($message);
     }
-
+    public static function MissingOrderDetails(string $message = "Missing order details")
+    {
+        return new static($message);
+    }
+    public static function MaxOrdersExceeded(string $message = "Customer cannot purchase more of this product")
+    {
+        return new static($message);
+    }
+    public static function CustomerIsNotMember($message = "This product can only be purchased by active members")
+    {
+        return new static($message);
+    }
     public static function OrderNotFound()
     {
         return new static("Order not found");

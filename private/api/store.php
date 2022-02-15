@@ -244,13 +244,22 @@ function handle_post(Response &$response)
 			case 'name_en':
 			case 'description_no':
 			case 'description_en':
-			case 'amount':
-			case 'price':
 			case 'date_start':
 			case 'date_end':
 			case 'time_start':
 			case 'time_end':
-				$args["$key"] = ("$value" ? "$value" : NULL);
+			case 'max_orders_per_customer_per_year':
+			case 'require_phone':
+			case 'require_email':
+			case 'require_comment':
+			case 'require_membership':
+			case 'amount':
+			case 'price':
+			case 'price_member':
+			case 'product_visible':
+			case 'product_enabled':
+			case 'file':
+				$args["$key"] = ($value ? $value : NULL);
 				break;
 			default:
 
@@ -273,6 +282,10 @@ function handle_post(Response &$response)
 			];
 			return;
 		}
+	}
+
+	if ($args["require_membership"] || $args["price_member"] || $args["max_orders_per_customer_per_year"]) {
+		$args["require_phone"] = true;
 	}
 
 	// Default empty non-required values to 0
@@ -305,22 +318,30 @@ function handle_post(Response &$response)
 			throw StoreException::AddProductFailed("Could not move uploaded image to correct location");
 		}
 	} else {
-		throw StoreException::AddProductFailed("Cannot add a product without an image");
+		throw StoreException::AddProductFailed("There was some issues with the image");
 	}
 
 	$new_product = [
 		"hash" => $product_hash,
 		"name" => json_encode(["no" => $args["name_no"], "en" => $args["name_en"]]),
 		"description" => json_encode(["no" => $args["description_no"], "en" => $args["description_en"]]),
-		"price" => $args["price"],
-		"amount" => $args["amount"],
-		"start" => $start,
-		"end" => $end,
-		"image_name" => $image_name
+		"available_from" => $start,
+		"available_until" => $end,
+		"image" => $image_name,
+		"max_orders_per_customer_per_year" => $args["max_orders_per_customer_per_year"] || 0,
+		"require_phone" => $args["require_phone"] || false,
+		"require_email" => $args["require_email"] || false,
+		"require_comment" => $args["require_comment"] || false,
+		"require_membership" => $args["require_membership"] || false,
+		"amount_available" => $args["amount"],
+		"price" => $args["price"] === NULL ? NULL : $args["price"] * 100,
+		"price_member" => $args["price_member"] === NULL ? NULL : $args["price_member"] * 100,
+		"visible" => $args["product_visible"] || true,
+		"enabled" => $args["product_enabled"] || true
 	];
 	try {
 		Store::add_product($new_product);
-		log::message("Info: New product " . $new_product["name"]["en"] . " added to store", __FILE__, __LINE__);
+		log::message("Info: New product " . $args["name_en"] . " added to store", __FILE__, __LINE__);
 	} catch (mysqli_sql_exception $th) {
 		$response->data = ["success" => false, "error" => true, "message" => "Could not add new product to store"];
 		$response->code = HTTP_INTERNAL_SERVER_ERROR;
