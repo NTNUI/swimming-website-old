@@ -48,7 +48,10 @@ addLoadEvent(() => {
         // if licensed confirm with modal
         let licenseQuestion = "";
         if (member.get("licensee")) {
-            licenseQuestion = await display_modal("Do you have a valid license?", "You've selected that you have a valid license.\nPlease make sure you see your entry on https:\/\/medley.no\nIf you're not on the list you'll not be manually approved. You can either wait until you appear on the list and we see it ot you can continue to purchase an NSF license now.", "Purchase license", "Wait");
+            licenseQuestion = await display_modal("Do you have a valid license?", "You've selected that you have a valid license.\nPlease make sure you see your entry on https:\/\/medley.no\/utoveroversikt.aspx\nIf you're not on the list, click 'Back', unselect that you have a valid license and send the form again.\nIf you see your self on the list, then click 'Send form' ", "Send form", "Back");
+            if (licenseQuestion === "Back") {
+                return;
+            }
         }
 
         // send membership request
@@ -65,7 +68,7 @@ addLoadEvent(() => {
         if (enrollResponse.error) {
             switch (enrollResponse.membership_status) {
                 case "pending":
-                    const user_response = await display_modal("Warning", "It seems like you already have a pending membership. We need to manually review your request. This might take some time. You can either wait or, if you wish, continue to purchase a license and get a active membership instantly.", "Purchase license", "Wait");
+                    const user_response = await display_modal("Warning", "It seems like you have a pending membership.\nThat means you've registered but not yet approved.\nIf you wish to auto approve your membership click 'Continue to purchase'.\nIf you want to wait for manual approval click 'Wait'.", "Continue to purchase", "Wait");
                     if (user_response === "Wait") {
                         return;
                     }
@@ -81,7 +84,7 @@ addLoadEvent(() => {
             }
         }
 
-        if (licenseQuestion === "Wait") {
+        if (licenseQuestion === "Send form") {
             display_modal("Membership request sent", "Your membership request has been sent\nYou'll receive an email when your membership is ready.", "Accept", "", "success");
             return;
         }
