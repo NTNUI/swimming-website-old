@@ -19,7 +19,7 @@ if (!$access_control->can_access("api", "member_register")) {
 $member_id = argsURL("REQUEST", "id");
 
 // check missing argument
-if ($member_id === null) {
+if ($member_id === NULL) {
 	$response->code = HTTP_INVALID_REQUEST;
 	$response->data = [
 		"error" => true,

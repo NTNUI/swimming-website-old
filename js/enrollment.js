@@ -102,8 +102,8 @@ addLoadEvent(() => {
                 return;
             }
             display_modal("Loading", "Attempting to empty your bank account", "", "", "wait");
-            const chargeResponse = await store.charge(order.product, order.customer);
-            await display_modal("Success", chargeResponse, "Accept", "", "success");
+            const chargeResponse = await store.charge(order);
+            await display_modal("Success", chargeResponse.message, "Accept", "", "success");
             await display_modal("Welcome as a new member!", "Together we will make Norwegian swimming more fun.\nSprut nice 💦💦", "Accept", "", "success");
             // window.location.href = BASEURL;
         } catch (error) {

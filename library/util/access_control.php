@@ -44,7 +44,7 @@ class AccessControl
 		$result = false;
 		$match_level = 0;
 		if ($this->group_rules == NULL) {
-			log::die("role rules are null", __FILE__, __LINE__);
+			log::die("role rules are NULL", __FILE__, __LINE__);
 		}
 		if ($page === "admin" && $action === "") {
 			return true; // accept users to dashboard

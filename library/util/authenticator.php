@@ -89,12 +89,12 @@ class Authenticator
     /**
      * Get username
      *
-     * @return string of currently logged in user. null otherwise.
+     * @return string of currently logged in user. NULL otherwise.
      */
     static public function get_username()
     {
         if (!Authenticator::is_logged_in()) {
-            return null;
+            return NULL;
         }
         return $_SESSION["username"];
     }
@@ -215,7 +215,7 @@ class Authenticator
         $db->execute();
         $name = "";
         $db->stmt->bind_result($name);
-        if ($db->fetch() === null) {
+        if ($db->fetch() === NULL) {
             throw UserException::NotFound();
         }
         return $name;
@@ -241,7 +241,7 @@ class Authenticator
         $password_date = "";
         $name = "";
         $db->stmt->bind_result($name, $password_hash, $password_date);
-        if ($db->fetch() === null) {
+        if ($db->fetch() === NULL) {
             throw UserException::NotFound();
         }
 

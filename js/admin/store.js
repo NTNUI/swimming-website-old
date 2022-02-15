@@ -48,17 +48,25 @@ function submitNewProductHandler(event) {
     // Get content from form
     let form_data = new FormData(event.target);
     form_data.append('file', document.getElementById("form-image"));
-    // // Send request
+
+    // Send request
     fetch(BASEURL + "/api/store", {
         method: 'POST',
         body: form_data
-    }).then(() => {
+    }).then((response) => {
+        if (!response.ok) {
+            throw response.json();
+        }
         display_modal("Success", "New product has been added to the store", "Accept", "", "success");
     }
-    ).catch((response => {
-        display_modal("Failure", response.json(), "Accept", "", "failure");
-        console.error(response.json());
-    }));
+    ).catch(async (response_promise) => {
+        const response = await response_promise;
+        if (response.error) {
+            display_modal("Failure", response.message + "\n" + response.trace, "Accept", "", "failure");
+        } else {
+            console.error(response);
+        }
+    });
 }
 
 async function show_orders(data) {
@@ -117,7 +125,7 @@ let dateEditor = function(cell, onRendered, success, cancel) {
 
     input.addEventListener("change", onChange);
 
-    //submit new value on enter
+    // submit new value on enter
     input.addEventListener("keydown", function(e) {
         if (e.key == "Enter") {
             onChange();
@@ -131,10 +139,15 @@ let dateEditor = function(cell, onRendered, success, cancel) {
     return input;
 };
 
-function update_availability(data) {
+
+/**
+ * Update when a product is available for purchase
+ * @param {*} product_data
+ */
+function update_availability(product_data) {
     fetch(BASEURL + "/api/store", {
         method: 'PATCH',
-        body: JSON.stringify(data),
+        body: JSON.stringify(product_data),
     })
         .then(async (response) => {
             if (!response.ok) {
@@ -151,13 +164,20 @@ function update_availability(data) {
         });
 }
 
-// Create Date Editor
+/**
+ * TODO: documentation
+ * @param {array<product>} products 
+ * @param {array} product_groups 
+ * @returns 
+ */
 function createTableMatrix(products, product_groups) {
+    // todo: add other properties as read only or something
     products.forEach(product => {
         product.link_no = BASEURL + "/store?product_hash=" + product.hash;
         product.link_en = BASEURL + "/en/store?product_hash=" + product.hash;
     });
-    let table = new Tabulator("#products", {
+    const table = new Tabulator("#products",
+        {
         layout: "fitDataStretch",
         data: products,
         groupBy: "group_id",
@@ -309,7 +329,7 @@ function createTableMatrix(products, product_groups) {
 
 addLoadEvent(async () => {
 
-    // load and display products
+    // TODO: add inside a try catch block
     const product_groups = await (await fetch(BASEURL + "/api/store?request_type=get_product_groups")).json();
     const products = await (await fetch(BASEURL + "/api/store?request_type=get_products")).json();
     createTableMatrix(products, product_groups);

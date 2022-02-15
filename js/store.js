@@ -8,9 +8,9 @@ import {
 function handle_order(store, order) {
     // on purchase click, display loading modal and send charge request to server
     display_modal("Loading", "Attempting to empty your bank account", "", "", "wait");
-    store.charge(order.product, order.customer)
+    store.charge(order)
         .then(async (serverResponse) => {
-            await display_modal("Success", serverResponse, "Accept", "", "success");
+            await display_modal("Success", serverResponse.message, "Accept", "", "success");
         }).catch((error) => {
             console.error(error);
             if (error.message === undefined) {

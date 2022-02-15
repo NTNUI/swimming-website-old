@@ -57,12 +57,15 @@ try {
 		$response = $store->create_order($product_hash, $source, $owner);
 	} else {
 		http_response_code(400);
-		print(json_encode(["error" => true, "message" => "missing parameters. Expected paymentIntentId"]));
+		print(json_encode([
+			"success" => false,
+			"error" => true,
+			"message" => "Missing parameter. Expected payment_intent_id or payment_method_id"
+		]));
 		return;
 	}
 
 	http_response_code(200);
-	log::message(json_encode($response), __FILE__, __LINE__);
 	print(json_encode($response));
 	return;
 } catch (CardException | ApiErrorException | AuthenticationException | ApiConnectionException | RateLimitException | InvalidRequestException $e) {
@@ -72,12 +75,13 @@ try {
 	
 } catch (\StoreException $e) {
 	// Expected client errors like product not found and stuff like that
-	log::message($e->getMessage(), $e->getFile(), $e->getLine());
+	log::message($e->getMessage(), __FILE__, __LINE__);
+	log::message($e->getTraceAsString(), __FILE__, __LINE__);
 	handle_error($e, 400);
 
 } catch (Exception $e) {
 	// Unexpected errors on server
-	log::message($e->getMessage(), $e->getFile(), $e->getLine());
+	log::message($e->getMessage(), __FILE__, __LINE__);
+	log::message($e->getTraceAsString(), __FILE__, __LINE__);
 	handle_error($e, 500);
-
 }

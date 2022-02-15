@@ -19,11 +19,8 @@ addLoadEvent(async () => {
         store.checkout(inventory[0])
             .then((order) => {
                 display_modal("Loading", "Attempting to empty your bank account", "", "", "wait");
-                store.charge(order.product, order.customer).then(async (serverResponse) => {
-                    if (typeof (serverResponse == "object")) {
-                        serverResponse = serverResponse.message;
-                    }
-                    await display_modal("Success", serverResponse, "Accept", "", "success");
+                store.charge(order).then(async (serverResponse) => {
+                    await display_modal("Success", serverResponse.message, "Accept", "", "success");
                 }).catch(async (error) => {
                     if (typeof (error == "object")) {
                         error = error.message;
