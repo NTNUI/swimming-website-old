@@ -30,17 +30,8 @@ if ($member_id === NULL) {
 }
 
 try {
-	// get users phone number
-	$db = new DB("member");
-	$sql = "SELECT phone FROM member WHERE id=?";
-	$db->prepare($sql);
-	$db->bind_param("i", $member_id);
-	$db->execute();
-	$phone = "";
-	$db->stmt->bind_result($phone);
-	$db->fetch();
-
-	approve_member($phone);
+	$phone = Member::get_phone($member_id);
+	Member::approve($phone);
 
 	$response->code = HTTP_OK;
 	$response->data = ["success" => true, "message" => "user has been approved"];

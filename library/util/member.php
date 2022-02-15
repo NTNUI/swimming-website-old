@@ -1,27 +1,29 @@
 <?php
 require_once("library/util/db.php");
-
-/**
- * Approve member.
- * Side effects:
- * - log event
- * - send the new member a confirmation email
- * @param string $phone for the new member
- * @return void
- */
-function approve_member(string $phone): void
+class Member
 {
-    if (!$phone) {
-        throw new InvalidArgumentException("phone is required");
-    }
-    // approve member
+
+    /**
+     * Approve member.
+     * Side effects:
+     * - log event
+     * - send the new member a confirmation email
+     * @param string $phone for the new member
+     * @return void
+     */
+    public static function approve(string $phone): void
+    {
+        if (!$phone) {
+            throw new InvalidArgumentException("phone is required");
+        }
+        // approve member
         $db = new DB("member");
         $db->prepare("UPDATE member SET approved_date=NOW() WHERE phone=?");
         $db->bind_param("s", $phone);
         $db->execute();
         $db->reset();
 
-    // log success
+        // log success
         $db->prepare("SELECT first_name, surname, email FROM member WHERE phone = ?");
         $db->bind_param("s", $phone);
         $db->execute();
@@ -32,7 +34,7 @@ function approve_member(string $phone): void
         $db->fetch();
         log::message("Info: New member $first_name $surname approved", __FILE__, __LINE__);
 
-    // send email
+        // send email
         $subject = "NTNUI Swimming - membership approved";
 
         $headers = "Confirmation of registration<br>";
@@ -50,5 +52,32 @@ function approve_member(string $phone): void
             // local testing cannot (and shouldn't) send random emails
             log::message("[Warning]: failed sending approval mail", __FILE__, __LINE__);
         }
+    }
+
+    public static function get_phone(int $member_id)
+    {
+        $db = new DB("member");
+        $sql = "SELECT phone FROM member WHERE id=?";
+        $db->prepare($sql);
+        $db->bind_param("i", $member_id);
+        $db->execute();
+        $phone = "";
+        $db->stmt->bind_result($phone);
+        $db->fetch();
+        return $phone;
+    }
+
+
+    /**
+     * Is customer with @param phone has a valid membership
+     *
+     * @param string $phone 
+     * @return boolean true if phone number has an active membership this year
+     */
+    public static function is_active(string $phone): bool
+    {
+        global $settings;
+        $license_product_hash = $settings["license_product_hash"];
+        return (bool)Store::completed_orders($license_product_hash, $phone);
     }
 }
