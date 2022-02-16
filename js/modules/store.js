@@ -15,15 +15,9 @@ export default class Store {
         this.inventory = [];
         this.card_validation_error = true;
 
-        this.error_div = document.querySelector('#card-errors');
-        this.form = document.querySelector('#payment-form');
-        this.submitButton = this.form.querySelector("[type='submit']");
-        this.overlay = document.querySelector("#checkout_overlay");
-
         this.stripe = Stripe(publishable_key);
         this.elements = this.stripe.elements();
         this.card = this.elements.create('card');
-        // this.card.mount("#card-element");
     }
 
     /**
@@ -44,78 +38,84 @@ export default class Store {
      */
     checkout(product, customer) {
         return new Promise((resolve) => {
-            // Update product description
-            this.displayed_product = product;
-            this.overlay.querySelector("#checkout_title").textContent = product.name;
-            this.overlay.querySelector("#product_hash").value = product.product_hash;
-            this.overlay.querySelector("#checkout_description").innerHTML = product.description;
-            this.overlay.querySelector("#checkout_img").src = product.image;
-            this.overlay.querySelector("#checkout_price").textContent = this.formatCurrency(product.price);
+            // create a new checkout modal
+            const checkout_template = document.querySelector("#checkout_template").cloneNode(true).content;
+            document.querySelector(".content").appendChild(checkout_template);
+            const checkout_node = document.querySelector(".content #checkout_overlay")
 
-            if (product.price_member) {
-                this.overlay.querySelector("#checkout_price_member_label").style.display = "block";
-                this.overlay.querySelector("#checkout_price_member").textContent = this.formatCurrency(product.price_member);
-            } else {
-                this.overlay.querySelector("#checkout_price_member_label").style.display = "none";
-            }
+            // product
+            const checkout_description = checkout_node.querySelector("#checkout_description");
+            const checkout_title = checkout_node.querySelector("#checkout_title");
+            const checkout_price = checkout_node.querySelector("#checkout_price");
+            const checkout_price_member = checkout_node.querySelector("#checkout_price_member");
+            const checkout_price_member_label = checkout_node.querySelector("#checkout_price_member_label");
+            const checkout_img = checkout_node.querySelector("#checkout_img");
+            const checkout_hash = checkout_node.querySelector("#product_hash");
 
-            if (product.require_email) {
-                this.overlay.querySelector("#checkout_email").setAttribute("required", true);
-            } else {
-                this.overlay.querySelector("#checkout_email").removeAttribute("required");
-            }
+            // customer
+            const checkout_name = checkout_node.querySelector("#checkout_name");
+            const checkout_phone = checkout_node.querySelector("#checkout_phone");
+            const checkout_email = checkout_node.querySelector("#checkout_email");
+            const checkout_comment = checkout_node.querySelector("#checkout_comment");
 
-            if (product.require_phone) {
-                this.overlay.querySelector("#checkout_phone").setAttribute("required", true);
-            } else {
-                this.overlay.querySelector("#checkout_phone").removeAttribute("required");
-            }
-
-            if (product.require_comment) {
-                this.overlay.querySelector("#checkout_comment").setAttribute("required", true);
-            } else {
-                this.overlay.querySelector("#checkout_comment").removeAttribute("required");
-            }
-
-            // unhide the overlay
-            this.overlay.style.display = "block";
-
-            // Recreate the node to clear out old event listeners
-            // If old event listeners are not cleared out multiple
-            // charges might occur for one click.
-            this.form = document.querySelector('#payment-form');
-            let old_element = this.form;
-            let new_element = old_element.cloneNode(true);
-            old_element.parentNode.replaceChild(new_element, old_element);
-
-            // remount validated input fields
-            this.card.mount("#card-element");
-
-            this.checkoutPhoneInput = this.checkoutPhoneInput || this.overlay.querySelector("#checkout_phone");
-            if (window.checkoutPhone !== undefined) {
-                window.checkoutPhone.destroy();
-            }
-            window.checkoutPhone = window.intlTelInput(this.checkoutPhoneInput, {
+            // create phone input
+            console.log(checkout_phone);
+            window.checkoutPhone = window.intlTelInput(checkout_phone, {
                 initialCountry: "no",
                 separateDialCode: true,
+                customPlaceholder: () => { return ""; },
                 utilsScript: "https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.15/js/utils.min.js"
             });
 
+            // Update product description
+            this.displayed_product = product;
+            checkout_title.textContent = product.name;
+            checkout_hash.value = product.hash;
+            checkout_description.innerHTML = product.description;
+            checkout_img.src = product.image;
+            checkout_price.textContent = this.formatCurrency(product.price);
+
+            // set attributes on user input based on product properties
+            if (product.price_member) {
+                checkout_price_member_label.style.display = "block";
+                checkout_price_member.textContent = this.formatCurrency(product.price_member);
+            } else {
+                checkout_price_member_label.style.display = "none";
+            }
+
+            if (product.require_email) {
+                checkout_email.setAttribute("required", true);
+            } else {
+                checkout_email.removeAttribute("required");
+            }
+
+            if (product.require_phone) {
+                checkout_phone.setAttribute("required", true);
+            } else {
+                checkout_phone.removeAttribute("required");
+            }
+
+            if (product.require_comment) {
+                checkout_comment.setAttribute("required", true);
+            } else {
+                checkout_comment.removeAttribute("required");
+            }
+
             // lock user from editing personal info if customer is defined
             if (customer !== undefined) {
-                const inputName = this.overlay.querySelector("#checkout_name");
-                const inputEmail = this.overlay.querySelector("#checkout_email");
+                const inputName = checkout_node.querySelector("#checkout_name");
+                const inputEmail = checkout_node.querySelector("#checkout_email");
 
-                inputName.value = customer.name;
-                inputEmail.value = customer.email;
+                checkout_name.value = customer.name;
+                checkout_email.value = customer.email;
                 window.checkoutPhone.setNumber(customer.phone);
 
                 inputName.disabled = true;
                 inputEmail.disabled = true;
-                this.checkoutPhoneInput.disabled = true;
-                // this.overlay.querySelector("#checkout_comment").style.display = "none";
+                checkout_phone.disabled = true;
             }
 
+            // event handlers
             function submitHandler(event) {
                 event.preventDefault();
 
@@ -124,42 +124,54 @@ export default class Store {
                     return;
                 }
 
-                const comment = this.overlay.querySelector("#checkout_comment").value;
+                const comment = checkout_node.querySelector("#checkout_comment").value;
                 if (customer === undefined) {
                     // get customer info from checkout overlay
                     const customer = {};
-                    customer.name = this.overlay.querySelector("#checkout_name").value;
-                    customer.email = this.overlay.querySelector("#checkout_email").value;
+                    customer.name = checkout_node.querySelector("#checkout_name").value;
+                    customer.email = checkout_node.querySelector("#checkout_email").value;
                     customer.phone = window.checkoutPhone.getNumber();
 
-                    // close checkout modal and return new order
-                    this.overlay.style.display = "none";
                     const order = {
                         "product": product,
                         "customer": customer,
                         "comment": comment
                     }
+
+                    window.checkoutPhone.destroy();
+                    // checkout_node.parentNode.removeChild(checkout_node);
+                    this.old_checkout = checkout_node;
                     resolve(order);
                     return;
                 }
-                // close checkout modal and return new order
-                this.overlay.style.display = "none";
+
                 const order = {
                     "product": product,
                     "customer": customer,
                     "order_comment": comment
                 }
+                window.checkoutPhone.destroy();
+                // checkout_node.parentNode.removeChild(checkout_node);
+                this.old_checkout = checkout_node;
                 resolve(order);
             }
+            function cancelHandler() {
+                window.checkoutPhone.destroy();
+                checkout_node.parentNode.removeChild(checkout_node);
+                resolve("abort");
+            }
+
+            this.error_div = document.querySelector('#card-errors');
+
+            // remount validated input fields
+            const card_element = checkout_node.querySelector("#card-element");
+            this.card.mount(card_element);
 
             // Attach event listeners
+            checkout_node.querySelector(".close").addEventListener("click", cancelHandler.bind(this));
+            checkout_node.querySelector(".locked").addEventListener("click", cancelHandler.bind(this));
             document.querySelector('#payment-form').addEventListener("submit", submitHandler.bind(this));
             this.card.addEventListener('change', this.card_validation_handler.bind(this));
-            this.overlay.querySelectorAll("span.close, button.locked").forEach(element => {
-                element.addEventListener("click", () => {
-                    this.overlay.style.display = "none";
-                });
-            });
         });
     }
 
@@ -188,6 +200,7 @@ export default class Store {
                 if (payment.error !== undefined) {
                     reject(payment.error);
                 }
+                this.old_checkout.parentNode.removeChild(this.old_checkout);
                 // absolute path is required because of dynamic document root
                 const chargeResponse = await fetch(BASEURL + "/api/charge", {
                     method: "POST",
@@ -251,19 +264,20 @@ export default class Store {
     }
 
     card_validation_handler(event) {
+        const submitButton = document.querySelector("#payment-form [type='submit']");
 
         if (event.error) {
             this.card_validation_error = true;
-            if (!this.submitButton.classList.contains("btn_disabled")) {
-                this.submitButton.classList.add("btn_disabled");
+            if (!submitButton.classList.contains("btn_disabled")) {
+                submitButton.classList.add("btn_disabled");
             }
             this.error_div.textContent = event.error.message;
             return;
         }
         this.error_div.textContent = '';
         this.card_validation_error = false;
-        if (this.submitButton.classList.contains("btn_disabled")) {
-            this.submitButton.classList.remove("btn_disabled");
+        if (submitButton.classList.contains("btn_disabled")) {
+            submitButton.classList.remove("btn_disabled");
         }
     }
 

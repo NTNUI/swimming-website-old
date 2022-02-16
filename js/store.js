@@ -40,6 +40,9 @@ store.init(BASEURL + "/api/inventory?language=" + LANGUAGE).then(async () => {
             // display checkout modal on purchase click
             store.checkout(inventory[i])
                 .then((order) => {
+                    if (order === "abort") {
+                        return;
+                    }
                     handle_order(store, order);
                 })
                 .catch((error) => {
