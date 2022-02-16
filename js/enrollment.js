@@ -101,7 +101,7 @@ addLoadEvent(() => {
         try {
             // display checkout for license payment
             const order = await store.checkout(license_product, customer);
-            if (order === undefined) {
+            if (order === "abort") {
                 // If user aborts the checkout customer object is not available
                 return;
             }
