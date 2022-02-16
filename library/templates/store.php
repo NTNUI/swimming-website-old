@@ -22,14 +22,7 @@ global $t;
 			</p>
 		</div>
 		<div class="bottom">
-			<button class="purchase_button store_button"><?php print $t->get_translation("kjop", "store"); ?></button>
-			<button class="purchase_button btn_disabled wait"><?php print $t->get_translation("opens", "store"); ?> <span class="store_opensin"></span></button>
-			<button class="purchase_button btn_disabled soldout"><?php print $t->get_translation("soldout", "store");  ?></button>
-			<button class="purchase_button btn_disabled timeout"><?php print $t->get_translation("timeout", "store"); ?></button>
-			<div class="store_countdown" style="display: none">
-				<?php print $t->get_translation("closes_in", "store"); ?>
-				<span class="store_timeleft"></span>
-			</div>
+			<button class="purchase_button store_button" disabled="true"><?php print $t->get_translation("kjop", "store"); ?></button>
 		</div>
 	</div>
 </template>

@@ -302,8 +302,6 @@ export default class Store {
         let price_member = product.price_member;
         let sold = product.amount_sold || 0;
         let available = product.amount_available;
-        let startTime = product.available_from ? 1e3 * product.available_from - this.serverOffset : false;
-        let endTime = product.available_until ? 1e3 * product.available_until - this.serverOffset : false;
 
         // clone a product container block from <template>
         let t = document.querySelector("#store_dummy");
@@ -323,110 +321,29 @@ export default class Store {
         node.querySelector(".store_availability").textContent = available == null ? "Unlimited" : sold + " / " + available;
         node.querySelector("img").src = image;
 
-        let openContainer = node.querySelector(".store_opensin");
-        let timeContainer = node.querySelector(".store_timeleft");
-        let locked = { startTime: false, soldout: false, timeout: false };
-
-        if (startTime !== false && startTime > new Date().getTime()) {
-            locked.startTime = true;
-
-            let open = setInterval(function() {
-                const timeLeft = startTime - new Date().getTime();
-                if (timeLeft < 0) {
-                    locked.startTime = false;
-                    clearInterval(open);
-                }
-                openContainer.textContent = this.formatTime(timeLeft).bind(this);
-            }, 250);
-
-        } else if (endTime !== false) {
-            node.querySelector(".store_countdown").style.display = "";
-            let close = setInterval(function() {
-                const timeLeft = (endTime - new Date().getTime());
-                if (timeLeft < 0) {
-                    locked.timeout = true;
-                    clearInterval(close);
-                }
-                timeContainer.textContent = this.formatTime(timeLeft);
-            }.bind(this), 250);
+        if (product.amount_available && (product.amount_sold >= product.amount_available)) {
+            node.querySelector(".purchase_button").textContent = "Sold out";
+            return node;
         }
 
-        if (available > 0 && sold >= available) locked.soldout = true;
-        let storeButton = node.querySelector(".store_button");
-        let lastLock = {};
+        const startTime = product.available_from ? new Date(1000 * product.available_from - this.server_time_offset) : false;
+        const endTime = product.available_until ? new Date(1000 * product.available_until - this.server_time_offset) : false;
+        const current_time = new Date();
+        if (startTime && (current_time < startTime)) {
+            node.querySelector(".purchase_button").textContent = "Product will be available " + startTime.toLocaleDateString() + " " + startTime.toLocaleTimeString();
+            return node;
+        }
 
-        setInterval(function() {
-            if (locked == lastLock) return;
-            lastLock = locked;
-            if (locked.startTime || locked.soldout || locked.timeout) {
-                storeButton.style.display = "none";
-                bottom.querySelector(".store_countdown").style.display = "none";
-
-                // hide all info labels
-                bottom.querySelector(".wait").style.display = "none";
-                bottom.querySelector(".soldout").style.display = "none";
-                bottom.querySelector(".timeout").style.display = "none";
-
-                // unhide correct label
-                if (locked.startTime) {
-                    bottom.querySelector(".wait").style.display = "";
-                } else if (locked.soldout) {
-                    bottom.querySelector(".soldout").style.display = "";
-                } else if (locked.timeout) {
-                    bottom.querySelector(".timeout").style.display = "";
-                }
-            } else {
-                // hide all elements
-                productContainer.classList.remove("locked");
-                bottom.querySelector(".wait").style.display = "none";
-                bottom.querySelector(".soldout").style.display = "none";
-                bottom.querySelector(".timeout").style.display = "none";
-
-            }
-        }, 250);
+        if (endTime && (current_time > endTime)) {
+            node.querySelector(".purchase_button").textContent = "Product is no longer available";
+            return node;
+        }
+        node.querySelector(".purchase_button").removeAttribute("disabled");
         return node;
     }
 
     formatCurrency(price) {
         return price + ",-";
-    }
-
-
-    formatTime(time, lang = "en") {
-        if (time < 0) return " i fortiden";
-        let seconds = (time / 1000).toFixed(0);
-        const weeks = Math.floor(seconds / (60 * 60 * 24 * 7));
-        seconds %= 60 * 60 * 24 * 7;
-        const days = Math.floor(seconds / (60 * 60 * 24));
-        seconds %= 60 * 60 * 24;
-        const hours = Math.floor(seconds / (60 * 60));
-        seconds %= 60 * 60;
-        const minutes = Math.floor(seconds / 60);
-        seconds %= 60;
-
-        const translations = {
-            "no": {
-                "week": "uke",
-                "day": "dag",
-                "week_plural": "uker",
-                "day_plural": "dager",
-            },
-            "en": {
-                "week": "week",
-                "day": "day",
-                "week_plural": "weeks",
-                "day_plural": "days",
-            }
-        }
-        const text = translations[lang];
-
-        let r = "";
-        if (weeks > 0) r += weeks + " " + (weeks == 1 ? text.week : text.week_plural) + " ";
-        if (days > 0) r += days + " " + (days == 1 ? text.day : text.day_plural) + " ";
-        r += (hours < 10 ? "0" : "") + hours + ":";
-        r += (minutes < 10 ? "0" : "") + minutes + ":";
-        r += (seconds < 10 ? "0" : "") + seconds;
-        return r;
     }
 
 }
