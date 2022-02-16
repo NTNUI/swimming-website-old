@@ -303,7 +303,7 @@ class Store
 		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
 		$db->prepare($sql);
 		$db->bind_param(
-			"ssssiiiiiiiiiiii",
+			"ssssssiiiiiiiiii",
 			$product["hash"],
 			$product["name"],
 			$product["description"],
@@ -640,7 +640,7 @@ class Store
 		}
 
 		$db = new DB("web");
-		$sql = "SELECT COUNT(*) FROM orders WHERE (SELECT id FROM products WHERE hash=?) AND phone=? AND (order_status='DELIVERED' OR order_status='FINALIZED')";
+		$sql = "SELECT COUNT(*) FROM orders WHERE products_id = (SELECT id FROM products WHERE hash=?) AND phone=? AND (order_status='DELIVERED' OR order_status='FINALIZED')";
 		if ($this_year) {
 			$sql .= "AND EXTRACT(YEAR FROM timestamp) = YEAR(NOW())";
 		}

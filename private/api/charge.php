@@ -1,5 +1,7 @@
 <?php
 require_once("library/util/store.php");
+require_once("library/util/api.php");
+
 define("DEBUG", false);
 function handle_error(Throwable $th, int $code = HTTP_INTERNAL_SERVER_ERROR) 
 {
@@ -86,7 +88,8 @@ try {
 } catch (CardException | ApiErrorException | AuthenticationException | ApiConnectionException | RateLimitException | InvalidRequestException $e) {
 	// Expected stripe errors that should be shown to users
 	log::message($e->getError()->message . " Payment intent: " . $e->getError()->payment_intent->id, $e->getFile(), $e->getLine());
-	handle_error($e, $e->getHttpStatus());
+	log::message($e->getTraceAsString(), $e->getFile(), $e->getLine());
+	handle_error($e, 400);
 	
 } catch (\StoreException $e) {
 	// Expected client errors like product not found and stuff like that

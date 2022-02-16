@@ -328,7 +328,7 @@ function handle_post(Response &$response)
 		"available_from" => $start,
 		"available_until" => $end,
 		"image" => $image_name,
-		"max_orders_per_customer_per_year" => $args["max_orders_per_customer_per_year"] || 0,
+		"max_orders_per_customer_per_year" => (int)($args["max_orders_per_customer_per_year"] || 0),
 		"require_phone" => $args["require_phone"] || false,
 		"require_email" => $args["require_email"] || false,
 		"require_comment" => $args["require_comment"] || false,
