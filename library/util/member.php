@@ -76,8 +76,12 @@ class Member
      */
     public static function is_active(string $phone): bool
     {
-        global $settings;
-        $license_product_hash = $settings["license_product_hash"];
-        return (bool)Store::completed_orders($license_product_hash, $phone);
+        $db = new DB("member");
+        $db->prepare("SELECT approved_date FROM member WHERE phone=?");
+        $db->bind_param("s", $phone);
+        $db->execute();
+        $db->stmt->bind_result($approved_date);
+        $db->fetch();
+        return (bool)$approved_date;
     }
 }
