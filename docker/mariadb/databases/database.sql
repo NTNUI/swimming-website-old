@@ -117,11 +117,11 @@ INSERT INTO `products` (
   `price`,
   `available_from`,
   `available_until`,
-  `max_orders_per_customer_per_year`
+  `max_orders_per_customer_per_year`,
   `require_phone`,
-  `require_email`
-  `require_comment`
-  `require_active_membership`
+  `require_email`,
+  `require_comment`,
+  `require_active_membership`,
   `amount_available`,
   `image`,
   `visible`,
