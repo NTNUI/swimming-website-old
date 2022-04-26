@@ -132,19 +132,19 @@ INSERT INTO `products` (
   '31e61c8253b54cdde3b9',
   '{\"no\":\"NSF Lisens\",\"en\":\"NSF License\"}',
   '{\"no\":\"Lisensen gir deg adgang til nasjonsale stevner og obligatorisk treningsforsikring. Lisensen har en gyldighet i ett kalender år fra januar til desember.\",\"en\":\"Norwegian Swimming license is required for practices and national competitions. License is valid max one year from January until December.\"}',
-  76500, --price
-  NULL, -- available_from
-  NULL, -- available_until
-  1, -- max_orders_per_customer_per_year
-  1, -- require_phone
-  1, -- require_email
-  0, -- require_comment
-  0, -- require_active_membership
-  NULL, -- amount_available
-  '31e61c8253b54cdde3b9.jpg', -- image
-  0, -- visible
-  0, -- archived
-  1 -- group_id
+  76500,
+  NULL,
+  NULL,
+  1,
+  1,
+  1,
+  0,
+  0,
+  NULL,
+  '31e61c8253b54cdde3b9.jpg',
+  0,
+  0,
+  1
 );
 
 CREATE TABLE IF NOT EXISTS `product_groups` (
