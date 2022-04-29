@@ -20,4 +20,4 @@ function didClick() {
         a = 0x0;
     }, 0x7d0);
 }
-document[_0x526b('0x3')]('img-nestleder')[0x0]['addEventListener'](_0x526b('0x0'), didClick);
+document[_0x526b('0x3')]('senior_styremedlem')[0x0]['addEventListener'](_0x526b('0x0'), didClick);
