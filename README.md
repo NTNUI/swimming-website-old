@@ -5,7 +5,7 @@ This repository contains source files for NTNUI Swimming web site. This reposito
 
 ## Installation
 ```bash
-git clone git@github.com:pavelskipenes/org.ntnu.svommer.git
+git clone git@github.com:NTNUI/org.ntnu.svommer.git
 cd org.ntnu.svommer
 cp .env.example .env # fill inn api keys in .env file
 docker-compose up -d --build
