@@ -50,6 +50,19 @@ services:
         networks:
             - epstein-didnt-kill-himself
 
+    stripe:
+        image: stripe/stripe-cli
+        container_name: stripe-cli
+        command: listen
+        environment:
+            - STRIPE_API_KEY=sk_test_8NXxtSWrHXG33iGpr07ec3fo
+            - STRIPE_DEVICE_NAME=${USERNAME:-testing_host}
+            - STRIPE_CLI_TELEMETRY_OPTOUT=true
+        depends_on:
+            - apache
+        networks:
+            - epstein-didnt-kill-himself
+
 networks:
     epstein-didnt-kill-himself:
         driver: bridge
