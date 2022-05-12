@@ -51,5 +51,9 @@ RUN composer install --no-plugins --no-scripts
 # Logs are stored here. Faster access to logs when "docker exec -it web_php /bin/ash"
 WORKDIR /var/log/apache2/
 
+# Convinient shortcuts
+RUN ln -s /var/www/localhost/htdocs /var/log/apache2/htdocs
+RUN ln -s /var/log/apache2/ /var/www/localhost/htdocs/logs
+
 EXPOSE 80 443
 CMD ["httpd", "-DFOREGROUND"]
