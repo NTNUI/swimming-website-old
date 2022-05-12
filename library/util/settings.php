@@ -12,7 +12,7 @@ function load_settings($path){
         die();
     }
     if(0 !== strpos($settings["baseurl"], "https://")){
-    	throw new Exception("Error: settings[hosting][baseurl] does not start with 'https://'. This will break links. settings[hosting][baseurl] contains: ". $settings["baseurl"], __FILE__, __LINE__);
+        throw new Exception("Error: settings[hosting][baseurl] does not start with 'https://'. This will break links. settings[hosting][baseurl] contains: ". $settings["baseurl"]);
     }
     return $settings;
 }

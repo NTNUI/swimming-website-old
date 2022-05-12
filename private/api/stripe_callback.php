@@ -17,10 +17,10 @@ try {
 		$sig_header,
 		$secret
 	);
-} catch (\UnexpectedValueException $e) {
+} catch (\stripe\Exception\UnexpectedValueException $e) {
 	log::client_error("Bad Request", __FILE__, __LINE__);
 	exit();
-} catch (\Stripe\Error\SignatureVerification $e) {
+} catch (\stripe\Exception\SignatureVerificationException $e) {
 	log::client_error("Wrong signature", __FILE__, __LINE__);
 	exit();
 }
