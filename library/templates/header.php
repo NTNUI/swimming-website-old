@@ -29,7 +29,7 @@ if ($title == "") $title = ucwords($page);
 
 		}?>
 		const BASEURL = "<?php print $settings['baseurl']; ?>";
-		const STRIPE_PUBLISHABLE_KEY = "<?php print $settings['stripe']['publishable_key']; ?>";
+		const STRIPE_PUBLISHABLE_KEY = "<?php print $_ENV['STRIPE_PUBLISHABLE_KEY']; ?>";
 		const INVENTORY_URL = BASEURL + "<?php global $language; print '/api/inventory?language=' .$language; ?>";
 		const SERVER_TIME_OFFSET = new Date().getTime() - <?php print time() ?> * 1000;
 		const LANGUAGE = "<?php print $language ?>";

@@ -7,16 +7,12 @@ This repository contains source files for NTNUI Swimming web site. This reposito
 ```bash
 git clone git@github.com:pavelskipenes/org.ntnu.svommer.git
 cd org.ntnu.svommer
+cp .env.example .env # fill inn api keys in .env file
 docker-compose up -d --build
 chmod -R 777 img
 chmod -R 777 translations
 ```
-You should now be able to go to [https://127.0.0.1](https://127.0.0.1) and see the web page.
-> Note that the text content is missing unless you download it from a production server.
-> ```bash
-> scp -r USERNAME@PRODUCTIONSERVER:svommer/translations/ translations/..
-> ```
-
+> Open .env file and fill inn your API test keys. If you don't have them you can fill out some random string but certain functionality will be limited (like e-commerce or captcha).
 ## Starting and stopping local server
 
 To start the server:

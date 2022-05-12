@@ -45,7 +45,7 @@ function get_age(DateTime $birthDate): int
 function valid_captcha(): bool
 {
     global $settings;
-    $secret = $settings["captcha_key"];
+    $secret = $_ENV["GOOGLE_CAPTCHA_KEY"];
     $token = $_POST['g-recaptcha-response'];
     $url = "https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=$token";
     $ch = curl_init($url);

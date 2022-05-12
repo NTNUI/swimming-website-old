@@ -8,8 +8,6 @@
 		"baseurl",
 		"memberTable",
 		"translations_dir",
-		"captcha_key",
-		"stripe",
 		"emails",
 		"SQL_server",
 		"enrollment",
