@@ -6,8 +6,8 @@ RUN apk upgrade
 RUN apk add composer shadow openssl apache2 apache2-ssl neovim micro perl bat
 
 # To use php version 8 uncomment commented line and vise versa
-# RUN apk add php8 php8-apache2 php8-common php8-embed php8-session php8-json php8-mysqli php8-iconv php8-curl
-RUN apk add php7 php7-apache2 php7-common php7-embed php7-session php7-json php7-mysqli php7-iconv php7-curl
+# RUN apk add php8 php8-apache2 php8-common php8-embed php8-session php8-json php8-mysqli php8-iconv php8-curl php8-mbstring
+RUN apk add php7 php7-apache2 php7-common php7-embed php7-session php7-json php7-mysqli php7-iconv php7-curl php7-mbstring
 
 # Configure self signed sertificate
 WORKDIR /tmp
@@ -28,6 +28,7 @@ WORKDIR /var/www/localhost/htdocs
 RUN mkdir -p sessions translations img/store settings
 COPY index.php .
 COPY docker/.htaccess .
+COPY .env .
 COPY composer.json .
 COPY composer.lock .
 COPY docker/docker.json settings/settings.json

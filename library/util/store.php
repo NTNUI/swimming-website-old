@@ -11,7 +11,7 @@ class Store
 	function __construct($lang)
 	{
 		global $settings;
-		\Stripe\Stripe::setApiKey($settings["stripe"]["secret_key"]);
+		\Stripe\Stripe::setApiKey($_ENV["STRIPE_SECRET_KEY"]);
 		$this->language = $lang;
 		$this->license_key = $settings["license_product_hash"];
 	}

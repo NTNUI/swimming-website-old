@@ -4,7 +4,7 @@ require_once("library/util/store.php");
 
 $store = new Store("en");
 
-$secret = $settings["stripe"]["signing_key"];
+$secret = $_ENV["STRIPE_SIGNING_KEY"];
 
 $data = @file_get_contents("php://input");
 $sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
