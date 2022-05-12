@@ -48,51 +48,6 @@
 			],
 			"pattern": "^.*$"
 		},
-		"captcha_key": {
-			"$id": "#root/captcha_key",
-			"title": "Captcha_key",
-			"type": "string",
-			"description": "API key for Google reCaptcha",
-			"minLength": 40,
-			"maxLength": 40
-		},
-		"stripe": {
-			"$id": "#root/stripe",
-			"title": "Stripe",
-			"description": "Set of API keys for accessing Stripe backend",
-			"type": "object",
-			"required": [
-				"secret_key",
-				"publishable_key",
-				"signing_key"
-			],
-			"properties": {
-				"secret_key": {
-					"$id": "#root/stripe/secret_key",
-					"title": "Secret key",
-					"description": "Stripe API secret key",
-					"type": "string",
-					"minLength": 32,
-					"maxLength": 32
-				},
-				"publishable_key": {
-					"$id": "#root/stripe/publishable_key",
-					"title": "Publishable key",
-					"description": "Stripe API publishable key",
-					"type": "string",
-					"minLength": 32,
-					"maxLength": 32
-				},
-				"signing_key": {
-					"$id": "#root/stripe/signing_key",
-					"title": "Signing key",
-					"description": "Stripe API signing key",
-					"type": "string",
-					"minLength": 38,
-					"maxLength": 38
-				}
-			}
-		},
 		"emails": {
 			"$id": "#root/emails",
 			"title": "Emails",

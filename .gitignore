@@ -13,3 +13,4 @@ cgi-bin/
 storage/
 composer.pahr
 .DS_Store
+.env
