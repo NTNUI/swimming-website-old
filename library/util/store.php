@@ -256,6 +256,45 @@ class Store
 		$db->execute();
 	}
 
+	/**
+	 * Get number of orders for a product
+	 * 
+	 * @param string $product_hash of the product
+	 * @return int number of fulfilled orders
+	 */
+	static public function get_order_count(string $product_hash): int
+	{
+		if (!Store::product_exists($product_hash)) {
+			throw StoreException::ProductNotFound();
+		}
+		$db = new DB("web");
+		$sql = "SELECT COUNT(*) FROM orders WHERE products_id = (SELECT id FROM products WHERE hash=?) AND (order_status='DELIVERED' OR order_status='FINALIZED')";
+		return (int)$db->execute_and_fetch($sql, "s", $product_hash)[0];
+	}
+
+	/**
+	 * Update number of products available for purchase
+	 * 
+	 * @param string $product_hash of the product to be modified
+	 * @param int new inventory count
+	 */
+	static public function update_inventory_count(string $product_hash, int $new_inventory_count): void
+	{
+		if (!Store::product_exists($product_hash)) {
+			throw StoreException::ProductNotFound();
+		}
+
+		$num_orders = Store::get_order_count($product_hash);
+		$UNLIMITED = 0;
+		if ($num_orders > $new_inventory_count && $new_inventory_count !== $UNLIMITED) {
+			throw StoreException::ModifyProductException("Cannot set inventory count lower than number of orders.\nMinimum value is " . $num_orders . " or 0 for unlimited.\nReceived: " . $new_inventory_count);
+		}
+
+		$db = new DB("web");
+		$db->prepare("UPDATE products SET amount_available=? WHERE hash=?");
+		$db->bind_param("is", $new_inventory_count, $product_hash);
+		$db->execute();
+	}
 
 	/**
 	 * Check if product exists
