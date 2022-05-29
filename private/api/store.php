@@ -236,8 +236,27 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			];
 			break;
 
+		case "product_inventory_count":
+			if (!isset($input_json->{"params"}->{"product_hash"})) {
+				throw new InvalidArgumentException("Missing product_hash");
+			}
+			if (!isset($input_json->{"params"}->{"available"})) {
+				throw new InvalidArgumentException("Missing available");
+			}
+			$available = $input_json->{"params"}->{"available"};
+			
+			if(!is_int($available)){
+				throw new InvalidArgumentException("argument available is not an integer");
+			}
+			$product_hash = $input_json->{"params"}->{"product_hash"};
+			Store::update_inventory_count($product_hash, $available);
+			$response->code = HTTP_OK;
+			$response->data = [
+				"success" => true
+			];
+			break;
 		default:
-			$response->error("Got invalid request: '" . $input_json->{"request_type"} . "'. Valid requests are request_type and update_visibility");
+			$response->error("Got invalid request: '" . $input_json->{"request_type"} . "'. Valid requests are 'update_delivered', 'update_visibility', 'update_availability', 'update_price', 'product_inventory_count'");
 	}
 }
 

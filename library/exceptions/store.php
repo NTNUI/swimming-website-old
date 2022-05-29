@@ -50,6 +50,10 @@ class StoreException extends \Exception
         return new static($message);
     }
 
+    public static function ModifyProductException(string $message = "Could not modify product")
+    {
+        return new static($message);
+    }
     public static function RemoveProductFailed(string $message = "Could not remove product")
     {
         return new static($message);

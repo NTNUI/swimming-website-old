@@ -221,11 +221,55 @@ function createTableMatrix(products, product_groups) {
                     {
                         title: "Available",
                         field: "amount_available",
-                        formatter: function(cell, formatterParams, onRendered) {
-                            return cell.getValue() === null ? "Unlimited" : cell.getValue();
+                        editor: "number",
+                        editorParams: {
+                            min: 0
                         },
-                        cellClick: () => {
-                            display_modal("Info", "Changing the amount of available products is not yet supported", "Accept", "");
+                        formatter: function(cell, formatterParams, onRendered) {
+                            let cell_value = cell.getValue();
+                            if(cell_value === null || cell_value === 0 || cell_value === "") {
+                                return "Unlimited";
+                            }
+                            return cell_value;
+                        },
+                        cellEdited: (cell) => {
+                            let new_inventory_count = cell.getValue();
+                            if (isNaN(parseFloat(new_inventory_count) || !isFinite(new_inventory_count))) {
+                                // not a number
+                                cell.restoreOldValue();
+                                return;
+                            }
+
+                            // server accepts only integers
+                            if (new_inventory_count === "") {
+                                new_inventory_count = 0;
+                            }
+                            const request = {
+                                request_type: "product_inventory_count",
+                                params: {
+                                    "product_hash": cell.getRow().getData().hash,
+                                    "available": new_inventory_count
+                                }
+                            };
+                            fetch(BASEURL + "/api/store",
+                                {
+                                    method: "PATCH",
+                                    body: JSON.stringify(request)
+                                }
+
+                            ).then(async (response) => {
+                                if (!response.ok) {
+                                    throw await response.json();
+                                }
+                            }).catch((err) => {
+                                cell.restoreOldValue();
+                                console.error(err);
+                                if(typeof (err) === "object") {
+                                    display_modal("Failure", err.message, "Accept", "", "failure");
+                                    return;
+                                }
+                                display_modal("Failure", err, "Accept", "", "failure");
+                            });
                         }
                     },
                     {
