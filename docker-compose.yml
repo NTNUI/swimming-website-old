@@ -55,7 +55,7 @@ services:
         container_name: stripe-cli
         command: listen
         environment:
-            - STRIPE_API_KEY=$(STRIPE_SECRET_KEY)
+            - STRIPE_API_KEY=${STRIPE_SECRET_KEY}
             - STRIPE_DEVICE_NAME=${USERNAME:-testing_host}
             - STRIPE_CLI_TELEMETRY_OPTOUT=true
         depends_on:
