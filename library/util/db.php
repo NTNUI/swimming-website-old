@@ -77,7 +77,7 @@ class DB
 	 * @param mixed ...$_
 	 * @return array results form db
 	 */
-	public function execute_and_fetch(string $sql, string $types, mixed &$var1, mixed &...$_): array
+	public function execute_and_fetch(string $sql, string $types, &$var1, &...$_): array
 	{
 		$this->prepare($sql);
 		$this->bind_param($types, $var1, ...$_);

@@ -31,7 +31,7 @@ try {
 		case "source.canceled":
 		case "charge.failed":
 			log::message("Info: Charge failed", __FILE__, __LINE__);
-			$store->fail_order($event["data"]["object"]);
+			$store->set_order_status($event["data"]["object"]["payment_intent"], "FAILED");
 			break;
 		case "charge.succeeded":
 			log::message("Info: Charge succeeded", __FILE__, __LINE__);

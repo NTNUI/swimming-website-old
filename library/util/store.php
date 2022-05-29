@@ -1,4 +1,6 @@
 <?php
+
+declare(strict_types=1);
 // TODO: split this class into product and order
 require_once("library/util/db.php");
 require_once("library/exceptions/store.php");
@@ -243,6 +245,10 @@ class Store
 	 */
 	static function update_price(string $product_hash, int $price)
 	{
+		if (!Store::product_exists($product_hash)) {
+			throw StoreException::ProductNotFound();
+		}
+
 		$price *= 100; // convert from NOK to øre
 		$db = new DB("web");
 		$db->prepare("UPDATE products SET price=? WHERE hash=?");
@@ -267,7 +273,7 @@ class Store
 		$db->stmt->bind_result($result);
 		$db->fetch();
 		if ($result !== 0 && $result !== 1) {
-			throw new UnexpectedValueException($result);
+			throw new UnexpectedValueException((string)$result);
 		}
 		return (bool)$result;
 	}
@@ -373,6 +379,19 @@ class Store
 	}
 
 	/**
+	 * Get database order id from stripe payment intent string
+	 * 
+	 * @param string $paymentIntent_id Stripe payment intent
+	 * @return int database row id of the order
+	 */
+	public static function get_order_id(string $paymentIntent_id): int
+	{
+		$db = new DB("web");
+		$sql = "SELECT id FROM orders WHERE source_id=?";
+		return $db->execute_and_fetch($sql, "s", $paymentIntent_id)[0];
+	}
+
+	/**
 	 * Update order to FINALIZED in db
 	 * Side effects:
 	 * - if order was used to purchase a license then member is approved. Following it's side effects.
@@ -397,21 +416,6 @@ class Store
 		if (Store::get_product_hash($product_id) === $this->license_key) {
 			Member::approve($phone);
 		}
-	}
-
-
-	/**
-	 * Update order in DB to be FAILED.
-	 *
-	 * @param \Stripe\Charge $charge_event
-	 * @return void
-	 */
-	function fail_order(\Stripe\Charge $charge_event)
-	{
-		$db = new DB("web");
-		$db->prepare("UPDATE orders SET order_status='FAILED' WHERE source_id=?");
-		$db->bind_param("ss", $charge_event["payment_intent"], $charge_event["id"]);
-		$db->execute();
 	}
 
 
@@ -490,7 +494,7 @@ class Store
 		$db->stmt->bind_result($result);
 		$db->fetch();
 		if ($result !== 0 && $result !== 1) {
-			throw new UnexpectedValueException($result);
+			throw new UnexpectedValueException((string)$result);
 		}
 		return (bool)$result;
 	}
