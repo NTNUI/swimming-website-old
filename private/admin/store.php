@@ -73,10 +73,10 @@ require_once("library/templates/modal.php");
 				<label for="price">Price for members</label>
 				<input disabled name="price_member" type="number" min="3" />
 
-				<label for="amount">Available products (leave blank for unlimited)</label>
-				<input disabled name="amount" type="number" min="1" />
+				<label for="inventory_count">Available products (leave blank for unlimited)</label>
+				<input disabled name="inventory_count" type="number" min="1" />
 
-				<label for="amount">Max purchases per customer per calendar year (leave blank for unlimited)</label>
+				<label for="max_orders_per_customer_per_year">Max purchases per customer per calendar year (leave blank for unlimited)</label>
 				<input disabled name="max_orders_per_customer_per_year" type="number" min="1"/>
 			</div>
 			<div>

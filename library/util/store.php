@@ -269,7 +269,13 @@ class Store
 		}
 		$db = new DB("web");
 		$sql = "SELECT COUNT(*) FROM orders WHERE products_id = (SELECT id FROM products WHERE hash=?) AND (order_status='DELIVERED' OR order_status='FINALIZED')";
-		return (int)$db->execute_and_fetch($sql, "s", $product_hash)[0];
+		$db->prepare($sql);
+		$db->bind_param("s", $product_hash);
+		$db->execute();
+		$result = 0;
+		$db->stmt->bind_result($result);
+		$db->fetch();
+		return $result;
 	}
 
 	/**
@@ -360,7 +366,7 @@ class Store
 			$product["require_email"],
 			$product["require_comment"],
 			$product["require_membership"],
-			$product["amount_available"],
+			$product["inventory_count"],
 			$product["price"],
 			$product["price_member"],
 			$product["visible"],

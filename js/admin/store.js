@@ -3,26 +3,24 @@ import { display_modal } from "../modules/modal.js";
 // TODO: add drag & drop support for image uploads
 // TODO: move styles to css
 
-function set_product_visibility(product_hash, visibility) {
-    let data = {
-        "request_type": "update_visibility",
-        "params": {
-            "product_hash": product_hash,
-            "visibility": visibility
-        }
+function handleError(err) {
+    console.error(err);
+    let message = "";
+    if (err.hasOwnProperty("message")) {
+        message = err.message + "\n";
     }
-    fetch(BASEURL + "/api/store", {
-        method: 'PATCH',
-        body: JSON.stringify(data),
-    }).catch((err) => {
-        display_modal("Failure", err.json(), "Accept", "", "failure");
-        console.error(err.json());
-    });
+    if (err.hasOwnProperty("trace")) {
+        message += err.trace;
+    }
+    if (message === "") {
+        message = "something went wrong\n";
+    }
+    display_modal("Failure", message, "Accept", "", "failure");
 }
 
 function deliverHandler(event) {
     const order_id = event.target.id.substring("button-deliver-".length);
-    const data = {
+    const payload = {
         "request_type": "update_delivered",
         "params": {
             "order_id": order_id,
@@ -31,14 +29,16 @@ function deliverHandler(event) {
     }
     fetch(BASEURL + "/api/store", {
         method: "PATCH",
-        body: JSON.stringify(data)
+        body: JSON.stringify(payload)
     })
-        .then(() => {
+        .then(async (response) => {
+            if (!response.ok) {
+                throw await response.json();
+            }
             event.target.disabled = true
         })
-        .catch((response) => {
-            display_modal("Failure", response.json(), "Accept", "", "failure");
-            console.error(response.json());
+        .catch((err) => {
+            handleError(err);
         });
 }
 
@@ -51,7 +51,7 @@ function submitNewProductHandler(event) {
     for (const pair of form_data.entries()) {
         const key = pair[0];
         const value = pair[1];
-        if (value == "on"){
+        if (value == "on") {
             form_data.set(key, true);
         }
     }
@@ -62,27 +62,23 @@ function submitNewProductHandler(event) {
     fetch(BASEURL + "/api/store", {
         method: 'POST',
         body: form_data
-    }).then((response) => {
-        if (!response.ok) {
-            throw response.json();
-        }
-        display_modal("Success", "New product has been added to the store", "Accept", "", "success");
-    }
-    ).catch(async (response_promise) => {
-        const response = await response_promise;
-        if (response.error) {
-            display_modal("Failure", response.message + "\n" + response.trace, "Accept", "", "failure");
-        } else {
-            console.error(response);
-        }
-    });
+    })
+        .then(async (response) => {
+            if (!response.ok) {
+                throw await response.json();
+            }
+            display_modal("Success", "New product has been added to the store", "Accept", "", "success");
+        })
+        .catch((err) => {
+            handleError(err);
+        });
 }
 
-async function show_orders(data) {
+async function show_orders(orders) {
     let orders_container = document.getElementById("order_list");
     orders_container.innerHTML = ""; // Clear orders from last selection
 
-    Object.values(data).forEach(order => {
+    Object.values(orders).forEach(order => {
         // create a new row
         let row = document.getElementById("purchase-row").content.cloneNode(true);
         row.querySelector(".purchase-row-name").innerText = order.name;
@@ -164,12 +160,7 @@ function update_availability(product_data) {
             }
         })
         .catch((err) => {
-            console.error(err);
-            if (typeof (err) === "object") {
-                display_modal("Failure", err.message + "\n\n" + err.trace, "Accept", "", "failure");
-                return;
-            }
-            display_modal("Failure", err, "Accept", "", "failure");
+            handleError(err);
         });
 }
 
@@ -180,7 +171,6 @@ function update_availability(product_data) {
  * @returns 
  */
 function createTableMatrix(products, product_groups) {
-    // todo: add other properties as read only or something
     products.forEach(product => {
         product.link_no = BASEURL + "/store?product_hash=" + product.hash;
         product.link_en = BASEURL + "/en/store?product_hash=" + product.hash;
@@ -190,7 +180,7 @@ function createTableMatrix(products, product_groups) {
             layout: "fitDataStretch",
             data: products,
             groupBy: "group_id",
-            groupHeader: function(value, count, data, group) {
+            groupHeader: function(value, count, _data, _group) {
                 return product_groups[value] + " (" + count + ")";
             },
             columns:
@@ -206,28 +196,32 @@ function createTableMatrix(products, product_groups) {
                         title: "Sold",
                         field: "amount_sold",
                         cellClick: (_, cell) => {
+                            if (cell.getValue() === 0) {
+                                return;
+                            }
                             const product_hash = cell.getRow().getData().hash;
                             fetch(BASEURL + "/api/store?request_type=get_orders&product_hash=" + product_hash)
-                                .then(res => res.json())
-                                .then((orders) => {
-                                    show_orders(orders);
+                                .then(async (response) => {
+                                    if (!response.ok) {
+                                        throw await response.json();
+                                    }
+                                    show_orders(await response.json());
                                 })
                                 .catch((err) => {
-                                    display_modal("Failure", err, "Accept", "", "failure");
-                                    console.log(err);
+                                    handleError(err);
                                 })
                         }
                     },
                     {
-                        title: "Available",
-                        field: "amount_available",
+                        title: "Inventory",
+                        field: "inventory",
                         editor: "number",
                         editorParams: {
                             min: 0
                         },
-                        formatter: function(cell, formatterParams, onRendered) {
+                        formatter: function(cell, _formatterParams, _onRendered) {
                             let cell_value = cell.getValue();
-                            if(cell_value === null || cell_value === 0 || cell_value === "") {
+                            if (cell_value === null || cell_value === 0 || cell_value === "") {
                                 return "Unlimited";
                             }
                             return cell_value;
@@ -244,32 +238,28 @@ function createTableMatrix(products, product_groups) {
                             if (new_inventory_count === "") {
                                 new_inventory_count = 0;
                             }
-                            const request = {
+                            const payload = {
                                 request_type: "product_inventory_count",
                                 params: {
                                     "product_hash": cell.getRow().getData().hash,
-                                    "available": new_inventory_count
+                                    "new_inventory_count": new_inventory_count
                                 }
                             };
                             fetch(BASEURL + "/api/store",
                                 {
                                     method: "PATCH",
-                                    body: JSON.stringify(request)
+                                    body: JSON.stringify(payload)
                                 }
-
-                            ).then(async (response) => {
-                                if (!response.ok) {
-                                    throw await response.json();
-                                }
-                            }).catch((err) => {
-                                cell.restoreOldValue();
-                                console.error(err);
-                                if(typeof (err) === "object") {
-                                    display_modal("Failure", err.message, "Accept", "", "failure");
-                                    return;
-                                }
-                                display_modal("Failure", err, "Accept", "", "failure");
-                            });
+                            )
+                                .then(async (response) => {
+                                    if (!response.ok) {
+                                        throw await response.json();
+                                    }
+                                })
+                                .catch((err) => {
+                                    cell.restoreOldValue();
+                                    handleError(err);
+                                });
                         }
                     },
                     {
@@ -284,7 +274,7 @@ function createTableMatrix(products, product_groups) {
                             return cell.getValue() + " kr";
                         },
                         cellEdited: (cell) => {
-                            const data = {
+                            const payload = {
                                 "request_type": "update_price",
                                 "params": {
                                     "product_hash": cell.getRow().getData().hash,
@@ -293,7 +283,7 @@ function createTableMatrix(products, product_groups) {
                             }
                             fetch(BASEURL + "/api/store", {
                                 method: 'PATCH',
-                                body: JSON.stringify(data),
+                                body: JSON.stringify(payload),
                             })
                                 .then(async (response) => {
                                     if (!response.ok) {
@@ -301,12 +291,7 @@ function createTableMatrix(products, product_groups) {
                                     }
                                 })
                                 .catch((err) => {
-                                    console.error(err);
-                                    if (typeof (err) === "object") {
-                                        display_modal("Failure", err.message + "\n\n" + err.trace, "Accept", "", "failure");
-                                        return;
-                                    }
-                                    display_modal("Failure", err, "Accept", "", "failure");
+                                    handleError(err);
                                 });
 
                         }
@@ -314,39 +299,39 @@ function createTableMatrix(products, product_groups) {
                     {
                         title: "Available from",
                         field: "available_from",
-                        formatter: function(cell, formatterParams, onRendered) {
+                        formatter: function(cell, _formatterParams, _onRendered) {
                             if (cell.getValue() === null) return "Always";
                             return new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" });
                         },
                         editor: dateEditor,
                         cellEdited: function(cell) {
-                            const product_data = {
+                            const payload = {
                                 "request_type": "update_availability",
                                 "params": {
                                     "product_hash": cell.getRow().getData().hash,
                                     "date_start": new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" })
                                 }
                             }
-                            update_availability(product_data);
+                            update_availability(payload);
                         }
                     },
                     {
                         title: "Available until",
                         field: "available_until",
-                        formatter: function(cell, formatterParams, onRendered) {
+                        formatter: function(cell, _formatterParams, _onRendered) {
                             if (cell.getValue() === null) return "Always";
                             return new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" });
                         },
                         editor: dateEditor,
                         cellEdited: function(cell) {
-                            const product_data = {
+                            const payload = {
                                 "request_type": "update_availability",
                                 "params": {
                                     "product_hash": cell.getRow().getData().hash,
                                     "date_end": new Date(cell.getValue() * 1000).toLocaleString('nb-no', { timezone: "Europe/Oslo" })
                                 }
                             }
-                            update_availability(product_data);
+                            update_availability(payload);
                         }
 
                     },
@@ -357,15 +342,31 @@ function createTableMatrix(products, product_groups) {
                         formatter: "tickCross",
                         sorter: "boolean",
                         cellEdited: function(cell) {
-                            // send data to server
-                            const data = cell.getData();
-                            set_product_visibility(data.hash, data.visibility);
+                            const payload = {
+                                "request_type": "update_visibility",
+                                "params": {
+                                    "product_hash": cell.getData().hash,
+                                    "visibility": cell.getData().visibility
+                                }
+                            }
+                            fetch(BASEURL + "/api/store", {
+                                method: 'PATCH',
+                                body: JSON.stringify(payload),
+                            })
+                                .then(async (response) => {
+                                    if (!response.ok) {
+                                        throw await response.json();
+                                    }
+                                })
+                                .catch((err) => {
+                                    handleError(err);
+                                });
                         },
                     },
                     {
                         title: "Link NO",
                         field: "link_no",
-                        formatter: (cell) => { return '<i class="fa fa-copy"></i>' },
+                        formatter: (_cell) => { return '<i class="fa fa-copy"></i>' },
                         editor: false,
                         cellClick: (_, cell) => {
                             navigator.clipboard.writeText(cell.getValue());
@@ -374,7 +375,7 @@ function createTableMatrix(products, product_groups) {
                     {
                         title: "Link EN",
                         field: "link_en",
-                        formatter: (cell) => { return '<i class="fa fa-copy"></i>' },
+                        formatter: (_cell) => { return '<i class="fa fa-copy"></i>' },
                         editor: false,
                         cellClick: (_, cell) => {
                             navigator.clipboard.writeText(cell.getValue());

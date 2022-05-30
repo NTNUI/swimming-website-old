@@ -142,8 +142,8 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			$store->set_order_status($order_id, $order_status);
 			$response->code = HTTP_OK;
 			$response->data = [
-				"success" => true,
 				"error" => false,
+				"success" => true
 			];
 			break;
 		case 'update_visibility':
@@ -162,8 +162,8 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			$store->set_product_visibility($product["id"], $visibility);
 			$response->code = HTTP_OK;
 			$response->data = [
-				"success" => true,
 				"error" => false,
+				"success" => true
 			];
 			break;
 		case 'update_availability':
@@ -200,8 +200,8 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			Store::update_product_date($product_hash, $date_start, $date_end);
 			$response->code = HTTP_OK;
 			$response->data = [
-				"success" => true,
 				"error" => false,
+				"success" => true
 			];
 			break;
 
@@ -231,8 +231,8 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			Store::update_price($product_hash, $price);
 			$response->code = HTTP_OK;
 			$response->data = [
-				"success" => true,
 				"error" => false,
+				"success" => true
 			];
 			break;
 
@@ -240,18 +240,19 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			if (!isset($input_json->{"params"}->{"product_hash"})) {
 				throw new InvalidArgumentException("Missing product_hash");
 			}
-			if (!isset($input_json->{"params"}->{"available"})) {
-				throw new InvalidArgumentException("Missing available");
+			if (!isset($input_json->{"params"}->{"new_inventory_count"})) {
+				throw new InvalidArgumentException("Missing new_inventory_count");
 			}
-			$available = $input_json->{"params"}->{"available"};
-			
-			if(!is_int($available)){
-				throw new InvalidArgumentException("argument available is not an integer");
+			$new_inventory_count = $input_json->{"params"}->{"new_inventory_count"};
+
+			if (!is_int($new_inventory_count)) {
+				throw new InvalidArgumentException("argument new_inventory_count is not an integer");
 			}
 			$product_hash = $input_json->{"params"}->{"product_hash"};
-			Store::update_inventory_count($product_hash, $available);
+			Store::update_inventory_count($product_hash, $new_inventory_count);
 			$response->code = HTTP_OK;
 			$response->data = [
+				"error" => false,
 				"success" => true
 			];
 			break;
@@ -287,7 +288,7 @@ function handle_post(Response &$response)
 			case 'require_email':
 			case 'require_comment':
 			case 'require_membership':
-			case 'amount':
+			case 'inventory_count':
 			case 'price':
 			case 'price_member':
 			case 'product_visible':
@@ -298,7 +299,11 @@ function handle_post(Response &$response)
 			default:
 
 				$response->code = HTTP_INVALID_REQUEST;
-				$response->data = ["error" => true, "success" => false, "message" => "Unknown argument: $key has been passed in"];
+				$response->data = [
+					"error" => true,
+					"success" => false,
+					"message" => "Unknown argument: $key has been passed in"
+				];
 				$response->send();
 				return;
 		}
@@ -367,7 +372,7 @@ function handle_post(Response &$response)
 		"require_email" => $args["require_email"] || false,
 		"require_comment" => $args["require_comment"] || false,
 		"require_membership" => $args["require_membership"] || false,
-		"amount_available" => $args["amount"],
+		"inventory_count" => $args["inventory_count"],
 		"price" => $args["price"] === NULL ? NULL : $args["price"] * 100,
 		"price_member" => $args["price_member"] === NULL ? NULL : $args["price_member"] * 100,
 		"visible" => $args["product_visible"] || true,
@@ -435,12 +440,10 @@ function handle_get(Store &$store, Response &$response)
 			$response->code = HTTP_OK;
 			break;
 		case "get_products":
-			log::message("Info: Requesting products", __FILE__, __LINE__);
 			$response->data = $store->get_products(0, 100, "", false, false);
 			$response->code = HTTP_OK;
 			break;
 		case "get_product":
-			log::message("Info: Requesting product : " . $_GET["product_hash"], __FILE__, __LINE__);
 			$response->data = $store->get_product($_GET["product_hash"]);
 			$response->code = HTTP_OK;
 			break;
