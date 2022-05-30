@@ -214,13 +214,13 @@ function createTableMatrix(products, product_groups) {
                     },
                     {
                         title: "Inventory",
-                        field: "inventory",
+                        field: "amount_available",
                         editor: "number",
                         editorParams: {
                             min: 0
                         },
                         formatter: function(cell, _formatterParams, _onRendered) {
-                            let cell_value = cell.getValue();
+                            const cell_value = cell.getValue();
                             if (cell_value === null || cell_value === 0 || cell_value === "") {
                                 return "Unlimited";
                             }
