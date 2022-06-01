@@ -15,4 +15,4 @@ if (file_put_contents("$dir/$page.json", file_get_contents("php://input")) === f
 header("Content-Type", "application/json");
 print json_encode(json_decode(file_get_contents("$dir/$page.json")));
 
-$access_control->log("api/translations", "edit", $page);
+log::message(Authenticator::get_username() . " has updated translations for $page", __FILE__, __LINE__);

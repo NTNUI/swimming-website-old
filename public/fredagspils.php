@@ -10,7 +10,7 @@ $db->prepare("SELECT users.name, beers.date FROM friday_beer as beers JOIN users
 $db->bind_param("s", date("Y-m-d", $genfors));
 $db->execute();
 $db->stmt->bind_result($username, $date);
-$result = array();
+$result = [];
 while ($db->fetch()) {
 	$result[$username][] = $date;
 }

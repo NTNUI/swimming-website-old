@@ -53,16 +53,6 @@ CREATE TABLE IF NOT EXISTS `member_statistics` (
 CREATE DATABASE IF NOT EXISTS `svommer_web` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `svommer_web`;
 
-CREATE TABLE IF NOT EXISTS `access_log` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `timestamp` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'time_stamp',
-  `page` text NOT NULL,
-  `user` text NOT NULL,
-  `action` text NOT NULL,
-  `value` text,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
 CREATE TABLE IF NOT EXISTS `friday_beer` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `user_id` int(11) NOT NULL,

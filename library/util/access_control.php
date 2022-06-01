@@ -10,7 +10,7 @@ class AccessControl
 		$this->get_group_rules();
 	}
 
-	public function get_group_rules()
+	private function get_group_rules()
 	{
 		$db = new DB("web");
 		if ($this->user != "") {
@@ -31,7 +31,7 @@ class AccessControl
 		$pattern = "";
 		$db->stmt->bind_result($type, $pattern);
 		while ($db->fetch()) {
-			$this->group_rules[] = array("type" => $type, "pattern" => $pattern);
+			$this->group_rules[] = ["type" => $type, "pattern" => $pattern];
 		}
 	}
 
@@ -76,14 +76,4 @@ class AccessControl
 		return $result;
 	}
 
-	public function log(string $page, string $action, $value = NULL)
-	{
-		$username = $this->user;
-		if ($this->user == "") $username = "~Unregistered User~";
-		$sql = "INSERT INTO access_log (page, user, action, value) VALUES(?, ?, ?, ?)";
-		$db = new DB("web");
-		$db->prepare($sql);
-		$db->bind_param("ssss", $page, $username, $action, $value);
-		$db->execute();
-	}
 }

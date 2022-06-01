@@ -96,13 +96,8 @@ function create_user(string $name, string $username, string $email)
 	$random_password = substr(md5(mt_rand()), 0, 7);
 	Authenticator::create_user($name, $username, $random_password);
 
-	// log action
-	global $access_control, $action;
-	$access_control->log("users", $action, $username);
-
 	// Send mail
 	// TODO: move content to settings
-	global $settings;
 	$email_title = "NTNUI Swimming: New user";
 	$message = "Your user account has been created.\n";
 	$message .=	"Username: $username\n";
@@ -141,9 +136,7 @@ function update_user(string $name, string $username, int $user_id, int $role_id)
 	$db->bind_param("ssii", $username, $name, $role_id, $user_id);
 	$db->execute();
 
-	// log action
-	global $access_control, $action;
-	$access_control->log("admin/users", $action, user_id_to_name($user_id));
+	log::message("username $username has been modified by " . Authenticator::get_username(), __FILE__, __LINE__);
 
 	log::alert("Record updated successfully");
 }
@@ -175,10 +168,7 @@ function delete_user(int $user_id)
 	$db->bind_param("i", $user_id);
 	$db->execute();
 
-	// log action
-	global $access_control, $action;
-	$name_user = user_id_to_name($user_id);
-	$access_control->log("admin/users", $action, $name_user);
+	log::message("user " . Authenticator::get_username() . " has deleted user " . Authenticator::get_username_from_id($user_id), __FILE__, __LINE__);
 }
 
 
@@ -203,9 +193,7 @@ function create_role(string $new_role_name)
 	$db->bind_param("s", $new_role_name);
 	$db->execute();
 
-	// log action
-	global $access_control, $action;
-	$access_control->log("admin/users", $action, $new_role_name);
+	log::message(Authenticator::get_username() . " has created a new role: " . $new_role_name, __FILE__, __LINE__);
 }
 
 
@@ -236,10 +224,8 @@ function delete_role(int $role_id)
 	$db->bind_param("i", $role_id);
 	$db->execute();
 
-	// log action
-	global $access_control, $action;
 	$name_role = role_id_to_string($role_id);
-	$access_control->log("admin/users", $action, $name_role);
+	log::message(Authenticator::get_username() . " has deleted the role: " . $name_role, __FILE__, __LINE__);
 }
 
 
@@ -257,7 +243,7 @@ function get_users_with_role_id(int $role_id): array
 	$db->execute();
 	$user_id = 0;
 	$db->stmt->bind_result($user_id);
-	$result = array();
+	$result = [];
 	while ($db->fetch()) {
 		array_push($result, $user_id);
 	}
@@ -279,7 +265,7 @@ function get_roles(): array
 	$user_id = "";
 	$role = "";
 	$db->stmt->bind_result($user_id, $role);
-	$roles = array();
+	$roles = [];
 	while ($db->fetch()) {
 		$roles[$user_id] = $role;
 	}
@@ -318,7 +304,7 @@ function role_id_to_usernames(int $role_id): array
 	$db->prepare("SELECT username FROM users WHERE role=?");
 	$db->bind_param("i", $role_id);
 	$db->execute();
-	$result = array();
+	$result = [];
 	$db->stmt->bind_result($result);
 	$db->fetch();
 	return $result;
