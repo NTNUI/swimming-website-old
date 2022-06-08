@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 function enrollment_is_active(): bool
 {
 	global $settings;

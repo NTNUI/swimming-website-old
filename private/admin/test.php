@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 require_once("library/templates/content.php");
 require_once("library/templates/modal.php");
 require_once("library/templates/store.php");

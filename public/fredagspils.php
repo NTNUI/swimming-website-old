@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 // Guess new board starts every 1st of february
 $genfors = strtotime("first day of february" . (date("m") < 2 ? " last year" : ""));
 $db = new DB("web");

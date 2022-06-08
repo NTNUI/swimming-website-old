@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 require_once("library/helpers/admin.php");
 
 if (!Authenticator::is_logged_in()) {

@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 require_once("library/util/store.php");
 $store = new Store($language);

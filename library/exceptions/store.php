@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 class StoreException extends \Exception
 {
     public static function PriceError($message = "Price is wrong. Contact admin")

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 global $settings;
 $last_friday = date("N") == 5 ? "today" : "last friday";
 $friday_beer = date("d-m-Y", strtotime($last_friday));

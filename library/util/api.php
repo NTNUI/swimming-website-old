@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 define("HTTP_OK", 200);
 define("HTTP_INVALID_REQUEST", 400);
 define("HTTP_FORBIDDEN", 403);
@@ -20,7 +22,20 @@ class Response{
 
     public function error(string $message, int $code = HTTP_INVALID_REQUEST){
         $this->code = $code;
-        $this->data = ["error" => true, "message" => $message];
+        $this->data = [
+            "error" => true,
+            "success" => false,
+            "message" => $message
+        ];
+    }
+
+    public function success(string $message = "", int $code = HTTP_OK){
+        $this->code = $code;
+        $this->data = [
+            "error" => false,
+            "success" => true,
+            "message" => $message
+        ];
     }
 
     public function __construct()

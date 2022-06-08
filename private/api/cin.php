@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 require_once("library/util/api.php");
 require_once("library/util/db.php");
@@ -40,8 +41,28 @@ try {
         case "PATCH":
             switch ($input->function) {
                 case 'patch_cin':
-                    patch_cin($input->args->id, $input->args->cin);
-                    $response->data = ["success" => true, "message" => "Customer identification number has been saved"];
+                    $filter_options = [
+                        "options" => [
+                            "min_range" => 10_000_000,
+                            "max_range" => 99_999_999
+                        ],
+                        "flags" => FILTER_NULL_ON_FAILURE
+                    ];
+                    $cin = filter_var($input->args->cin, FILTER_VALIDATE_INT, $filter_options);
+                    if($cin === NULL){
+                        $response->data = [
+                            "success" => false,
+                            "error" => true,
+                            "message" => "Customer identification number validation failed"
+                        ];
+                        break;
+                    }
+                    patch_cin($input->args->id, $cin);
+                    $response->data = [
+                        "success" => true,
+                        "error" => false,
+                        "message" => "Customer identification number has been saved"
+                    ];
                     break;
                 case 'set_forwarded':
                     if (gettype($input->args->cin) === "array") {
@@ -55,7 +76,11 @@ try {
                             set_forwarded(intval($cin));
                         }
                     }
-                    $response->data = ["success" => true, "message" => "CIN numbers has been successfully updated"];
+                    $response->data = [
+                        "success" => true,
+                        "error" => false,
+                        "message" => "CIN numbers has been successfully updated"
+                    ];
                     break;
             }
 
@@ -69,13 +94,17 @@ try {
 } catch (InvalidArgumentException $ex) {
     $response->code = HTTP_INVALID_REQUEST;
     $response->data = [
-        "error" => $ex->getMessage(),
+        "error" => true,
+        "success" => false,
+        "message" => $ex->getMessage(),
         "backtrace" => $ex->getTraceAsString()
     ];
 } catch (Exception | mysqli_sql_exception | Throwable $ex) {
     $response->code = HTTP_INTERNAL_SERVER_ERROR;
     $response->data = [
-        "error" => $ex->getMessage(),
+        "success" => false,
+        "error" => true,
+        "message" => $ex->getMessage(),
         "backtrace" => $ex->getTraceAsString()
     ];
 } finally {
