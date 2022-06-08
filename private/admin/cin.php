@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 global $settings;
 require_once("library/templates/modal.php");
 

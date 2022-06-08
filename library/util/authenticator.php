@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 require_once("library/exceptions/user.php");
 require_once("library/exceptions/authentication.php");
 // TODO: new function: Generate random password

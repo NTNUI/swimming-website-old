@@ -1,6 +1,6 @@
 <?php
-// require strict type checking
 declare(strict_types=1);
+
 error_reporting(E_ALL & ~E_NOTICE);
 // Don't output errors to standard output. That breaks json formatting in API
 ini_set("display_errors", "0");

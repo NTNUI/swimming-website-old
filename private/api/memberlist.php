@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 if (!Authenticator::is_logged_in()) {
 	log::forbidden("Access denied", __FILE__, __LINE__);
 }

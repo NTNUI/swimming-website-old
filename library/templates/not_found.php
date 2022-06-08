@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 // TODO: These translations are not loaded. When this site is returned three entries in the logs are created and makes a lot of trash in the logs. Commenting this out for now to avoid spamming the log file. - Pavel
 
 // global $t;

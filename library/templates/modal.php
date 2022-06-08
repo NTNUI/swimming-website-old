@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 global $settings;
 print("<link rel='stylesheet' type='text/css' href='${settings["baseurl"]}/css/modal.css'></link>");
 ?>

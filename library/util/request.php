@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 function isValidURL($URL_part)
 {
     // contains directory climbing pattern

@@ -1,4 +1,7 @@
-        </div>
+<?php
+declare(strict_types=1);
+?>
+    </div>
         <footer>
             <div>
                 <?php

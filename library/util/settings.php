@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 function load_settings($path){
     $settings_raw = file_get_contents($path);
     if(!$settings_raw){

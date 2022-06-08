@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 global $t, $settings, $page;
 $t->load_translation('menu');
 

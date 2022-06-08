@@ -1,6 +1,8 @@
 <?php
 // This file has a stupid name and location.
 
+declare(strict_types=1);
+
 function redirect($action)
 {
 	global $language, $access_control, $page;

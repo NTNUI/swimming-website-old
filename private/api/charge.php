@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 require_once("library/util/store.php");
 require_once("library/util/api.php");
 
@@ -37,7 +39,7 @@ use Stripe\Exception\AuthenticationException as AuthenticationException;
 use Stripe\Exception\ApiConnectionException as ApiConnectionException;
 use Stripe\Exception\ApiErrorException as ApiErrorException;
 
-header("Content-Type", "application/json");
+header("Content-Type: application/json");
 try {
 	$response = "error";
 
