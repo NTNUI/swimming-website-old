@@ -40,7 +40,7 @@ class Store
 		if (isset($date_from)) {
 			$db->prepare("UPDATE products SET available_from=? WHERE hash=?");
 			$val = $date_from->format("Y-m-d H:i:s");
-			log::message("Attempting to save timestamp: " . $val, __FILE__, __LINE__);
+			log::message("Product available from update: " . $val  . " on product with hash " . $product_hash, __FILE__, __LINE__);
 			$db->bind_param("ss", $val, $product_hash);
 			$db->execute();
 			$db->reset();
@@ -48,7 +48,7 @@ class Store
 		if (isset($date_to)) {
 			$db->prepare("UPDATE products SET available_until=? WHERE hash=?");
 			$val = $date_to->format("Y-m-d H:i:s");
-			log::message("Attempting to save timestamp: " . $val, __FILE__, __LINE__);
+			log::message("Product available to update: " . $val  . " on product with hash " . $product_hash, __FILE__, __LINE__);
 			$db->bind_param("ss", $val, $product_hash);
 			$db->execute();
 		}
@@ -532,7 +532,14 @@ class Store
 		$product = $this->get_product($product_hash);
 
 		if (!$product["enabled"]) throw \StoreException::ProductNotEnabled("This product cannot be purchased at this time");
-		if ($product["amount_available"] !== NULL && $product["amount_sold"] >= $product["amount_available"]) throw \StoreException::ProductSoldOut();
+
+		// amount available 0 => unlimited
+		if ($product["amount_available"] !== NULL && $product["amount_available"] !== 0) {
+			if ($product["amount_sold"] >= $product["amount_available"]) {
+				throw \StoreException::ProductSoldOut();
+			}
+		}
+
 		if ($product["available_from"] !== NULL && $product["available_from"] > time()) throw \StoreException::ProductNotAvailable("Current product is not yet available");
 		if ($product["available_until"] !== NULL && $product["available_until"] < time()) throw \StoreException::ProductNotAvailable("Current product is no longer available");
 		if (empty($name)) throw \StoreException::MissingCustomerDetails("Missing customer name");

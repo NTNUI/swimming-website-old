@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 // TODO: Refactor this file
 
 $result = ["error" => "Not implemented"];

@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 if (!$access_control->can_access("api", "gavekort")) {
 	log::forbidden("Access denied", __FILE__, __LINE__);
 }

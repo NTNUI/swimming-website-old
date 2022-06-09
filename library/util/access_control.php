@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 require_once("library/util/db.php");
 class AccessControl
 {

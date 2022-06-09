@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 // Fuck this mess...
 require_once("library/util/db.php");
 

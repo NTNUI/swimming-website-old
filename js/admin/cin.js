@@ -55,9 +55,23 @@ function copyClipboard() {
     navigator.clipboard.writeText(box.textContent);
 }
 
+function handle_error(err) {
+    console.error(err);
+    let message = "";
+    if (err.hasOwnProperty("message")) {
+        message = err.message + "\n";
+    }
+    if (err.hasOwnProperty("trace")) {
+        message += err.trace;
+    }
+    if (message === "") {
+        message = "something went wrong\n";
+    }
+    display_modal("Failure", message, "Accept", "", "failure");
+}
 
-async function get_not_payed() {
-    const request = {
+function get_not_payed() {
+    const payload = {
         function: "get_not_payed"
     };
     const options = {
@@ -65,26 +79,17 @@ async function get_not_payed() {
         headers: {
             "Accept": "Application/json"
         },
-        body: JSON.stringify(request)
+        body: JSON.stringify(payload)
     }
     try {
-        const response = await fetch(BASEURL + "/api/cin", options);
-        if (response.status !== 200) {
-            throw response.statusText;
-        }
-        let lines_arr = [];
-        const response_json = await response.json();
-        response_json.forEach((item) => {
-            lines_arr.push(item.cin)
+        return fetch(BASEURL + "/api/cin", options).then(async (response) => {
+            if (!response.ok) {
+                throw await response.json();
+            }
+            return response.json();
         });
-        return lines_arr;
-    } catch (error) {
-        console.error(error);
-        if (typeof (error) === "object") {
-            error = JSON.stringify(error);
-        }
-        display_modal("Error", "Could not retrieve unpayed CIN numbers\n" + error, "Accept", "", "failure");
-        throw error;
+    } catch (err) {
+        handle_error(err);
     }
 }
 
@@ -92,7 +97,7 @@ async function getMembers() {
     const container = document.getElementById("members");
 
     try {
-        const request = {
+        const payload = {
             function: "get_missing"
         }
         const options = {
@@ -100,25 +105,20 @@ async function getMembers() {
             headers: {
                 "Accept": "Application/json"
             },
-            body: JSON.stringify(request)
+            body: JSON.stringify(payload)
         };
-        const response = await fetch(BASEURL + "/api/cin", options);
-        if (response.status !== 200) {
-            throw response.statusText;
-        }
-
-        const rowsCreated = appendMembers(await response.json(), container);
-        if (rowsCreated === 0) {
-            display_modal("Success", "All members have a valid CIN", "Accept", "", "success");
-            return;
-        }
-    } catch (error) {
-        console.error(error);
-        if (typeof (error) === "object") {
-            error = JSON.stringify(error);
-        }
-        display_modal("Error", error, "Accept", "", "failure");
-
+        fetch(BASEURL + "/api/cin", options).then(async (response) => {
+            if (!response.ok) {
+                throw await response.json();
+            }
+            const rowsCreated = appendMembers(await response.json(), container);
+            if (rowsCreated === 0) {
+                display_modal("Success", "All members have a valid CIN", "Accept", "", "success");
+                return;
+            }
+        });
+    } catch (err) {
+        handle_error(err);
     }
     return;
 }
@@ -168,7 +168,7 @@ function valid_cin(cin) {
 
 async function save_cin_number(node, id, cin) {
     console.log("id: " + id + ". cin: " + cin);
-    const request = {
+    const payload = {
         function: "patch_cin",
         args: {
             id: id,
@@ -180,19 +180,20 @@ async function save_cin_number(node, id, cin) {
         headers: {
             "Accept": "Application/json"
         },
-        body: JSON.stringify(request)
+        body: JSON.stringify(payload)
     };
     try {
-        const response = await fetch(BASEURL + "/api/cin", options);
-        if (response.status !== 200) {
-            throw response;
-        }
-        // delete that row on success
-        console.log((await response.json()).message);
-        node.parentElement.remove();
-    } catch (response) {
-        console.log(response)
-        display_modal(response.statusText, (await response.json()).error, "Accept", "", "failure");
+        fetch(BASEURL + "/api/cin", options).then(async (response) => {
+
+            if (!response.ok) {
+                throw await response.json();
+            }
+            // delete that row on success
+            console.log((await response.json()).message);
+            node.parentElement.remove();
+        });
+    } catch (err) {
+        handle_error(err);
     }
 }
 
@@ -204,12 +205,7 @@ addLoadEvent(async () => {
     });
     const cin_raw = await get_not_payed();
     let cin_lines = "";
-
-    if (Array.isArray(cin_raw)) {
-        cin_raw.forEach(element => {
-            cin_lines += element + "\n";
-        });
-    }
+    cin_raw.forEach((element) => { cin_lines += element.cin + "\n" });
 
     document.querySelector("#CIN_numbers").textContent = cin_lines;
     generateOutput();
@@ -230,7 +226,7 @@ addLoadEvent(async () => {
 
     document.querySelector("#btn-cin-mark-forwarded").addEventListener("click", async () => {
         const cin_numbers = document.querySelector("#CIN_numbers");
-        const request = {
+        const payload = {
             function: "set_forwarded",
             args: {
                 cin: cin_numbers.textContent.split("\n")
@@ -241,26 +237,23 @@ addLoadEvent(async () => {
             headers: {
                 "Accept": "Application/json"
             },
-            body: JSON.stringify(request)
+            body: JSON.stringify(payload)
         };
         try {
-            const response = await fetch(BASEURL + "/api/cin", options);
-            if (response.status !== 200) {
-                throw response;
-            }
-            cin_numbers.textContent = "";
-            document.getElementById("output").innerText = "";
-            document.querySelector("#paymentsGenerated").innerText = 0;
-            display_modal(response.statusText, (await response.json()).message, "Accept", "", "success");
-        } catch (response) {
-            console.log(response);
-            const resolved = await response;
-            const response_json = await resolved.json();
-            display_modal(resolved.statusText, `Error:\n${response_json.error}\n\nBacktrace:\n${response_json.backtrace}`, "Accept", "", "failure");
+            fetch(BASEURL + "/api/cin", options).then(async (response) => {
+                if (!response.ok) {
+                    throw await response.json();
+                }
+                cin_numbers.textContent = "";
+                document.getElementById("output").innerText = "";
+                document.querySelector("#paymentsGenerated").innerText = 0;
+                display_modal(response.statusText, (await response.json()).message, "Accept", "", "success");
+            });
+        } catch (err) {
+            handle_error(err);
         }
 
     });
-
 
     // enable buttons
     document.querySelectorAll("button").forEach((el) => {

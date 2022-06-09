@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 // TODO: Move styling to css file
 // TODO: Add translations
 // TODO: change key 'id' in database to 'user_id' and to 'role_id'
@@ -263,11 +265,11 @@ function get_roles(): array
 	$db->prepare("SELECT id, name FROM roles");
 	$db->execute();
 	$user_id = "";
-	$role = "";
-	$db->stmt->bind_result($user_id, $role);
+	$role_name = "";
+	$db->stmt->bind_result($user_id, $role_name);
 	$roles = [];
 	while ($db->fetch()) {
-		$roles[$user_id] = $role;
+		$roles[$user_id] = $role_name;
 	}
 	return $roles;
 }
@@ -472,23 +474,21 @@ function print_user_matrix()
  * @param integer $user_id
  * @param string $username
  * @param string $name
- * @param string $role_id current role.
+ * @param int $role_id current role.
  * @param array $roles list of available rows
  * @return void
  * 
- * TODO: role_id should be an int not string. Investigate
  */
-function print_user_entry(int $user_id, string $username, string $name, string $role_id, array $roles)
+function print_user_entry(int $user_id, string $username, string $name, int $role_id, array $roles)
 { ?>
-	<input name="user_id" type="hidden" value="<?php print $user_id ?>" />
-	<td><input name="username" type="text" value="<?php print $username ?>" /></td>
-	<td><input name="name" type="text" value="<?php print $name ?>" /></td>
+	<input name="user_id" type="hidden" value="<?php echo $user_id ?>" />
+	<td><input name="username" type="text" value="<?php echo $username ?>" /></td>
+	<td><input name="name" type="text" value="<?php echo $name ?>" /></td>
 	<td>
 		<select name="role_id">
-			<?php foreach ($roles as $i => $r) {
-				// print available roles
-				print "<option value='$i'" . ($i == $role_id ? " selected" : "") . ">$r</option>";
-			} ?>
+			<?php foreach ($roles as $role_index => $role_name): ?>
+				<option value="<?php echo $role_index;?>" <?php echo $role_index === $role_id ? " selected" : ""; ?>><?php echo $role_name; ?></option>
+			<?php endforeach; ?>
 		</select>
 	</td>
 <?php

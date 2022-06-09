@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 // TODO: Add ability to disable crash alerts
 // Usage: log::message("Something important happen", __FILE__, __LINE__);
 // log will be visible on the root of the directory in php.log (settings are in .htaccess file)

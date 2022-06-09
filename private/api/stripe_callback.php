@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 // Documentation: https://stripe.com/docs/webhooks
 require_once("library/util/store.php");
 

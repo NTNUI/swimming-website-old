@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 // Libs
 require_once("library/util/store.php");

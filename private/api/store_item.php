@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 // Get a specific product
 // TODO: merge with api/store.php
 header("Content-Type: application/json");

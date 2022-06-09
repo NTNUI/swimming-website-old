@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 // Available services:
 // [GET] get_product(product_id)
 // [GET] get_products()
@@ -38,12 +40,14 @@ try {
 	$response->code = HTTP_INVALID_REQUEST;
 	$response->data = [
 		"error" => true,
+		"success" => false,
 		"message" => $ex->getMessage()
 	];
 } catch (\Exception $ex) {
 	$response->code = HTTP_INTERNAL_SERVER_ERROR;
 	$response->data = [
-		"error" => true
+		"error" => true,
+		"success" => false
 	];
 	// append crash information if logged in
 	if (Authenticator::is_logged_in()) {
@@ -77,7 +81,11 @@ function handle_patch(Store &$store, string $input, Response &$response)
 	global $access_control;
 	if (!$input) {
 		$response->code = HTTP_INVALID_REQUEST;
-		$response->data = ["error" => true, "message" => "No input provided for " . $_SERVER['REQUEST_METHOD'] . " request"];
+		$response->data = [
+			"error" => true,
+			"success" => false,
+			"message" => "No input provided for " . $_SERVER['REQUEST_METHOD'] . " request"
+		];
 		$response->send();
 		return;
 	}
@@ -96,6 +104,7 @@ function handle_patch(Store &$store, string $input, Response &$response)
 				$response->code = HTTP_INVALID_REQUEST;
 				$response->data = [
 					"error" => true,
+					"success" => false,
 					"message" => "Missing required parameter order_id"
 				];
 				break;
@@ -104,6 +113,7 @@ function handle_patch(Store &$store, string $input, Response &$response)
 				$response->code = HTTP_INVALID_REQUEST;
 				$response->data = [
 					"error" => true,
+					"success" => false,
 					"message" => "Missing required parameter order_status"
 				];
 				break;
@@ -112,6 +122,7 @@ function handle_patch(Store &$store, string $input, Response &$response)
 				$response->code = HTTP_NOT_FOUND;
 				$response->data = [
 					"error" => true,
+					"success" => false,
 					"message" => "Order not found"
 				];
 				break;
@@ -121,6 +132,7 @@ function handle_patch(Store &$store, string $input, Response &$response)
 				$response->code = HTTP_INVALID_REQUEST;
 				$response->data = [
 					"error" => true,
+					"success" => false,
 					"message" => "Invalid input on property order_status. Got : " . $input_json->{"params"}->{"order_status"} . " Valid inputs are DELIVERED and FINALIZED."
 				];
 				break;
@@ -130,7 +142,8 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			$store->set_order_status($order_id, $order_status);
 			$response->code = HTTP_OK;
 			$response->data = [
-				"success" => true
+				"success" => true,
+				"error" => false,
 			];
 			break;
 		case 'update_visibility':
@@ -140,6 +153,7 @@ function handle_patch(Store &$store, string $input, Response &$response)
 				$response->code = HTTP_NOT_FOUND;
 				$response->data = [
 					"error" => true,
+					"success" => false,
 					"message" => "Product not found"
 				];
 				break;
@@ -148,7 +162,8 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			$store->set_product_visibility($product["id"], $visibility);
 			$response->code = HTTP_OK;
 			$response->data = [
-				"success" => true
+				"success" => true,
+				"error" => false,
 			];
 			break;
 		case 'update_availability':
@@ -161,6 +176,7 @@ function handle_patch(Store &$store, string $input, Response &$response)
 				$response->code = HTTP_NOT_FOUND;
 				$response->data = [
 					"error" => true,
+					"success" => false,
 					"message" => "Product not found"
 				];
 				break;
@@ -184,7 +200,8 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			Store::update_product_date($product_hash, $date_start, $date_end);
 			$response->code = HTTP_OK;
 			$response->data = [
-				"success" => true
+				"success" => true,
+				"error" => false,
 			];
 			break;
 
@@ -205,6 +222,7 @@ function handle_patch(Store &$store, string $input, Response &$response)
 				$response->code = HTTP_NOT_FOUND;
 				$response->data = [
 					"error" => true,
+					"success" => false,
 					"message" => "Product not found"
 				];
 				break;
@@ -213,7 +231,8 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			Store::update_price($product_hash, $price);
 			$response->code = HTTP_OK;
 			$response->data = [
-				"success" => true
+				"success" => true,
+				"error" => false,
 			];
 			break;
 
@@ -302,7 +321,7 @@ function handle_post(Response &$response)
 	// generate a random hash for new product
 	$product_hash = "";
 	do {
-		$product_hash = substr(md5(time()), 0, 20);
+		$product_hash = substr(md5((string)time()), 0, 20);
 	} while (Store::product_exists($product_hash));
 
 	// upload image, set file name to be the same as the product hash
@@ -339,12 +358,19 @@ function handle_post(Response &$response)
 		Store::add_product($new_product);
 		log::message("Info: New product " . $args["name_en"] . " added to store", __FILE__, __LINE__);
 	} catch (mysqli_sql_exception $th) {
-		$response->data = ["success" => false, "error" => true, "message" => "Could not add new product to store"];
+		$response->data = [
+			"success" => false,
+			"error" => true,
+			"message" => "Could not add new product to store"
+		];
 		$response->code = HTTP_INTERNAL_SERVER_ERROR;
 		throw $th;
 	}
 
-	$response->data = ["success" => true, "error" => false];
+	$response->data = [
+		"success" => true,
+		"error" => false
+	];
 	$response->code = HTTP_OK;
 	return;
 }
