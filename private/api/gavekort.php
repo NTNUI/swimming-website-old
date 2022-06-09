@@ -19,7 +19,6 @@ if ($preview) {
 	print $html;
 } else {
 	mail($data->email, $subject, $html, "Content-type: text/html; charset=utf-8"); 
-	$access_control->log("api/gavekort", "send " . $data->amount, $data->email);
 }
 
 

@@ -33,14 +33,14 @@ while ($db->fetch()) {
 		$registration_diff .= $interval->m . " month, ";
 	}
 	$registration_diff .= $interval->d . " days";
-	$result[] = array(
+	$result[] = [
 		"id" => $id,
 		"first_name" => $first_name,
 		"surname" => $surname,
 		"email" => $epost,
 		"registration_date" => $registration_date,
 		"registration_diff" => $registration_diff,
-	);
+	];
 }
 header("Content-Type: application/json");
 print(json_encode($result));

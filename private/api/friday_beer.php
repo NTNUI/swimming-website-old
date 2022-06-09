@@ -3,7 +3,7 @@ declare(strict_types=1);
 
 // TODO: Refactor this file
 
-$result = array("error" => "Not implemented");
+$result = ["error" => "Not implemented"];
 if (isset($_GET["register"])) {
 	$username = $_GET["register"];
 	$db = new DB("web");
@@ -26,20 +26,20 @@ if (isset($_GET["register"])) {
 			$db->prepare("INSERT INTO friday_beer (user_id, date) VALUES (?, ?)");
 			$db->bind_param("is", $id, $friday);
 			$db->execute();
-			$access_control->log("api/friday_beer", "beered", $username);
-			$result = array("success" => "ok");
+			log::message($username . " was attending friday beer", __FILE__, __LINE__);
+			$result = ["success" => "ok"];
 		} else {
-			$result = array("error" => "Already drank beer");
+			$result = ["error" => "Already drank beer"];
 		}
 	} else {
-		$result = array("error" => "Username not found");
+		$result = ["error" => "Username not found"];
 	}
 } else {
 	$db = new DB("web");
 	$db->prepare("SELECT users.username, beers.date FROM friday_beer as beers JOIN users ON users.id = beers.user_id WHERE role IN (2, 5, 6)");
 	$db->execute();
 	$db->stmt->bind_result($username, $date);
-	$result = array();
+	$result = [];
 	while ($db->fetch()) {
 		$result[$username][] = $date;
 	}

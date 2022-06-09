@@ -209,7 +209,7 @@ class Authenticator
      */
     static public function get_name(string $username): string
     {
-        if(!Authenticator::is_logged_in()){
+        if (!Authenticator::is_logged_in()) {
             throw UserException::LoginRequired();
         }
         $db = new DB("web");
@@ -261,6 +261,26 @@ class Authenticator
 
 
     /**
+     * Get username from a user id
+     *
+     * @param integer $user_id of the user
+     * @return string with users username
+     * @throws UserException if user is not found
+     */
+    static public function get_username_from_id(int $user_id): string
+    {
+        $db = new DB("web");
+        $db->prepare("SELECT username FROM users WHERE id=?");
+        $db->bind_param("i", $user_id);
+        $db->execute();
+        $db->stmt->bind_result($username);
+        if ($db->fetch() === NULL) {
+            throw UserException::NotFound();
+        }
+        return $username;
+    }
+
+    /**
      * Create a new user
      * Side effects:
      * - log action
@@ -284,9 +304,7 @@ class Authenticator
         $db->bind_param("sss", $name, $username, $password_hash);
         $db->execute();
 
-        // log create user
-        global $access_control;
-        $access_control->log("admin/users", "create user", $username);
+        log::message("Created a new user with username: $username by " . Authenticator::get_username(), __FILE__, __LINE__);
 
         return true;
     }

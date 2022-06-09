@@ -57,19 +57,16 @@ if ($type !== "") {
 			<h1 class="box error">Something went wrong...</h1>
 		<?php
 		}
-		$access_control->log("admin/access", "add " . $page . " rule for g[" . $role_id . "] ", $ruleType);
 	} else if ($type === "editRole") {
 		$db = new DB("web");
 		if ($_REQUEST["delete"] === 1) {
 
 			$db->prepare("DELETE FROM role_access WHERE id=?");
 			$db->bind_param("i", $id);
-			$access_control->log("admin/access", "delete rule", $ruleId);
 		} else {
 			if ($ruleType === "" || $page === "") die("Wrong request format");
 			$db->prepare("UPDATE role_access SET type=?, page=? WHERE id=?");
 			$db->bind_param("ssi", $ruleType, $page, $id);
-			$access_control->log("admin/access", "change " . $page . " rule for g[" . $role_id . "]", $ruleType);
 		}
 		if ($db->execute()) { ?>
 			<h1 class="box">Record updated</h1>

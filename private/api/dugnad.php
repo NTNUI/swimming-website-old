@@ -24,13 +24,13 @@ function getVolunteers($number)
 	$db->stmt->bind_result($id, $first, $last, $phone, $email, $volunteer_status);
 	$result = [];
 	while ($db->fetch()) {
-		$result[] = array(
+		$result[] = [
 			"id" => $id,
 			"name" => "$first $last",
 			"email" => $email,
 			"phone" => $phone,
 			"volunteer_status" => $volunteer_status
-		);
+		];
 	}
 
 	return $result;
@@ -48,13 +48,13 @@ function search($name)
 	$db->stmt->bind_result($id, $first, $last, $phone, $email, $volunteer_status);
 	$result = [];
 	while ($db->fetch()) {
-		$result[] = array(
+		$result[] = [
 			"id" => $id,
 			"name" => "$first $last",
 			"email" => $email,
 			"phone" => $phone,
 			"volunteer_status" => $volunteer_status
-		);
+		];
 	}
 	return $result;
 }
@@ -90,11 +90,11 @@ switch ($action) {
 		$result = getVolunteers($getRandom);
 		break;
 	case 'approve':
-		$access_control->log("api/volunteer", $action, $approve_id);
+		log::message(Authenticator::get_username() . " has approved volunteering for a member", __FILE__, __LINE__);
 		setVolunteer($approve_id, true);
 		break;
 	case 'reject':
-		$access_control->log("api/volunteer", $action, $reject_id);
+		log::message(Authenticator::get_username() . " has rejected volunteering for a member", __FILE__, __LINE__);
 		setVolunteer($reject_id, false);
 		break;
 	case 'search':

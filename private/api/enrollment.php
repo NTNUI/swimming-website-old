@@ -57,7 +57,7 @@ function valid_captcha(): bool
 }
 
 header("Content-Type: application/json; charset=UTF-8");
-$input = array();
+$input = [];
 
 // block non POST requests
 if ($_SERVER["REQUEST_METHOD"] !== "POST") {

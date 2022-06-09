@@ -45,7 +45,7 @@ $db->stmt->bind_result($first_name, $surname);
 
 // fetch result from database
 while ($db->fetch()) {
-	$result[] = array("first_name" => $first_name, "surname" => $surname);
+	$result[] = ["first_name" => $first_name, "surname" => $surname];
 }
 $response->code = HTTP_OK;
 $response->data = $result;

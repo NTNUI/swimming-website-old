@@ -145,7 +145,6 @@ function handle_patch(Store &$store, string $input, Response &$response)
 				"success" => true,
 				"error" => false,
 			];
-			$access_control->log("admin/store", "order delivery status update", $order_id);
 			break;
 		case 'update_visibility':
 			$product_hash = $input_json->{"params"}->{"product_hash"};
@@ -166,7 +165,6 @@ function handle_patch(Store &$store, string $input, Response &$response)
 				"success" => true,
 				"error" => false,
 			];
-			$access_control->log("admin/store", "update visibility", $product_hash);
 			break;
 		case 'update_availability':
 			// get product
@@ -205,7 +203,6 @@ function handle_patch(Store &$store, string $input, Response &$response)
 				"success" => true,
 				"error" => false,
 			];
-			$access_control->log("admin/store", "update availability", $product_hash);
 			break;
 
 
@@ -237,7 +234,6 @@ function handle_patch(Store &$store, string $input, Response &$response)
 				"success" => true,
 				"error" => false,
 			];
-			$access_control->log("admin/store", "update availability", $product_hash);
 			break;
 
 		default:
@@ -404,7 +400,7 @@ function handle_get(Store &$store, Response &$response)
 			$comment = "";
 			$status = "";
 			$db->stmt->bind_result($order_id, $name, $email, $phone, $comment, $status);
-			$result = array();
+			$result = [];
 			while ($db->fetch()) {
 				$row = [
 					"id" => $order_id,
