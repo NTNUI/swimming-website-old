@@ -8,9 +8,7 @@ services:
             - 80:80
             - 443:443
         depends_on:
-            - mariadb
-        networks:
-            - epstein-didnt-kill-himself
+            - ${DB_HOSTNAME}
         volumes:
             - ./private:/var/www/localhost/htdocs/private
             - ./public:/var/www/localhost/htdocs/public
@@ -20,23 +18,23 @@ services:
             - ./img:/var/www/localhost/htdocs/img
             - ./assets:/var/www/localhost/htdocs/assets
             - ./library:/var/www/localhost/htdocs/library
+
     # Database
     mariadb:
         image: mariadb
-        container_name: mariadb
+        container_name: ${DB_HOSTNAME}
         ports:
             - 3306:3306
         environment:
             - MYSQL_ROOT_HOST=%
-            - MARIADB_RANDOM_ROOT_PASSWORD=yes
-            - MYSQL_USER=svommer_web
-            - MYSQL_PASSWORD=testing_password
+            - MYSQL_RANDOM_ROOT_PASSWORD=yes
+            - MYSQL_USER=${DB_USERNAME}
+            - MYSQL_PASSWORD=${DB_PASSWORD}
         volumes:
-            - ./storage/mariadb:/var/lib/mysql
+            - ./docker/mariadb/storage:/var/lib/mysql
             - ./docker/mariadb/databases:/docker-entrypoint-initdb.d
             - ./docker/mariadb/conf.d/:/etc/mysql/
-        networks:
-            - epstein-didnt-kill-himself
+
     # Database frontend
     phpmyadmin:
         image: phpmyadmin
@@ -44,11 +42,9 @@ services:
         ports:
             - 42069:80
         environment:
-            - PMA_HOST=mariadb
+            - PMA_HOST=${DB_HOSTNAME}
         depends_on:
-            - mariadb
-        networks:
-            - epstein-didnt-kill-himself
+            - ${DB_HOSTNAME}
 
     stripe:
         image: stripe/stripe-cli
@@ -60,15 +56,6 @@ services:
             - STRIPE_CLI_TELEMETRY_OPTOUT=true
         depends_on:
             - apache
-        networks:
-            - epstein-didnt-kill-himself
-
-networks:
-    epstein-didnt-kill-himself:
-        driver: bridge
-        ipam:
-            config:
-                - subnet: 172.24.0.0/24
 
 volumes:
     sessions: null

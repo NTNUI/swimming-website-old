@@ -212,10 +212,12 @@ CREATE TABLE IF NOT EXISTS `users` (
   UNIQUE KEY `username` (`username`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
+-- login credentials on /admin
 INSERT INTO `users` (`username`, `passwd`, `name`, `last_password`, `role`) VALUES
 ('admin', '$2y$10$6DvTLWHY38TLZCfcKdQs5utG1EX39QcAmeVdA3FY6JEm6SVeGWyym', 'Administrator', NOW(), 1);
 
-GRANT ALL PRIVILEGES ON *.* TO `svommer_web`@`%` IDENTIFIED BY PASSWORD '*C26EC909F368489BFCE885F5ED67303BB3822B41' WITH GRANT OPTION;
+-- login credentials to database
+GRANT ALL PRIVILEGES ON *.* TO `admin`@`%` IDENTIFIED BY PASSWORD '*C26EC909F368489BFCE885F5ED67303BB3822B41' WITH GRANT OPTION;
 
 COMMIT;
 
