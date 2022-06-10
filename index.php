@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 error_reporting(E_ALL & ~E_NOTICE);
@@ -23,7 +24,17 @@ $settings = load_settings("./settings/settings.json");
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
-$dotenv->required(['STRIPE_SECRET_KEY', 'STRIPE_PUBLISHABLE_KEY', 'STRIPE_SIGNING_KEY', 'GOOGLE_CAPTCHA_KEY'])->notEmpty();
+$dotenv->required(
+	[
+		'STRIPE_SECRET_KEY',
+		'STRIPE_PUBLISHABLE_KEY',
+		'STRIPE_SIGNING_KEY',
+		'GOOGLE_CAPTCHA_KEY',
+		"DB_HOSTNAME",
+		"DB_USERNAME",
+		"DB_PASSWORD"
+	]
+)->notEmpty();
 
 // Libraries
 require_once("library/util/db.php");
