@@ -10,15 +10,6 @@
         "coach": "svomming-trener@ntnui.no",
         "bot-general": "svomming-noreply@ntnui.no"
     },
-    "SQL_server": {
-        "servername": "172.24.0.2",
-        "username": "svommer_web",
-        "password": "testing_password",
-        "databases": {
-            "member": "svommer_member",
-            "web": "svommer_web"
-        }
-    },
     "enrollment": {
         "open": "auto",
         "start_month": "january",

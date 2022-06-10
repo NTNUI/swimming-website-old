@@ -27,7 +27,7 @@ class Authenticator
         }
         $password_hash = "";
         try {
-            $password_hash = (new Authenticator)->load_from_db($username);
+            $password_hash = Authenticator::load_from_db($username);
         } catch (\UserException $_) {
             throw \AuthenticationException::WrongCredentials();
         }

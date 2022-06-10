@@ -19,15 +19,14 @@ class DB
 	 */
 	public function __construct(string $database)
 	{
-		global $settings;
 		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
-		$database = $settings["SQL_server"]["databases"][$database];
-		$server_name = $settings["SQL_server"]["servername"];
-		$username = $settings["SQL_server"]["username"];
-		$password = $settings["SQL_server"]["password"];
+		$hostname = $_ENV["DB_HOSTNAME"];
+		$username = $_ENV["DB_USERNAME"];
+		$password = $_ENV["DB_PASSWORD"];
 
-		$this->conn = new mysqli($server_name, $username, $password, $database);
+		# TODO: remove "svommer_" from table names in database
+		$this->conn = new mysqli($hostname, $username, $password, "svommer_" . $database);
 		if (!$this->conn->set_charset("utf8")) {
 			throw new mysqli_sql_exception("Failed to set charset");
 		}

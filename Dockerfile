@@ -6,16 +6,10 @@ RUN apk upgrade
 RUN apk add composer shadow openssl apache2 apache2-ssl neovim micro perl bat
 
 # Install php and php modules.
-# Installing packages from main repository. If packages are being flagged and are only availanble in testing,
-# you can install following packages by running:
-# RUN apk add "php packages" --update-cache --repository "repository-link" --allow-untrusted
-# list of "repository-link"s can be found here: https://mirrors.alpinelinux.org
-# Example:
-# RUN apk add "php packages" --update-cache --repository https://ftp.acc.umu.se/mirror/alpinelinux.org/edge/testing --allow-untrusted
-#
-# php8 packages can be used once the hosting server upgrades to it.
-# php8 packages: php8 php8-apache2 php8-common php8-embed php8-session php8-json php8-mysqli php8-iconv php8-curl php8-mbstring
+RUN sed -i 's/v3.16/v3.15/' /etc/apk/repositories
 RUN apk add php7 php7-apache2 php7-common php7-embed php7-session php7-json php7-mysqli php7-iconv php7-curl php7-mbstring
+# Once php8 is available on the server delete lines above and uncomment line below
+# RUN apk add php8 php8-apache2 php8-common php8-embed php8-session php8-json php8-mysqli php8-iconv php8-curl php8-mbstring
 
 # Configure self signed sertificate
 WORKDIR /tmp
