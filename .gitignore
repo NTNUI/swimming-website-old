@@ -1,11 +1,7 @@
 vendor
 translations/*
 settings/settings.json
-sessions/*
-log/
 img/
-filer/
-cgi-bin/
 *.swp
 *.save
 .vscode
