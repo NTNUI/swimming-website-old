@@ -1,0 +1,37 @@
+# Disable indexing
+Options -Indexes
+
+# Logging
+php_flag log_errors on
+#php_value error_log /var/log/php.log
+php_flag display_startup_errors off
+php_flag html_errors off
+php_flag ignore_repeated_errors on
+
+# Rules
+# Documentation: https://httpd.apache.org/docs/current/rewrite/
+
+RewriteEngine On
+
+# Force ssl
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Allow access to directories img, css and js
+RewriteCond %{REQUEST_URI}% "/(img|css|js)/"
+RewriteRule (.*) $1 [L]
+
+# Languages
+RewriteRule ^(en)(?:/(.*)|)$ $2?lang=$1 [L,QSA]
+
+# Api directory
+RewriteRule ^api/?(.*)/?$ "&side=api&action=$1" [L]
+
+# Admin directory
+RewriteRule ^admin/(.*)$ "&side=admin?&action=$1" [QSA,L]
+
+# in admin. grab last element and slap it into action variable
+RewriteRule ^admin/(.*)/?$ action=$1 [L]
+
+# Finally let the request to an actual page
+RewriteRule ^(.*)/?$ index.php?side=$1 [QSA]
