@@ -22,16 +22,6 @@ RUN apk add \
     perl \
     bat
 
-# Create self signed sertificate
-WORKDIR /tmp
-COPY docker/app/conf/cert.ini ./
-RUN openssl genrsa -out server.key 1024 && \
-    openssl req -new -key server.key -out server.csr -config cert.ini && \
-    openssl x509 -req -days 365 -in server.csr -signkey server.key -out server.crt && \
-    mv server.key /etc/apache2/conf.d/ && \
-    mv server.crt /etc/apache2/conf.d/ && \
-    rm server.csr
-
 # Copy over configs and application data
 WORKDIR /var/www/localhost/htdocs
 
