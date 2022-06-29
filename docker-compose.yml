@@ -41,7 +41,7 @@ services:
         build:
             context: ./
             dockerfile: ./docker/self_signed_certificate/Dockerfile
-        container_name: self-signed-certificate
+        container_name: self_signed_certificate
         volumes:
             - ./docker/self_signed_certificate/conf:/app
             - ./docker/storage/self_signed_certificate:/out
