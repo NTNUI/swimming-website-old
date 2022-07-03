@@ -1,7 +1,3 @@
-settings/settings.json
-sessions/*
-logs
-log
-cgi-bin/
-.vscode
 .git
+.vscode
+docker/storage

@@ -1,26 +1,52 @@
 version: "2.2"
 services:
-    # Web server
-    apache:
-        build: .
-        container_name: apache
+    composer:
+        image: composer/composer
+        container_name: composer
+        command: [ "composer", "install" ]
+        volumes:
+            - ./docker/composer/conf/composer.json:/app/composer.json:ro
+            - ./docker/composer/conf/composer.lock:/app/composer.lock:ro
+            - ./docker/storage/vendor:/app/vendor
+
+    app:
+        build:
+            context: ./
+            dockerfile: ./docker/app/Dockerfile
+        container_name: app
         ports:
             - 80:80
             - 443:443
         depends_on:
             - ${DB_HOSTNAME}
+            - self_signed_certificate
         volumes:
-            - ./private:/var/www/localhost/htdocs/private
-            - ./public:/var/www/localhost/htdocs/public
-            - ./js:/var/www/localhost/htdocs/js
-            - ./translations:/var/www/localhost/htdocs/translations
-            - ./css:/var/www/localhost/htdocs/css
-            - ./img:/var/www/localhost/htdocs/img
-            - ./assets:/var/www/localhost/htdocs/assets
-            - ./library:/var/www/localhost/htdocs/library
+            - ./private:/var/www/localhost/htdocs/private:ro
+            - ./public:/var/www/localhost/htdocs/public:ro
+            - ./js:/var/www/localhost/htdocs/js:ro
+            - ./css:/var/www/localhost/htdocs/css:ro
+            - ./assets:/var/www/localhost/htdocs/assets:ro
+            - ./library:/var/www/localhost/htdocs/library:ro
+            - ./assets:/var/www/localhost/assets:ro
+            - ./index.php:/var/www/localhost/htdocs/index.php:ro
+            - ./.env:/var/www/localhost/htdocs/.env:ro
+            - ./docker/app/conf/.htaccess:/var/www/localhost/htdocs/.htaccess:ro
+            - ./docker/app/conf/settings.json:/var/www/localhost/htdocs/settings/settings.json:ro
+            - ./docker/app/conf/httpd.conf:/etc/apache2/httpd.conf:ro
+            - ./docker/storage/vendor:/var/www/localhost/htdocs/vendor:ro
+            - ./docker/storage/self_signed_certificate/server.key:/etc/apache2/conf.d/server.key
+            - ./docker/storage/self_signed_certificate/server.crt:/etc/apache2/conf.d/server.crt
 
+    self_signed_certificate:
+        build:
+            context: ./
+            dockerfile: ./docker/self_signed_certificate/Dockerfile
+        container_name: self_signed_certificate
+        volumes:
+            - ./docker/self_signed_certificate/conf:/app
+            - ./docker/storage/self_signed_certificate:/out
     # Database
-    mariadb:
+    db:
         image: mariadb
         container_name: ${DB_HOSTNAME}
         ports:
@@ -31,9 +57,9 @@ services:
             - MYSQL_USER=${DB_USERNAME}
             - MYSQL_PASSWORD=${DB_PASSWORD}
         volumes:
-            - ./docker/mariadb/storage:/var/lib/mysql
-            - ./docker/mariadb/databases:/docker-entrypoint-initdb.d
-            - ./docker/mariadb/conf.d/:/etc/mysql/
+            - ./docker/storage/db/:/var/lib/mysql
+            - ./docker/db/init/:/docker-entrypoint-initdb.d:ro
+            - ./docker/db/conf.d/:/etc/mysql/:ro
 
     # Database frontend
     phpmyadmin:
@@ -55,8 +81,13 @@ services:
             - STRIPE_DEVICE_NAME=${USERNAME:-testing_host}
             - STRIPE_CLI_TELEMETRY_OPTOUT=true
         depends_on:
-            - apache
-
-volumes:
-    sessions: null
-    storage: null
+            - app
+    # Workaround so developers can delete ./docker/storage
+    volume-permissions-manager:
+        image: alpine:latest
+        command: sh -c "chmod -R 777 /storage && chown -R 1000:1000 /storage"
+        volumes:
+            - ./docker/storage/:/storage
+        depends_on:
+            - ${DB_HOSTNAME}
+            - composer
