@@ -17,7 +17,7 @@ RUN apk add \
     nerd-fonts \
     perl \
     shadow \
-    ssh \
+    openssh \
     zsh \
     zsh-theme-powerlevel10k \
     zsh-vcs
