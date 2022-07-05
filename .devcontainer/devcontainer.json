@@ -15,7 +15,8 @@
 				"bmewburn.vscode-intelephense-client",
 				"aaron-bond.better-comments",
 				"streetsidesoftware.code-spell-checker",
-				"IronGeek.vscode-env"
+				"IronGeek.vscode-env",
+				"SanderRonde.phpstan-vscode"
 			]
 		}
 	}
