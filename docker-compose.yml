@@ -5,8 +5,8 @@ services:
         container_name: composer
         command: [ "composer", "install" ]
         volumes:
-            - ./docker/composer/conf/composer.json:/app/composer.json:ro
-            - ./docker/composer/conf/composer.lock:/app/composer.lock:ro
+            - ./docker/composer/conf/composer.json:/app/composer.json
+            - ./docker/composer/conf/composer.lock:/app/composer.lock
             - ./docker/storage/vendor:/app/vendor
 
     app:

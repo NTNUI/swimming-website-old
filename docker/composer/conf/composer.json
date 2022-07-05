@@ -35,5 +35,8 @@
             "name": "Sigurd Holten Bøen",
             "email": "sigurd.boen@ntnui.no"
         }
-    ]
+    ],
+    "require-dev": {
+        "phpstan/phpstan": "^1.8"
+    }
 }
