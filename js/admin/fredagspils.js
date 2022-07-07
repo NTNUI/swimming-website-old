@@ -1,6 +1,6 @@
 "use strict";
 function register(username) {
-    fetch(BASEURL + "/api/friday_beer?register=" + username)
+    fetch(BASEURL + "/api/fridayBeer?register=" + username)
         .then((response) => response.json())
         .then((json) => {
             if (json.error && json.error != "Already drank beer") {

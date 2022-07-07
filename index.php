@@ -19,7 +19,7 @@ ini_set("session.gc_divisor", "100");
 session_start();
 
 // Load settings and environments
-require_once("library/util/settings.php");
+require_once("Library/Util/Settings.php");
 $settings = load_settings("./settings/settings.json");
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
@@ -37,25 +37,21 @@ $dotenv->required(
 )->notEmpty();
 
 // Libraries
-require_once("library/util/db.php");
-require_once("library/util/translator.php");
-require_once("library/util/access_control.php");
-require_once("library/util/request.php");
-require_once("library/util/log.php");
-require_once("library/util/authenticator.php");
+require_once("Library/Util/AccessControl.php");
+require_once("Library/Util/Authenticator.php");
+require_once("Library/Util/Db.php");
+require_once("Library/Util/Log.php");
+require_once("Library/Util/Request.php");
+require_once("Library/Util/Translator.php");
 
 // Check write permissions
 test_settings();
 
 // Get request
-$language = argsURL("REQUEST", "lang");
-$page = argsURL("REQUEST", "side");
+$language = argsURL("REQUEST", "lang") ?? $settings["defaults"]["language"];
+$page = argsURL("REQUEST", "side") ?? $settings["defaults"]["landing-page"];
 $action = argsURL("REQUEST", "action");
 $user = argsURL("SESSION", "username");
-
-// Defaults
-if ($language == "") $language = $settings["defaults"]["language"];
-if ($page == "") $page = $settings["defaults"]["landing-page"];
 
 // Translator
 $t = new Translator($page, $language);
@@ -63,32 +59,34 @@ $t = new Translator($page, $language);
 $access_control = new AccessControl($user);
 // handle the request
 if (isValidURL($page)) {
+	$page = ucfirst($page);
+	$action = ucfirst($action);
 	switch ($page) {
 		case "api":
 
 			// file does not exist
-			if (!file_exists("private/api/$action.php")) {
+			if (!file_exists("Private/Api/$action.php")) {
 				break;
 			}
 
-			require_once("private/api/$action.php");
+			require_once("Private/Api/$action.php");
 			return;
 		default:
 			// file does not exist
-			if (!file_exists("public/$page.php")) {
+			if (!file_exists("Public/$page.php")) {
 				break;
 			}
 
 			// valid file, accept request
-			require_once("library/templates/header.php");
-			require_once("public/$page.php");
-			require_once("library/templates/footer.php");
+			require_once("Library/Templates/Header.php");
+			require_once("Public/$page.php");
+			require_once("Library/Templates/Footer.php");
 			return;
 	}
 }
 
 // Illegal request, page not found
-require_once("library/templates/header.php");
-require_once("library/templates/not_found.php");
-require_once("library/templates/footer.php");
+require_once("Library/Templates/Header.php");
+require_once("Library/Templates/NotFound.php");
+require_once("Library/Templates/Footer.php");
 return;
