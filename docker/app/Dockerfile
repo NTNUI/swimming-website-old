@@ -16,11 +16,7 @@ RUN apk add \
     php8-mysqli \
     php8-iconv \
     php8-curl \
-    php8-mbstring \
-    neovim \
-    micro \
-    perl \
-    bat
+    php8-mbstring
 
 # Copy over configs and application data
 WORKDIR /var/www/localhost/htdocs

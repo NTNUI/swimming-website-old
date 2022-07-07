@@ -1,0 +1,23 @@
+{
+	"name": "PHP dev container",
+	"dockerComposeFile": [
+		"../docker-compose.yml",
+		"docker-compose.yml"
+	],
+	"service": "dev_container",
+	"workspaceFolder": "/workspace",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"GitHub.vscode-pull-request-github",
+				"ms-azuretools.vscode-docker",
+				"neilbrayfield.php-docblocker",
+				"bmewburn.vscode-intelephense-client",
+				"aaron-bond.better-comments",
+				"streetsidesoftware.code-spell-checker",
+				"IronGeek.vscode-env",
+				"SanderRonde.phpstan-vscode"
+			]
+		}
+	}
+}
