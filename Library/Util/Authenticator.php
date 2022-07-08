@@ -17,22 +17,22 @@ class Authenticator
      * @see Authenticator::is_logged_in()
      * @param string $username
      * @param string $password
-     * @throws \AuthenticationException on failure
+     * @throws AuthenticationException on failure
      * @return void
      */
     static public function log_in(string $username, string $password)
     {
         if (Authenticator::is_logged_in()) {
-            log::die("Trying to log in even though a user is logged in", __FILE__, __LINE__);
+            throw new \Exception("Trying to log in even though a user is logged in");
         }
         $password_hash = "";
         try {
             $password_hash = Authenticator::load_from_db($username);
-        } catch (\UserException $_) {
-            throw \AuthenticationException::WrongCredentials();
+        } catch (UserNotFoundException $_) {
+            throw new InvalidCredentialsException();
         }
         if (!password_verify($password, $password_hash)) {
-            throw \AuthenticationException::WrongCredentials();
+            throw new InvalidCredentialsException();
         }
     }
 
@@ -45,7 +45,7 @@ class Authenticator
     static public function has_posted_login_credentials(): bool
     {
         if (Authenticator::is_logged_in()) {
-            log::die("User is POSTing credentials while being logged in", __FILE__, __LINE__);
+            throw new \Exception("User is POSTing credentials while being logged in");
         }
         return argsURL("POST", "username") && argsURL("POST", "password");
     }
@@ -58,7 +58,7 @@ class Authenticator
     static public function has_posted_updated_credentials(): bool
     {
         if (!Authenticator::is_logged_in()) {
-            log::die("Non logged in user tries to POST credentials", __FILE__, __LINE__);
+            throw new \Exception("Non logged in user tries to POST credentials");
         }
         return argsURL("POST", "new_pass1") && argsURL("POST", "new_pass2");
     }
@@ -204,13 +204,13 @@ class Authenticator
      *
      * @param string $username of the user
      * @return string users display name
-     * @throws UserException if current user is not logged in
-     * @throws UserException if user is not found
+     * @throws LoginRequiredException if current user is not logged in
+     * @throws UserNotFoundException if user is not found
      */
     static public function get_name(string $username): string
     {
         if (!Authenticator::is_logged_in()) {
-            throw UserException::LoginRequired();
+            throw new LoginRequiredException();
         }
         $db = new DB("web");
         $db->prepare("SELECT name FROM users WHERE username=?");
@@ -219,7 +219,7 @@ class Authenticator
         $name = "";
         $db->stmt->bind_result($name);
         if ($db->fetch() === NULL) {
-            throw UserException::NotFound();
+            throw new UserNotFoundException();
         }
         return $name;
     }
@@ -245,7 +245,7 @@ class Authenticator
         $name = "";
         $db->stmt->bind_result($name, $password_hash, $password_date);
         if ($db->fetch() === NULL) {
-            throw UserException::NotFound();
+            throw new UserNotFoundException();
         }
 
         // refresh access control
@@ -265,7 +265,7 @@ class Authenticator
      *
      * @param integer $user_id of the user
      * @return string with users username
-     * @throws UserException if user is not found
+     * @throws UserNotFoundException if user is not found
      */
     static public function get_username_from_id(int $user_id): string
     {
@@ -275,7 +275,7 @@ class Authenticator
         $db->execute();
         $db->stmt->bind_result($username);
         if ($db->fetch() === NULL) {
-            throw UserException::NotFound();
+            throw new UserNotFoundException();
         }
         return $username;
     }

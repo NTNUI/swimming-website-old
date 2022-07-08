@@ -51,7 +51,7 @@ class Member
         // send mail
         $mail_send_success = mail($email, $subject, $headers, "Content-type: text/html; charset=utf-8");
         if (!$mail_send_success) {
-            // throw new Exception("Could not send email");
+            // throw new \Exception("Could not send email");
             // local testing cannot (and shouldn't) send random emails
             log::message("[Warning]: failed sending approval mail", __FILE__, __LINE__);
         }

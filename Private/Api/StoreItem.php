@@ -18,6 +18,6 @@ $store = new Store($language);
 http_response_code(200);
 try {
     print json_encode($store->get_product($_GET["product_hash"]));
-} catch (\StoreException $th) {
+} catch (StoreException $th) {
     print json_encode(["error" => true, "message" => $th]);
 }

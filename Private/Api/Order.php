@@ -1,8 +1,10 @@
 <?php
+/* 
 declare(strict_types=1);
 
 require_once("Library/Util/Store.php");
-function handle_error($id, $error) {
+function handle_error($id, $error)
+{
 	global $t;
 	if (array_key_exists("message", $error)) $error = $error["message"];
 	$url = $t->get_url("store?item_id=$id&error=" . urlencode($error));
@@ -28,7 +30,6 @@ try {
 		header("Location: " . $src["redirect"]["url"]);
 		exit();
 	}
-
 } catch (\Stripe\Error\Card $e) {
 	$body = $e->getJsonBody();
 	$e = $body["error"];
@@ -48,3 +49,4 @@ try {
 	handle_error($hash, $t->get_translation($e->getMessage(), "store"));
 	exit();
 }
+ */

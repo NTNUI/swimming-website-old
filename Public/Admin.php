@@ -12,7 +12,7 @@ if (!Authenticator::is_logged_in()) {
 	$password = argsURL("POST", "password");
 	try {
 		Authenticator::log_in($username, $password);
-	} catch (\AuthenticationException $ex ) {
+	} catch (AuthenticationException $ex ) {
 		print_password_form(false, $ex->getMessage());
 		return;
 	}

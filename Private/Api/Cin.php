@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 require_once("Library/Util/Api.php");
@@ -34,8 +35,7 @@ try {
                     $response->data = get_not_payed();
                     break;
                 default:
-                    throw new InvalidArgumentException("Accepting only 'missing' or 'not_payed'");
-                    break;
+                    throw new \InvalidArgumentException("Accepting only 'missing' or 'not_payed'");
             }
             break;
         case "PATCH":
@@ -49,7 +49,7 @@ try {
                         "flags" => FILTER_NULL_ON_FAILURE
                     ];
                     $cin = filter_var($input->args->cin, FILTER_VALIDATE_INT, $filter_options);
-                    if($cin === NULL){
+                    if ($cin === NULL) {
                         $response->data = [
                             "success" => false,
                             "error" => true,
@@ -87,11 +87,10 @@ try {
             break;
 
         default:
-            throw new InvalidArgumentException("unsupported request method: " . $_SERVER['REQUEST_METHOD'] . ". Supported methods are SEARCH and PATCH");
-            break;
+            throw new \InvalidArgumentException("unsupported request method: " . $_SERVER['REQUEST_METHOD'] . ". Supported methods are SEARCH and PATCH");
     }
     $response->code = HTTP_OK;
-} catch (InvalidArgumentException $ex) {
+} catch (\InvalidArgumentException $ex) {
     $response->code = HTTP_INVALID_REQUEST;
     $response->data = [
         "error" => true,
@@ -99,7 +98,7 @@ try {
         "message" => $ex->getMessage(),
         "backtrace" => $ex->getTraceAsString()
     ];
-} catch (Exception | mysqli_sql_exception | Throwable $ex) {
+} catch (\Exception $ex) {
     $response->code = HTTP_INTERNAL_SERVER_ERROR;
     $response->data = [
         "success" => false,
@@ -124,8 +123,8 @@ function patch_cin(int $member_id, int $cin): void
     $gender = NULL;
     $db->stmt->bind_result($birth_date, $phone, $gender);
     $db->stmt->fetch();
-    if ($birth_date === NULL || $phone === NULL || $gender === NULL) {
-        throw new Exception("Could not retrieve personal info");
+    if (empty($birth_date) || empty($phone) || empty($gender)) {
+        throw new \Exception("Could not retrieve personal info");
     }
     $db->reset();
 
@@ -174,7 +173,7 @@ function get_missing(): array
 
     $meta = $db->stmt->result_metadata();
     if ($meta === false) {
-        throw new mysqli_sql_exception("Could not retrieve metadata");
+        throw new \Exception($db->conn->error);
     }
     $params = [];
     $row = [];
@@ -202,7 +201,7 @@ function get_not_payed(): array
 
     $meta = $db->stmt->result_metadata();
     if ($meta === false) {
-        throw new mysqli_sql_exception("Could not retrieve metadata");
+        throw new \Exception($db->conn->error);
     }
     $params = [];
     $row = [];

@@ -334,9 +334,9 @@ function role_id_to_string(int $role_id): string
  * Get role id given role name / title
  *
  * @param string $role_name
- * @return string
+ * @return int
  */
-function role_string_to_id(string $role_name): string
+function role_string_to_id(string $role_name): int
 {
 	$db = new DB("web");
 	$db->prepare("SELECT id FROM roles WHERE name=?");
@@ -431,9 +431,9 @@ function print_user_matrix()
 	$db->prepare("SELECT id, username, name, role FROM users");
 	$db->execute();
 	$name = "";
-	$user_id = "";
+	$user_id = 0;
 	$username = "";
-	$role_id = "";
+	$role_id = 0;
 	$db->stmt->bind_result($user_id, $username, $name, $role_id);
 
 	// create a row with actions for each user. 
@@ -471,7 +471,7 @@ function print_user_matrix()
 /**
  * Print out a row with user management actions
  *
- * @param integer $user_id
+ * @param int $user_id
  * @param string $username
  * @param string $name
  * @param int $role_id current role.

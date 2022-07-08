@@ -18,7 +18,7 @@ try {
 				"message" => "unsupported request method : " . $_SERVER['REQUEST_METHOD'] . " Supported method are GET"
 			];
 	}
-} catch (\StoreException $ex) {
+} catch (StoreException $ex) {
 	$response->code = HTTP_INVALID_REQUEST;
 	$response->data = [
 		"error" => true,

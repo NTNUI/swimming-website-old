@@ -65,7 +65,7 @@ class Store
 	 * @param boolean $visibility_check when true, return only visible products.
 	 * @return array of products where each product is an array
 	 */
-	function get_products(int $start = 0, int $limit = 30, string $product_hash = "", bool $rawData = false, bool $visibility_check = true)
+	function get_products(int $start = 0, int $limit = 30, string $product_hash = "", bool $rawData = false, bool $visibility_check = true): array
 	{
 		$db = new DB("web");
 		$visibility = "";
@@ -176,20 +176,28 @@ class Store
 			if (!$rawData) {
 				// Unpack json into array.
 				// Can this be done client side?
-				$name = json_decode($name);
-				if (property_exists($name, $language)) $name = $name->$language;
-				else if (array_key_exists("no", $name)) $name = $name->no;
-				else $name = "";
+				$name = json_decode($name, true, flags: JSON_THROW_ON_ERROR);
+				if (array_key_exists($language, $name)) {
+					$name = $name[$language];
+				} else if (array_key_exists("no", $name)) {
+					$name = $name["no"];
+				} else {
+					$name = "";
+				}
 
-				$description = json_decode($description);
-				if (property_exists($description, $language)) $description = $description->$language;
-				else if (array_key_exists("no", $description)) $description = $description->no;
-				else $description = "";
+				$description = json_decode($description, true, flags: JSON_THROW_ON_ERROR);
+				if (array_key_exists($language, $description)) {
+					$description = $description[$language];
+				} else if (array_key_exists("no", $description)) {
+					$description = $description["no"];
+				} else {
+					$description = "";
+				}
 			}
 
 			// add timezone info
-			$available_from = gettype($available_from) === "NULL" ? NULL : new DateTime($available_from, new DateTimeZone("Europe/Oslo"));
-			$available_until = gettype($available_until) === "NULL" ? NULL : new DateTime($available_until, new DateTimeZone("Europe/Oslo"));
+			$available_from = $available_from ?? new DateTime($available_from, new DateTimeZone("Europe/Oslo"));
+			$available_until = $available_until ?? new DateTime($available_until, new DateTimeZone("Europe/Oslo"));
 
 			// create date with time zone info
 			$result[] = array(
@@ -206,7 +214,6 @@ class Store
 				"require_email" => $require_email,
 				"require_comment" => $require_comment,
 				"require_active_membership" => $require_active_membership,
-				"require_email" => $require_email,
 				"amount_available" => $amount_available,
 				"amount_sold" => $amount_sold,
 				"visibility" => $visibility,
@@ -225,13 +232,14 @@ class Store
 	 * @param string $product_hash
 	 * @param boolean $rawData idk
 	 * @return array of one product
-	 * @throws \StoreException if @param $product_hash is not fund
+	 * @throws ProductNotFoundException if @param $product_hash is not fund
 	 */
 	function get_product(string $product_hash, bool $rawData = false): array
 	{
-		if (!$product_hash || $product_hash == "") return false;
-		$result = $this->get_products(0, 1, $product_hash, $rawData);
-		if (sizeof($result) < 1) throw \StoreException::ProductNotFound();
+		if (!self::product_exists($product_hash)) {
+			throw new ProductNotFoundException();
+		}
+		$result = $this->get_products(start: 0, limit: 1, product_hash: $product_hash, rawData: $rawData);
 		return $result[0];
 	}
 
@@ -240,12 +248,13 @@ class Store
 	 *
 	 * @param string $product_hash of the product
 	 * @param integer $price in NOK
+	 * @throws ProductNotFoundException
 	 * @return void
 	 */
-	static function update_price(string $product_hash, int $price)
+	static function update_price(string $product_hash, int $price): void
 	{
-		if (!Store::product_exists($product_hash)) {
-			throw StoreException::ProductNotFound();
+		if (!self::product_exists($product_hash)) {
+			throw new ProductNotFoundException("Product not found");
 		}
 
 		$price *= 100; // convert from NOK to øre
@@ -259,12 +268,13 @@ class Store
 	 * Get number of orders for a product
 	 * 
 	 * @param string $product_hash of the product
+	 * @throws ProductNotFoundException
 	 * @return int number of fulfilled orders
 	 */
 	static public function get_order_count(string $product_hash): int
 	{
-		if (!Store::product_exists($product_hash)) {
-			throw StoreException::ProductNotFound();
+		if (!self::product_exists($product_hash)) {
+			throw new ProductNotFoundException();
 		}
 		$db = new DB("web");
 		$sql = "SELECT COUNT(*) FROM orders WHERE products_id = (SELECT id FROM products WHERE hash=?) AND (order_status='DELIVERED' OR order_status='FINALIZED')";
@@ -281,18 +291,20 @@ class Store
 	 * Update number of products available for purchase
 	 * 
 	 * @param string $product_hash of the product to be modified
+	 * @throws ProductNotFoundException if product is not found
+	 * @throws ModifyProductException if new inventory count is lower than number of total orders on the product
 	 * @param int new inventory count
 	 */
 	static public function update_inventory_count(string $product_hash, int $new_inventory_count): void
 	{
-		if (!Store::product_exists($product_hash)) {
-			throw StoreException::ProductNotFound();
+		if (!self::product_exists($product_hash)) {
+			throw new ProductNotFoundException();
 		}
 
-		$num_orders = Store::get_order_count($product_hash);
+		$num_orders = self::get_order_count($product_hash);
 		$UNLIMITED = 0;
 		if ($num_orders > $new_inventory_count && $new_inventory_count !== $UNLIMITED) {
-			throw StoreException::ModifyProductException("Cannot set inventory count lower than number of orders.\nMinimum value is " . $num_orders . " or 0 for unlimited.\nReceived: " . $new_inventory_count);
+			throw new ModifyProductException("Cannot set inventory count lower than number of orders.\nMinimum value is " . $num_orders . " or 0 for unlimited.\nReceived: " . $new_inventory_count);
 		}
 
 		$db = new DB("web");
@@ -329,7 +341,7 @@ class Store
 	 * @param array $product to be added
 	 * @return void
 	 */
-	static public function add_product(array $product)
+	static public function add_product(array $product): void
 	{
 		$db = new DB("web");
 		$sql = "INSERT INTO products
@@ -379,12 +391,14 @@ class Store
 	 * Remove product from DB
 	 * 
 	 * @param array $product to be removed
+	 * @throws ProductNotFoundException if the product is not found
+	 * @throws RemoveProductFailedException if the product could not be removed
 	 * @return void
 	 */
-	static public function remove_product(string $product_hash)
+	static public function remove_product(string $product_hash): void
 	{
-		if (!Store::product_exists($product_hash)) {
-			throw StoreException::ProductNotFound();
+		if (!self::product_exists($product_hash)) {
+			throw new ProductNotFoundException();
 		}
 		// get image name
 		$db = new DB("web");
@@ -394,7 +408,7 @@ class Store
 		$image_path = "img/store/" . $db->fetch();
 		if (file_exists($image_path)) {
 			if (!unlink($image_path)) {
-				throw StoreException::RemoveProductFailed();
+				throw new RemoveProductFailedException();
 			}
 		}
 		$db->reset();
@@ -432,7 +446,13 @@ class Store
 	{
 		$db = new DB("web");
 		$sql = "SELECT id FROM orders WHERE source_id=?";
-		return $db->execute_and_fetch($sql, "s", $paymentIntent_id)[0];
+		$db->prepare($sql);
+		$db->stmt->bind_param("s", $paymentIntent_id);
+		$db->execute();
+		$result = 0;
+		$db->stmt->bind_result($result);
+		$db->fetch();
+		return $result;
 	}
 
 	/**
@@ -442,9 +462,10 @@ class Store
 	 * 
 	 * @see Store_helper::approve_member() FIXME
 	 * @param string $payment_intent_id
+	 * @throws ProductNotFoundException if the product is not found
 	 * @return void
 	 */
-	function finalize_order(string $payment_intent_id)
+	function finalize_order(string $payment_intent_id): void
 	{
 		$db = new DB("web");
 		$db->prepare("SELECT id, products_id, phone AS products_id FROM orders WHERE source_id=?");
@@ -452,12 +473,14 @@ class Store
 		$db->execute();
 		$db->stmt->bind_result($order_id, $product_id, $phone);
 
-		if (!$db->fetch()) throw \StoreException::ProductNotFound();
+		if ($db->fetch() === NULL) {
+			throw new ProductNotFoundException();
+		}
 
-		Store::set_order_status($order_id, "FINALIZED");
+		self::set_order_status($order_id, "FINALIZED");
 
 		// Member registration hook
-		if (Store::get_product_hash($product_id) === $this->license_key) {
+		if (self::get_product_hash($product_id) === $this->license_key) {
 			Member::approve($phone);
 		}
 	}
@@ -468,11 +491,11 @@ class Store
 	 *
 	 * @param integer $order_id row identifier in the database.
 	 * @param string $status allowed input: 'FINALIZED' | 'DELIVERED' | 'FAILED'
-	 * @throws \InvalidArgumentException if instructions above are ignored
+	 * @throws \InvalidArgumentException
 	 * @return void
 	 * @note @param int $order_id should not be confused with stripe id system witch uses strings as identifier.
 	 */
-	static function set_order_status(int $order_id, string $status)
+	static function set_order_status(int $order_id, string $status): void
 	{
 		if ($status !== "FINALIZED" && $status !== "DELIVERED" && $status !== "FAILED") {
 			throw new \InvalidArgumentException($status . " is not one of 'FINALIZED' | 'DELIVERED' | 'FAILED'");
@@ -491,7 +514,7 @@ class Store
 	 * @param boolean $visibility
 	 * @return void
 	 */
-	function set_product_visibility(int $product_id, bool $visibility)
+	function set_product_visibility(int $product_id, bool $visibility): void
 	{
 		$db = new DB("web");
 		$db->prepare("UPDATE products SET visible=? WHERE id=?");
@@ -505,7 +528,7 @@ class Store
 	 *
 	 * @param string $paymentIntent_id
 	 * @return string only 'FINALIZED' | 'DELIVERED' | 'FAILED'
-	 * @throws StoreException::OrderNotFound if order is not found.
+	 * @throws OrderNotFoundException if order is not found.
 	 */
 	function get_order_status(string $paymentIntent_id): string
 	{
@@ -516,7 +539,7 @@ class Store
 		$db->fetch();
 		$db->stmt->bind_result($order_status);
 		if ($order_status !== 'FINALIZED' && $order_status !== 'DELIVERED' && $order_status !== 'FAILED') {
-			throw StoreException::OrderNotFound();
+			throw new OrderNotFoundException();
 		}
 		return $order_status;
 	}
@@ -538,7 +561,7 @@ class Store
 		$db->stmt->bind_result($result);
 		$db->fetch();
 		if ($result !== 0 && $result !== 1) {
-			throw new UnexpectedValueException((string)$result);
+			throw new \Exception("Unexpected value received $result");
 		}
 		return (bool)$result;
 	}
@@ -552,66 +575,74 @@ class Store
 	 *
 	 * @param string $product_hash of the product to be purchased
 	 * @param string $payment_method_id id of the payment method for the customer
-	 * @param object $customer object containing name and optionally email and phone
-	 * @throws InvalidArgumentException if customer->phone is not a valid phone number
-	 * @throws StoreException when product cannot be sold
-	 * @throws \Stripe\Exception\ApiErrorException on unexpected internal stripe api error
+	 * @param array $customer containing name and optionally email and phone
 	 * @param string $comment optional argument if comment is attached with the order
+	 * @throws \InvalidArgumentException if customer->phone is not a valid phone number
+	 * @throws \Stripe\Exception\ApiErrorException if request to stripe fails
+	 * @throws CustomerIsNotMemberException if customer does not have required membership
+	 * @throws MaxOrdersExceededException if customer cannot purchase any more of this product
+	 * @throws MissingCustomerDetailsException if customer is missing some information
+	 * @throws PriceErrorException if attempting to perform a purchase where the price is outside of allowed range
+	 * @throws ProductNotAvailableException if the product is currently not available
+	 * @throws ProductNotEnabledException when product cannot be purchased
+	 * @throws ProductSoldOutException if the product is sold out
 	 * @return array containing response. Should be a Response object instead tbh.
 	 */
-	function create_order(string $product_hash, string $payment_method_id, object $customer, ?string $comment = NULL): array
+	function create_order(string $product_hash, string $payment_method_id, array $customer, ?string $comment = NULL): array
 	{
-		$name = $customer->name;
+		$name = $customer["name"];
 		$email = NULL;
-		if (!empty($customer->email)) {
-			$email = $customer->email;
-		}
 		$phone = NULL;
-		if (!empty($customer->phone)) {
-			$phone = $customer->phone;
+		if (!empty($customer["email"])) {
+			$email = $customer["email"];
+		}
+		if (!empty($customer["phone"])) {
+			$phone = $customer["phone"];
 			$phoneUtil = \libphonenumber\PhoneNumberUtil::getInstance();
 			$parsedPhone = $phoneUtil->parse($phone);
 			$isValid = $phoneUtil->isValidNumber($parsedPhone);
 			if (!$isValid) {
-				throw new InvalidArgumentException("Could not validate phone number");
+				throw new \InvalidArgumentException("Could not validate phone number");
 			}
 		}
 
 		$product = $this->get_product($product_hash);
-
-		if (!$product["enabled"]) throw \StoreException::ProductNotEnabled("This product cannot be purchased at this time");
+		if (!self::product_exists($product_hash)) {
+			throw new ProductNotFoundException("product not found");
+		}
+		if (!$product["enabled"]) throw new ProductNotEnabledException();
 
 		// amount available 0 => unlimited
 		if ($product["amount_available"] !== NULL && $product["amount_available"] !== 0) {
 			if ($product["amount_sold"] >= $product["amount_available"]) {
-				throw \StoreException::ProductSoldOut();
+				throw new ProductSoldOutException();
 			}
 		}
 
-		if ($product["available_from"] !== NULL && $product["available_from"] > time()) throw \StoreException::ProductNotAvailable("Current product is not yet available");
-		if ($product["available_until"] !== NULL && $product["available_until"] < time()) throw \StoreException::ProductNotAvailable("Current product is no longer available");
-		if (empty($name)) throw \StoreException::MissingCustomerDetails("Missing customer name");
-		if (empty($phone) && $product["require_phone"]) throw \StoreException::MissingCustomerDetails("A phone number is required for this purchase");
-		if (empty($email) && $product["require_email"]) throw \StoreException::MissingCustomerDetails("An email is required for this purchase");
-		if (empty($comment) && $product["require_comment"]) throw \StoreException::MissingOrderDetails("A comment is required for this purchase");
+		if ($product["available_from"] !== NULL && $product["available_from"] > time()) throw new ProductNotAvailableException("Current product is not yet available");
+		if ($product["available_until"] !== NULL && $product["available_until"] < time()) throw new ProductNotAvailableException("Current product is no longer available");
+		if (empty($name)) throw new MissingCustomerDetailsException("Missing customer name");
+		if (empty($phone) && $product["require_phone"]) throw new MissingCustomerDetailsException("A phone number is required for this purchase");
+		if (empty($email) && $product["require_email"]) throw new MissingCustomerDetailsException("An email is required for this purchase");
+		if (empty($comment) && $product["require_comment"]) throw new MissingOrderDetailsException("A comment is required for this purchase");
 
 		// Note: Only checking purchases for current year
 		if ($product["max_orders_per_customer_per_year"] !== NULL) {
 			if (empty($phone)) {
-				throw \StoreException::MissingCustomerDetails("A phone number is required for this purchase");
+				throw new MissingCustomerDetailsException("A phone number is required for this purchase");
 			}
-			if ($product["max_orders_per_customer_per_year"] < Store::completed_orders($product_hash, $phone)) {
-				throw \StoreException::MaxOrdersExceeded();
+			if ($product["max_orders_per_customer_per_year"] < self::completed_orders($product_hash, $phone)) {
+				throw new MaxOrdersExceededException();
 			}
 		}
 
 		if ($product["require_active_membership"]) {
 			if (empty($phone)) {
-				throw new \StoreException("A phone number is required for this purchase");
+				throw new MissingCustomerDetailsException("A phone number is required for this purchase");
 			}
 
 			if (!Member::is_active($phone)) {
-				throw \StoreException::CustomerIsNotMember();
+				throw new CustomerIsNotMemberException();
 			}
 		}
 
@@ -622,12 +653,12 @@ class Store
 		}
 
 		if ($price <= 3) { // 3 NOK - minimum chargeable amount
-			throw \StoreException::PriceError("Cannot charge below minimum charge amount");
+			throw new PriceErrorException("Cannot charge below minimum charge amount");
 		}
 
 		if ($price >= 2000) { // 2000 NOK failsafe
 			mail(Settings::get_instance()->get_email_address("developer"), "Charge blocked", "A charge of $price NOK has been blocked. Check the logs");
-			throw \StoreException::PriceError("Cannot charge this amount. Contact developers if this is a mistake");
+			throw new PriceErrorException("Cannot charge this amount. Contact developers if this is a mistake");
 		}
 
 		//Perform a 3D secure checkout
@@ -643,8 +674,8 @@ class Store
 				"comment" => $comment,
 				"product_hash" => $product_hash,
 				"product_name" => $product["name"],
-				"is_member" => Member::is_active($phone)
-			]
+				"is_member" => Member::is_active($phone),
+			],
 		]);
 
 		// Save order
@@ -660,17 +691,17 @@ class Store
 		if ($intent->status === "requires_action" && $intent->next_action->type === "use_stripe_sdk") {
 			return [
 				"requires_action" => true,
-				"payment_intent_client_secret" => $intent->client_secret
+				"payment_intent_client_secret" => $intent->client_secret,
 			];
 		} else if ($intent->status === "succeeded") {
 			$this->finalize_order($intent["id"]);
 			return [
 				"success" => true,
 				"error" => false,
-				"message" => "Purchase succeeded.\nYou've been charged " . $price . " NOK."
+				"message" => "Purchase succeeded.\nYou've been charged " . $price . " NOK.",
 			];
 		} else {
-			throw new \Stripe\Exception\ApiErrorException("stripe_error");
+			throw new \Exception("Stripe error");
 		}
 	}
 

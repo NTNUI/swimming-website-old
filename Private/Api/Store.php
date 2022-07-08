@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 // Available services:
@@ -36,24 +37,24 @@ try {
 				"message" => "unsupported request method : " . $_SERVER['REQUEST_METHOD'] . " Supported methods are GET, POST, PATCH"
 			];
 	}
-} catch (\StoreException $ex) {
+} catch (StoreException | \JsonException $ex) {
 	$response->code = HTTP_INVALID_REQUEST;
 	$response->data = [
 		"error" => true,
 		"success" => false,
-		"message" => $ex->getMessage()
+		"message" => $ex->getMessage(),
 	];
 } catch (\Exception $ex) {
 	$response->code = HTTP_INTERNAL_SERVER_ERROR;
 	$response->data = [
 		"error" => true,
-		"success" => false
+		"success" => false,
 	];
 	// append crash information if logged in
 	if (Authenticator::is_logged_in()) {
 		$response->data = array_merge($response->data, [
 			"message" => $ex->getMessage(),
-			"trace" => $ex->getTraceAsString()
+			"trace" => $ex->getTraceAsString(),
 		]);
 	} else {
 		$response->data = array_merge($response->data, [
@@ -78,187 +79,116 @@ return;
 function handle_patch(Store &$store, string $input, Response &$response)
 {
 	Authenticator::auth_API("api/store", "", __FILE__, __LINE__);
-	global $access_control;
 	if (!$input) {
 		$response->code = HTTP_INVALID_REQUEST;
 		$response->data = [
 			"error" => true,
 			"success" => false,
-			"message" => "No input provided for " . $_SERVER['REQUEST_METHOD'] . " request"
+			"message" => "No input provided for " . $_SERVER['REQUEST_METHOD'] . " request",
 		];
 		$response->send();
 		return;
 	}
-
-	$input_json = json_decode($input);
-	if ($input_json === NULL) {
-		$response->code = HTTP_INVALID_REQUEST;
-		$response->error("Syntax error in json object");
-		$response->send();
-		return;
+	$input_json = json_decode($input, true, flags: JSON_THROW_ON_ERROR);
+	if (!array_key_exists("request_type", $input_json)) {
+		throw new \InvalidArgumentException("recieved json object that does not contain required key");
+	}
+	if (!array_key_exists("params", $input_json)) {
+		throw new \InvalidArgumentException("missing 'params' inside input_json");
 	}
 
-	switch ($input_json->{"request_type"}) {
+	switch ($input_json["request_type"]) {
 		case 'update_delivered':
-			if (!isset($input_json->{"params"}->{"order_id"})) {
-				$response->code = HTTP_INVALID_REQUEST;
-				$response->data = [
-					"error" => true,
-					"success" => false,
-					"message" => "Missing required parameter order_id"
-				];
-				break;
+			if (!array_key_exists("order_id", $input_json["params"])) {
+				throw new \InvalidArgumentException("missing 'order_id' inside 'params'");
 			}
-			if (!isset($input_json->{"params"}->{"order_status"})) {
-				$response->code = HTTP_INVALID_REQUEST;
-				$response->data = [
-					"error" => true,
-					"success" => false,
-					"message" => "Missing required parameter order_status"
-				];
-				break;
+			if (empty($input_json["params"]["order_id"])) {
+				throw new \InvalidArgumentException("'order_id' is empty");
 			}
-			if (!Store::order_id_exists($input_json->{"params"}->{"order_id"})) {
-				$response->code = HTTP_NOT_FOUND;
-				$response->data = [
-					"error" => true,
-					"success" => false,
-					"message" => "Order not found"
-				];
-				break;
+			if (!Store::order_id_exists($input_json["params"]["order_id"])) {
+				throw new OrderNotFoundException();
 			}
-
-			if (!is_int(array_search($input_json->{"params"}->{"order_status"}, ["DELIVERED", "FINALIZED"]))) {
-				$response->code = HTTP_INVALID_REQUEST;
-				$response->data = [
-					"error" => true,
-					"success" => false,
-					"message" => "Invalid input on property order_status. Got : " . $input_json->{"params"}->{"order_status"} . " Valid inputs are DELIVERED and FINALIZED."
-				];
-				break;
+			if (!in_array($input_json["params"]["order_status"], ["DELIVERED", "FINALIZED"])) {
+				throw new \InvalidArgumentException("order_status can only be DELIVERED or FINALIZED. Got " . $input_json["params"]["order_status"]);
 			}
-			$order_id = $input_json->{"params"}->{"order_id"};
-			$order_status = $input_json->{"params"}->{"order_status"};
+			$order_id = $input_json["params"]["order_id"];
+			$order_status = $input_json["params"]["order_status"];
 			$store->set_order_status($order_id, $order_status);
-			$response->code = HTTP_OK;
-			$response->data = [
-				"error" => false,
-				"success" => true
-			];
 			break;
 		case 'update_visibility':
-			$product_hash = $input_json->{"params"}->{"product_hash"};
-			$product = $store->get_product($product_hash);
-			if ($product == false) {
-				$response->code = HTTP_NOT_FOUND;
-				$response->data = [
-					"error" => true,
-					"success" => false,
-					"message" => "Product not found"
-				];
-				break;
+			if (empty($input_json["params"]["product_hash"])) {
+				throw new \InvalidArgumentException("'product_hash' is empty");
 			}
-			$visibility = filter_var($input_json->{"params"}->{"visibility"}, FILTER_VALIDATE_BOOLEAN);
+			$product_hash = $input_json["params"]["product_hash"];
+			$product = $store->get_product($product_hash);
+			$visibility = filter_var($input_json["params"]["visibility"], FILTER_VALIDATE_BOOLEAN);
 			$store->set_product_visibility($product["id"], $visibility);
-			$response->code = HTTP_OK;
-			$response->data = [
-				"error" => false,
-				"success" => true
-			];
 			break;
 		case 'update_availability':
-			// get product
-			$product_hash = $input_json->{"params"}->{"product_hash"};
-			$product = [];
-			try {
-				$product = $store->get_product($product_hash);
-			} catch (\StoreException $ex) {
-				$response->code = HTTP_NOT_FOUND;
-				$response->data = [
-					"error" => true,
-					"success" => false,
-					"message" => "Product not found"
-				];
-				break;
+			if (empty($input_json["params"]["product_hash"])) {
+				throw new \InvalidArgumentException("'product_hash' is empty");
 			}
+			$product_hash = $input_json["params"]["product_hash"];
+			$product = [];
+			$product = $store->get_product($product_hash);
 			// construct DateTime object
 			$format = "d.m.Y, H:i:s"; // https://www.php.net/manual/en/datetime.createfromformat.php
 			$date_start = new DateTime;
-			if (property_exists($input_json->{"params"}, "date_start")) {
-				$date_start = DateTime::createFromFormat($format, $input_json->{"params"}->{"date_start"}, new DateTimeZone("Europe/Oslo"));
+			if (array_key_exists("date_start", $input_json["params"])) {
+				$date_start = DateTime::createFromFormat($format, $input_json["params"]["date_start"], new DateTimeZone("Europe/Oslo"));
 			} else {
 				$date_start = NULL;
 			}
 
 			$date_end = new DateTime;
-			if (property_exists($input_json->{"params"}, "date_end")) {
-				$date_end = DateTime::createFromFormat($format, $input_json->{"params"}->{"date_end"}, new DateTimeZone("Europe/Oslo"));
+			if (array_key_exists("date_end", $input_json["params"])) {
+				$date_end = DateTime::createFromFormat($format, $input_json["params"]["date_end"], new DateTimeZone("Europe/Oslo"));
 			} else {
 				$date_end = NULL;
 			}
 			// save result and return
 			Store::update_product_date($product_hash, $date_start, $date_end);
-			$response->code = HTTP_OK;
-			$response->data = [
-				"error" => false,
-				"success" => true
-			];
 			break;
-
-
 		case "update_price":
-			if (!isset($input_json->{"params"}->{"product_hash"})) {
-				throw new InvalidArgumentException("Missing product_hash");
+			if (!isset($input_json["params"]["product_hash"])) {
+				throw new InvalidArgumentException("missing product_hash");
 			}
-			if (!isset($input_json->{"params"}->{"price"})) {
-				throw new InvalidArgumentException("Missing price");
+			if (!isset($input_json["params"]["price"])) {
+				throw new InvalidArgumentException("missing price");
 			}
 			// get product
-			$product_hash = $input_json->{"params"}->{"product_hash"};
+			$product_hash = $input_json["params"]["product_hash"];
 			$product = [];
-			try {
-				$product = $store->get_product($product_hash);
-			} catch (\StoreException $ex) {
-				$response->code = HTTP_NOT_FOUND;
-				$response->data = [
-					"error" => true,
-					"success" => false,
-					"message" => "Product not found"
-				];
-				break;
-			}
-			$price = $input_json->{"params"}->{"price"};
+			$product = $store->get_product($product_hash);
+
+			$price = $input_json["params"]["price"];
 			Store::update_price($product_hash, $price);
-			$response->code = HTTP_OK;
-			$response->data = [
-				"error" => false,
-				"success" => true
-			];
 			break;
 
 		case "product_inventory_count":
-			if (!isset($input_json->{"params"}->{"product_hash"})) {
-				throw new InvalidArgumentException("Missing product_hash");
+			if (empty($input_json["params"]["product_hash"])) {
+				throw new \InvalidArgumentException("'product_hash' is empty");
 			}
-			if (!isset($input_json->{"params"}->{"new_inventory_count"})) {
-				throw new InvalidArgumentException("Missing new_inventory_count");
+			if (empty($input_json["params"]["new_inventory_count"])) {
+				throw new \InvalidArgumentException("'new_inventory_count' is empty");
 			}
-			$new_inventory_count = $input_json->{"params"}->{"new_inventory_count"};
 
-			if (!is_int($new_inventory_count)) {
+			$new_inventory_count = $input_json["params"]["new_inventory_count"];
+			$new_inventory_count = filter_var($new_inventory_count, FILTER_VALIDATE_INT, ["flags" => FILTER_NULL_ON_FAILURE]);
+			if ($new_inventory_count === NULL) {
 				throw new InvalidArgumentException("argument new_inventory_count is not an integer");
 			}
-			$product_hash = $input_json->{"params"}->{"product_hash"};
+			$product_hash = $input_json["params"]["product_hash"];
 			Store::update_inventory_count($product_hash, $new_inventory_count);
-			$response->code = HTTP_OK;
-			$response->data = [
-				"error" => false,
-				"success" => true
-			];
 			break;
 		default:
-			$response->error("Got invalid request: '" . $input_json->{"request_type"} . "'. Valid requests are 'update_delivered', 'update_visibility', 'update_availability', 'update_price', 'product_inventory_count'");
+			$response->error("Got invalid request: '" . $input_json["request_type"] . "'. Valid requests are 'update_delivered', 'update_visibility', 'update_availability', 'update_price', 'product_inventory_count'");
 	}
+	$response->code = HTTP_OK;
+	$response->data = [
+		"error" => false,
+		"success" => true
+	];
 }
 
 
@@ -268,7 +198,7 @@ function handle_patch(Store &$store, string $input, Response &$response)
  * @param Response $response
  * @return void
  */
-function handle_post(Response &$response)
+function handle_post(Response &$response): void
 {
 	Authenticator::auth_API("api/store", "", __FILE__, __LINE__);
 	// Get these arguments, throw on unexpected arguments
@@ -302,7 +232,7 @@ function handle_post(Response &$response)
 				$response->data = [
 					"error" => true,
 					"success" => false,
-					"message" => "Unknown argument: $key has been passed in"
+					"message" => "Unknown argument: $key has been passed in",
 				];
 				$response->send();
 				return;
@@ -317,7 +247,7 @@ function handle_post(Response &$response)
 			$response->data = [
 				"error" => true,
 				"success" => false,
-				"message" => "parameter $entry has not been set"
+				"message" => "parameter $entry has not been set",
 			];
 			return;
 		}
@@ -352,12 +282,11 @@ function handle_post(Response &$response)
 	if (validateUploadImage("image")) {
 		$extension = pathinfo($_FILES["image"]["name"], PATHINFO_EXTENSION);
 		$image_name = $product_hash . "." . $extension;
-		move_uploaded_file($_FILES["image"]["tmp_name"], "img/store/" . $image_name);
-		if (!file_exists("img/store/" . $image_name)) {
-			throw StoreException::AddProductFailed("Could not move uploaded image to correct location");
+		if (!move_uploaded_file($_FILES["image"]["tmp_name"], "img/store/" . $image_name)) {
+			throw new AddProductFailedException("failed to move uploaded image to correct location");
 		}
 	} else {
-		throw StoreException::AddProductFailed("There was some issues with the image");
+		throw new AddProductFailedException("Image not accepted for upload");
 	}
 
 	$new_product = [
@@ -368,28 +297,18 @@ function handle_post(Response &$response)
 		"available_until" => $end,
 		"image" => $image_name,
 		"max_orders_per_customer_per_year" => (int)($args["max_orders_per_customer_per_year"] || 0),
-		"require_phone" => $args["require_phone"] || false,
-		"require_email" => $args["require_email"] || false,
-		"require_comment" => $args["require_comment"] || false,
-		"require_membership" => $args["require_membership"] || false,
-		"inventory_count" => $args["inventory_count"],
+		"require_phone" => $args["require_phone"] ?? false,
+		"require_email" => $args["require_email"] ?? false,
+		"require_comment" => $args["require_comment"] ?? false,
+		"require_membership" => $args["require_membership"] ?? false,
+		"inventory_count" => $args["inventory_count"] ?? 0,
 		"price" => $args["price"] === NULL ? NULL : $args["price"] * 100,
 		"price_member" => $args["price_member"] === NULL ? NULL : $args["price_member"] * 100,
-		"visible" => $args["product_visible"] || true,
-		"enabled" => $args["product_enabled"] || true
+		"visible" => $args["product_visible"] ?? true,
+		"enabled" => $args["product_enabled"] ?? true,
 	];
-	try {
-		Store::add_product($new_product);
-		log::message("Info: New product " . $args["name_en"] . " added to store", __FILE__, __LINE__);
-	} catch (mysqli_sql_exception $th) {
-		$response->data = [
-			"success" => false,
-			"error" => true,
-			"message" => "Could not add new product to store"
-		];
-		$response->code = HTTP_INTERNAL_SERVER_ERROR;
-		throw $th;
-	}
+	Store::add_product($new_product);
+	log::message("Info: New product " . $args["name_en"] . " added to store", __FILE__, __LINE__);
 
 	$response->data = [
 		"success" => true,
@@ -407,7 +326,7 @@ function handle_post(Response &$response)
  * @param Response $response
  * @return void
  */
-function handle_get(Store &$store, Response &$response)
+function handle_get(Store &$store, Response &$response): void
 {
 	switch (argsURL("GET", "request_type")) {
 		case "get_orders":
@@ -417,7 +336,7 @@ function handle_get(Store &$store, Response &$response)
 			$db->prepare($sql);
 			$db->bind_param("i", $product["id"]);
 			$db->execute();
-			$order_id = "";
+			$order_id = 0;
 			$name = "";
 			$email = "";
 			$phone = "";
@@ -432,20 +351,17 @@ function handle_get(Store &$store, Response &$response)
 					"email" => $email,
 					"phone" => $phone,
 					"comment" => $comment,
-					"status" => $status
+					"status" => $status,
 				];
 				array_push($result, $row);
 			}
 			$response->data = $result;
-			$response->code = HTTP_OK;
 			break;
 		case "get_products":
 			$response->data = $store->get_products(0, 100, "", false, false);
-			$response->code = HTTP_OK;
 			break;
 		case "get_product":
 			$response->data = $store->get_product($_GET["product_hash"]);
-			$response->code = HTTP_OK;
 			break;
 		case "get_product_groups":
 			$db = new DB("web");
@@ -459,11 +375,11 @@ function handle_get(Store &$store, Response &$response)
 				$groups[$group_id] = $name;
 			}
 			$response->data = $groups;
-			$response->code = HTTP_OK;
 			break;
 		default:
 			$response->error("Got invalid request: '" . argsURL("GET", "request_type") . "'. Valid requests are get_orders, get_products and get_product_groups.");
 	}
+	$response->code = HTTP_OK;
 }
 
 

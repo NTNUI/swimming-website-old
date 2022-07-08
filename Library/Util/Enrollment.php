@@ -17,7 +17,7 @@ function enrollment_is_active(array $enrollment_settings): bool
 	$end_date = DateTime::createFromFormat($date_format, $end_day . " " . $end_month);
 
 	if ($start_date === false || $end_date === false) {
-		throw new Exception("Could not construct date time object");
+		throw new \Exception("Could not construct date time object");
 	}
 	$now = new DateTime("now");
 	if ($now > $start_date && $now < $end_date) {

@@ -49,18 +49,17 @@ try {
 	$response->code = HTTP_OK;
 	$response->data = [
 		"success" => true,
-		"success" => false,
+		"error" => false,
 		"message" => "user has been approved"
 	];
-} catch (\Throwable $th) {
-
+} catch (\Exception $ex) {
 	$response->code = HTTP_INTERNAL_SERVER_ERROR;
 	$response->data = [
 		"error" => true,
 		"success" => false,
 		"message" => "Internal server error"
 	];
-	log::message($th->getMessage(), __FILE__, __LINE__);
+	log::message(json_encode($ex), __FILE__, __LINE__);
 } finally {
 	$response->send();
 }

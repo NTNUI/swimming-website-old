@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 // This class is hard to debug because when there are issues this class returns empty values.
 // that means valid space and invalid space (errors) overlap.
-// TODO: create a custom Exception class than can be caught by users of this class.
+// TODO: create a custom \Exception class than can be caught by users of this class.
 // fatal errors can throw regular \Exception exceptions when stuff really does not work
 
 class Translator
@@ -12,7 +12,7 @@ class Translator
 	private array $translations = [];
 
 	function __construct(
-		string $page = "",
+		private string $page = "",
 		private string $language = "no",
 		private string $directory = "translations"
 	) {
@@ -68,7 +68,7 @@ class Translator
 
 		// if translations for this page is still not loaded throw an exception.
 		if (empty($this->translations[$page])) {
-			throw new Exception("Could not load translation for page $page");
+			throw new \Exception("Could not load translation for page $page");
 		}
 
 		$translations_this_page = $this->translations[$page];

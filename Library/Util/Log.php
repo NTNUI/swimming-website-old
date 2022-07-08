@@ -34,7 +34,7 @@ class log
         } else {
             print("<script>alert('The site has crashed. The developers have now been informed and will resolve the issue as soon as possible. Sorry for the inconvenience.')</script>");
         }
-        throw new Exception($message);
+        throw new \Exception($message);
     }
 
     // return 400 Bad request to client and log the event

@@ -34,12 +34,12 @@ class Settings
     private function __construct(string $path)
     {
         if (!file_exists($path)) {
-            throw new Exception("file $path does not exists");
+            throw new \Exception("file $path does not exists");
         }
 
         $file_content = file_get_contents($path);
         if (!$file_content) {
-            throw new Exception("could not read contents of $path");
+            throw new \Exception("could not read contents of $path");
         }
 
         $decoded = json_decode($file_content, true, flags: JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR);
@@ -54,7 +54,7 @@ class Settings
         ];
         foreach ($REQUIRED_KEYS as $key) {
             if (!array_key_exists($key, $decoded)) {
-                throw new Exception("key $key does not exists in settings");
+                throw new \Exception("key $key does not exists in settings");
             }
         }
         $REQUIRED_EMAIL_ROLES = [
@@ -65,17 +65,17 @@ class Settings
             "leader",
         ];
         if (0 !== strpos($decoded["baseurl"], "https://")) {
-            throw new Exception("decoded[baseurl] does not start with 'https://'. This will break links. decoded[baseurl] contains: " . $decoded["baseurl"]);
+            throw new \Exception("decoded[baseurl] does not start with 'https://'. This will break links. decoded[baseurl] contains: " . $decoded["baseurl"]);
         }
         $this->base_url = $decoded["baseurl"];
 
         $emails_array = $decoded["emails"];
         foreach ($REQUIRED_EMAIL_ROLES as $role) {
             if (!array_key_exists($role, $emails_array)) {
-                throw new Exception("key $role does not exists in emails");
+                throw new \Exception("key $role does not exists in emails");
             }
             if (NULL === filter_var($emails_array[$role], FILTER_VALIDATE_EMAIL, FILTER_NULL_ON_FAILURE)) {
-                throw new Exception("email " . $emails_array[$role] . " is not valid for role $role");
+                throw new \Exception("email " . $emails_array[$role] . " is not valid for role $role");
             }
         }
         $this->emails = $emails_array;
@@ -86,7 +86,7 @@ class Settings
         ];
         foreach ($REQUIRED_DEFAULT_KEYS as $key) {
             if (!array_key_exists($key, $decoded["defaults"])) {
-                throw new Exception("key $key does not exists in settings['defaults']");
+                throw new \Exception("key $key does not exists in settings['defaults']");
             }
         }
         $this->language = $decoded["defaults"]["language"];
@@ -101,27 +101,27 @@ class Settings
     {
         $err = session_save_path("sessions");
         if ($err === false) {
-            throw new Exception("could not start session");
+            throw new \Exception("could not start session");
         }
         $err = session_set_cookie_params(["lifetime" => self::COOKIE_LIFETIME]);
         if ($err === false) {
-            throw new Exception("could not start session");
+            throw new \Exception("could not start session");
         }
         $err = ini_set("session.gc_maxlifetime", (string)self::COOKIE_LIFETIME);
         if ($err === false) {
-            throw new Exception("could not start session");
+            throw new \Exception("could not start session");
         }
         $err = ini_set("session.gc_probability", "1");
         if ($err === false) {
-            throw new Exception("could not start session");
+            throw new \Exception("could not start session");
         }
         $err = ini_set("session.gc_divisor", "100");
         if ($err === false) {
-            throw new Exception("could not start session");
+            throw new \Exception("could not start session");
         }
         $err = session_start();
         if ($err === false) {
-            throw new Exception("could not start session");
+            throw new \Exception("could not start session");
         }
     }
 
@@ -130,12 +130,12 @@ class Settings
         // test access
         foreach (["img/store", "/tmp", "sessions", "translations"] as $dir) {
             if (!is_writable($dir)) {
-                throw new Exception("$dir is not writable");
+                throw new \Exception("$dir is not writable");
             }
         }
         foreach (["css", "js", "Library", "Private", "Public", "vendor", "assets"] as $dir) {
             if (!is_readable($dir)) {
-                throw new Exception("$dir is not readable");
+                throw new \Exception("$dir is not readable");
             }
         }
     }
@@ -154,7 +154,7 @@ class Settings
     public function get_email_address(string $role): string
     {
         if (!array_key_exists($role, ["developer", "analyst", "coach", "bot", "leader"])) {
-            throw new Exception("email does not exists");
+            throw new \Exception("email does not exists");
         }
         return $this->emails[$role];
     }
