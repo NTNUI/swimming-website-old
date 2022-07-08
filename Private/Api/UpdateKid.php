@@ -34,7 +34,7 @@ function save_CIN(int $member_id, int $CIN){
         $birthDate = 0;
         $phone = "";
         $db->stmt->bind_result($gender, $birthDate, $phone);
-        $hash = hash("sha256", $birthDate . $phone . $gender == "Male" ? true : false);
+        $hash = hash("sha256", (string)($birthDate . $phone . $gender == "Male" ? true : false));
     }
     // save CIN number
     {
@@ -96,7 +96,6 @@ if (!valid_ID($ID)){
 }
 
 // Update database
-global $settings;
 $sql = "UPDATE member SET `CIN`=? WHERE id=?";
 $db->prepare($sql);
 $db->bind_param("si", $CIN, $ID);

@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 require_once("Library/Templates/Content.php");
@@ -9,8 +10,8 @@ print_content_header(
     "Testing page",
     "This page includes a lot of elements that can be tested easily on their own"
 );
-global $settings;
-print("<script type='module' src='${settings['baseurl']}/js/admin/test.js'></script>");
+$url_js = Settings::get_instance()->get_baseurl() . "/js/admin/test.js";
+print("<script type='module' src='$urs_js'></script>");
 ?>
 <div class="box">
     <div class="contents">

@@ -123,7 +123,7 @@ function print_section($section)
 function access_link($page, $inline = false)
 {
 	global $t, $access_control;
-	$page = strtolower($page);
+	$page = lcfirst($page);
 	$link = $t->get_url("admin/$page");
 	$text = $t->get_translation("admin_$page");
 	$text = $text ? $text : $page;

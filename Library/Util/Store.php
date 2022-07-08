@@ -12,10 +12,9 @@ class Store
 	private $license_key;
 	function __construct($lang)
 	{
-		global $settings;
 		\Stripe\Stripe::setApiKey($_ENV["STRIPE_SECRET_KEY"]);
 		$this->language = $lang;
-		$this->license_key = $settings["license_product_hash"];
+		$this->license_key = Settings::get_instance()->get_license_product_hash();
 	}
 
 	/**
@@ -627,8 +626,7 @@ class Store
 		}
 
 		if ($price >= 2000) { // 2000 NOK failsafe
-			global $settings;
-			mail($settings["email"]["developer"], "Charge blocked", "A charge of $price NOK has been blocked. Check the logs");
+			mail(Settings::get_instance()->get_email_address("developer"), "Charge blocked", "A charge of $price NOK has been blocked. Check the logs");
 			throw \StoreException::PriceError("Cannot charge this amount. Contact developers if this is a mistake");
 		}
 

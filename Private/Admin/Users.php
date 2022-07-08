@@ -555,7 +555,6 @@ function print_forms()
  */
 function print_role_entry(int $role_id)
 {
-	global $settings;
 ?>
 	<tr>
 		<td>
@@ -566,8 +565,8 @@ function print_role_entry(int $role_id)
 			<input type="submit" name="update_type" value="Delete" style="width:49%;" />
 		</td>
 	</tr>
-	<link href="<?php print $settings['baseurl']; ?>/css/admin/users.css">
-	<script type="text/javascript" src="<?php print $settings['baseurl']; ?>/js/admin/users.js"></script>
+	<link href="<?php print Settings::get_instance()->get_baseurl(); ?>/css/admin/users.css">
+	<script type="text/javascript" src="<?php print Settings::get_instance()->get_baseurl(); ?>/js/admin/users.js"></script>
 
 <?php
 }

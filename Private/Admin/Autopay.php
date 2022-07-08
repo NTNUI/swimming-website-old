@@ -1,10 +1,9 @@
 <?php
 declare(strict_types=1);
 
-global $settings;
 require_once("Library/Templates/Modal.php");
 ?>
-<script type="module" src="<?php print $settings['baseurl']; ?>/js/admin/autopay.js"></script>
+<script type="module" src="<?php print Settings::get_instance()->get_baseurl(); ?>/js/admin/autopay.js"></script>
 
 <div class="box">
     <h2>Generate <a href="https://ui.vision">Kantu</a> script for bank transfer</h2>

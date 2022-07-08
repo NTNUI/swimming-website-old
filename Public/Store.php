@@ -5,6 +5,7 @@ require_once("Library/Templates/Store.php");
 require_once("Library/Templates/Content.php");
 require_once("Library/Templates/Modal.php");
 global $t;
+$settings = Settings::get_instance();
 print_content_header(
 	$t->get_translation("mainHeader"),
 	$t->get_translation("subHeader")
@@ -25,8 +26,8 @@ print_content_header(
 <script type="text/javascript">
 	const REQUESTED_PRODUCT_HASH = "<?php isset($_REQUEST["product_hash"]) ? print $_REQUEST['product_hash'] : ""; ?>";
 </script>
-<script type="module" src="<?php print $settings['baseurl']?>/js/store.js"></script>
-<link rel="stylesheet" href="<?php print $settings["baseurl"]?>/css/store.css" class="css">
+<script type="module" src="<?php print $settings->get_baseurl()?>/js/store.js"></script>
+<link rel="stylesheet" href="<?php print $settings->get_baseurl()?>/css/store.css" class="css">
 
 <?php
 // style_and_script(__FILE__);

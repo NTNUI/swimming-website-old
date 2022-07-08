@@ -10,12 +10,9 @@ class DB
 	private mysqli $conn;
 	public mysqli_stmt $stmt;
 	/**
-	 * Connect to a database. Credentials are automatically retrieved from global $settings.
-	 * Create a new instance like so
-	 * $conn = new DB();
-	 * @see __destruct method. It automatically disconnects form the database when this instance gets out of scope.
+	 * Connect to a database. Credentials are automatically retrieved from environment variables.
 	 * @param string $database name
-	 * @throws mysqli_sql_exception on failed connection
+	 * @throws Exception on failed connection
 	 */
 	public function __construct(string $database)
 	{
@@ -28,7 +25,7 @@ class DB
 		# TODO: remove "svommer_" from table names in database
 		$this->conn = new mysqli($hostname, $username, $password, "svommer_" . $database);
 		if (!$this->conn->set_charset("utf8")) {
-			throw new mysqli_sql_exception("Failed to set charset");
+			throw new Exception($this->conn->error);
 		}
 	}
 
@@ -36,7 +33,7 @@ class DB
 	{
 		$this->stmt = $this->conn->prepare($sql);
 		if (!$this->stmt) {
-			throw new mysqli_sql_exception("Could not prepare statement");
+			throw new Exception($this->conn->error);
 		}
 	}
 
@@ -44,21 +41,21 @@ class DB
 	{
 		$this->stmt->bind_param($types, $var1, ...$_);
 		if (!$this->stmt) {
-			throw new mysqli_sql_exception("Could not bind params");
+			throw new Exception($this->conn->error);
 		}
 	}
 
 	public function execute()
 	{
 		if (!$this->stmt->execute()) {
-			throw new mysqli_sql_exception("Could not execute statement");
+			throw new Exception($this->conn->error);
 		}
 	}
 
 	public function store_result()
 	{
 		if (!$this->stmt->store_result()) {
-			throw new mysqli_sql_exception("Could not store result");
+			throw new Exception($this->conn->error);
 		}
 	}
 
@@ -83,7 +80,7 @@ class DB
 		$this->execute();
 		$meta = $this->stmt->result_metadata();
 		if ($meta === false) {
-			throw new mysqli_sql_exception("Could not retrieve metadata");
+			throw new Exception($this->conn->error);
 		}
 		$params = [];
 		$row = [];
@@ -111,14 +108,14 @@ class DB
 	public function bind_result(&$var1, &...$_)
 	{
 		if (!$this->stmt->bind_result($var1, $_)) {
-			throw new mysqli_sql_exception($this->error);
+			throw new Exception($this->conn->error);
 		}
 	}
 	public function fetch()
 	{
 		$ret = $this->stmt->fetch();
 		if ($ret === false) {
-			throw new mysqli_sql_exception("Could not fetch data");
+			throw new Exception($this->conn->error);
 		}
 		return $ret;
 	}
@@ -132,7 +129,7 @@ class DB
 	{
 		$ret = $this->stmt->reset();
 		if ($ret === false) {
-			throw new mysqli_sql_exception("Could not reset statement");
+			throw new Exception($this->conn->error);
 		}
 		return $ret;
 	}
@@ -145,12 +142,12 @@ class DB
 		// close statement if present
 		if (isset($this->stmt)) {
 			if (!$this->stmt->close()) {
-				throw new mysqli_sql_exception("Could not close prepared statement");
+				throw new Exception($this->conn->error);
 			}
 		}
 		if (isset($this->conn)) {
 			if (!$this->conn->close()) {
-				throw new mysqli_sql_exception("Could not close connection to db");
+				throw new Exception($this->conn->error);
 			}
 		}
 	}

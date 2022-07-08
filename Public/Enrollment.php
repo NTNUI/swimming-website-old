@@ -7,6 +7,7 @@ require_once("Library/Templates/Store.php");
 require_once("Library/Util/Enrollment.php");
 require_once("Library/Util/Store.php");
 
+$settings = Settings::get_instance();
 $store = new Store($language);
 $tabindex = 0;
 
@@ -95,7 +96,7 @@ print_content_header(
 );
 
 // Start Content
-if (!enrollment_is_active()) {
+if (!enrollment_is_active($settings->get_enrollment())) {
 	print_content_block(
 		$t->get_translation("registration_closed_header"),
 		$t->get_translation("registration_closed_content"),
@@ -116,8 +117,8 @@ if (!enrollment_is_active()) {
 	print_textBox("address", "text", "address", "required");
 	print_textBox("email", "email", "email", "required");
 	$path = "assets/clubs.json";
-	print_selectBox("licensee", "Licensee", json_decode(file_get_contents($path)), "<a style='text-decoration: none;'href='FAQ'><span class='emoji'>❓</span></a>");
-	if ($settings["baseurl"] == "https://org.ntnu.no/svommer") {
+	print_selectBox("licensee", "Licensee", json_decode(file_get_contents($path)), "<a style='text-decoration: none;'href='faq'><span class='emoji'>❓</span></a>");
+	if ($settings->get_baseurl() === "https://org.ntnu.no/svommer") {
 		print_recaptcha();
 	}
 	print "<div class='box'><p>" . $t->get_translation("gdpr_notice") . "</p></div>";
@@ -129,12 +130,12 @@ if (!enrollment_is_active()) {
 <script defer type="text/javascript">
 	let license_product;
 	addLoadEvent(async () => {
-		license_product = await fetch(BASEURL + "/api/store?request_type=get_product&product_hash=" + "<?php global $settings; print $settings["license_product_hash"]; ?>").then(response => response.json());
+		license_product = await fetch(BASEURL + "/api/store?request_type=get_product&product_hash=" + "<?php print $settings->get_license_product_hash(); ?>").then(response => response.json());
 		license_product.image = BASEURL + "/img/store/" + license_product.image;
 	});
 </script>
 <!-- <script defer type="text/javascript" src="https://www.google.com/recaptcha/api.js"></script> -->
-<script type='module' src='<?php print $settings["baseurl"];?>/js/enrollment.js'></script>
+<script type='module' src='<?php print $settings->get_baseurl();?>/js/enrollment.js'></script>
 <?php 
 // style_and_script(__FILE__);
 ?>

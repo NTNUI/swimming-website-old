@@ -63,10 +63,9 @@ function inventory(Response &$response)
 		http_response_code(404);
 		return;
 	}
-	global $settings;
 	foreach ($products as $i => $product) {
 		if (array_key_exists("image", $product)) {
-			$products[$i]["image"] = $settings["baseurl"] . "/img/store/" . $product["image"];
+			$products[$i]["image"] = Settings::get_instance()->get_baseurl() . "/img/store/" . $product["image"];
 		}
 		$products[$i]["hash"] = $product["hash"];
 		unset($products[$i]["id"]);

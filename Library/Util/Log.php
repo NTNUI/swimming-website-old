@@ -21,12 +21,11 @@ class log
     // Crash the server, write a log and alert the developer about the incident.
     static function die($message, $file = __FILE__, $line = __LINE__, bool $api = false)
     {
-        global $settings;
         http_response_code(500);
         error_log(basename($file) . ":" . $line . " " . $message);
         error_log(print_r(debug_backtrace(), true));
         mail(
-            $settings["emails"]["developer"],
+            Settings::get_instance()->get_email_address("developer"),
             "Error on web server",
             "Error occurred. Please check the logs. Have fun fixing bugs btw."
         );

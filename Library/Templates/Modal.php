@@ -2,8 +2,8 @@
 
 declare(strict_types=1);
 
-global $settings;
-print("<link rel='stylesheet' type='text/css' href='${settings["baseurl"]}/css/modal.css'></link>");
+$base_url = Settings::get_instance()->get_baseurl();
+print("<link rel='stylesheet' type='text/css' href='$base_url/css/modal.css'></link>");
 ?>
 
 <template id="modal_template">

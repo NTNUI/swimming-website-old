@@ -2,16 +2,15 @@
 
 declare(strict_types=1);
 
-function enrollment_is_active(): bool
+function enrollment_is_active(array $enrollment_settings): bool
 {
-	global $settings;
-	if ($settings["enrollment"]["open"] !== "auto") {
-		return $settings["enrollment"]["open"];
+	if ($enrollment_settings["open"] !== "auto") {
+		return $enrollment_settings["open"];
 	}
-	$start_month = $settings["enrollment"]["start_month"];
-	$start_day = $settings["enrollment"]["start_day"];
-	$end_month = $settings["enrollment"]["end_month"];
-	$end_day = $settings["enrollment"]["end_day"];
+	$start_month = $enrollment_settings["start_month"];
+	$start_day = $enrollment_settings["start_day"];
+	$end_month = $enrollment_settings["end_month"];
+	$end_day = $enrollment_settings["end_day"];
 
 	$date_format = "j F"; // day month
 	$start_date = DateTime::createFromFormat($date_format, $start_day . " " . $start_month);

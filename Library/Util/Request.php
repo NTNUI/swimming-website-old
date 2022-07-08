@@ -22,22 +22,22 @@ function argsURL($type, $key)
 {
     switch ($type) {
         case "REQUEST":
-            if (isset($_REQUEST[$key])) {
+            if (!empty($_REQUEST[$key])) {
                 return $_REQUEST[$key];
             }
             break;
         case "SESSION":
-            if (isset($_SESSION[$key])) {
+            if (!empty($_SESSION[$key])) {
                 return $_SESSION[$key];
             }
             break;
         case "GET":
-            if (isset($_GET[$key])) {
+            if (!empty($_GET[$key])) {
                 return $_GET[$key];
             }
             break;
         case "POST":
-            if (isset($_POST[$key])) {
+            if (!empty($_POST[$key])) {
                 return $_POST[$key];
             }
             break;

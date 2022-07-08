@@ -1,7 +1,6 @@
 <?php 
 declare(strict_types=1);
 
-global $settings;
 ?>
 
 <form id="form">
@@ -23,5 +22,5 @@ global $settings;
 
 </form>
 
-<link href="<?php print $settings['baseurl'];?>/css/admin/gavekort.css">
-<script type="text/javascript" src="<?php print $settings['baseurl'];?>/js/admin/gavekort.js"><script>
+<link href="<?php print Settings::get_instance()->get_baseurl();?>/css/admin/gavekort.css">
+<script type="text/javascript" src="<?php print Settings::get_instance()->get_baseurl();?>/js/admin/gavekort.js"><script>

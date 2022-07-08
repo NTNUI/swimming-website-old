@@ -17,7 +17,7 @@ print_content_header(
 		foreach ($files as $file) {
 		?>
 			<div class="mySlides">
-				<img src="<?php print $settings["baseurl"] . "/" . $file; ?>">
+				<img src="<?php print Settings::get_instance()->get_baseurl() . "/" . $file; ?>">
 				<div class="slideshow-caption"><?php print $t->get_translation("caption_" . basename($file)); ?></div>
 			</div>
 		<?php

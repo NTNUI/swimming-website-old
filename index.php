@@ -7,20 +7,20 @@ error_reporting(E_ALL & ~E_NOTICE);
 ini_set("display_errors", "0");
 ini_set("max_execution_time", "5"); // seconds
 
-# Load external libraries
+// Libraries
+require_once("Library/Util/AccessControl.php");
+require_once("Library/Util/Authenticator.php");
+require_once("Library/Util/Db.php");
+require_once("Library/Util/Log.php");
+require_once("Library/Util/Request.php");
+require_once("Library/Util/Settings.php");
+require_once("Library/Util/Translator.php");
 require_once("vendor/autoload.php");
 
-// Start session
-session_save_path("sessions");
-session_set_cookie_params(4 * 60 * 60);
-ini_set("session.gc_maxlifetime", (string)(4 * 60 * 60));
-ini_set("session.gc_probability", "1");
-ini_set("session.gc_divisor", "100");
-session_start();
-
 // Load settings and environments
-require_once("Library/Util/Settings.php");
-$settings = load_settings("./settings/settings.json");
+$settings = Settings::get_instance("./settings/settings.json");
+$settings->test_settings();
+$settings->init_session();
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
@@ -36,33 +36,23 @@ $dotenv->required(
 	]
 )->notEmpty();
 
-// Libraries
-require_once("Library/Util/AccessControl.php");
-require_once("Library/Util/Authenticator.php");
-require_once("Library/Util/Db.php");
-require_once("Library/Util/Log.php");
-require_once("Library/Util/Request.php");
-require_once("Library/Util/Translator.php");
-
-// Check write permissions
-test_settings();
 
 // Get request
-$language = argsURL("REQUEST", "lang") ?? $settings["defaults"]["language"];
-$page = argsURL("REQUEST", "side") ?? $settings["defaults"]["landing-page"];
-$action = argsURL("REQUEST", "action");
-$user = argsURL("SESSION", "username");
+$language = argsURL("REQUEST", "lang") ?? $settings->get_language();
+$page = argsURL("REQUEST", "side") ?? $settings->get_landing_page();
+$action = argsURL("REQUEST", "action") ?? "";
+$user = argsURL("SESSION", "username") ?? "";
 
 // Translator
 $t = new Translator($page, $language);
 // Get access rules
 $access_control = new AccessControl($user);
 // handle the request
+$page = ucfirst($page);
+$action = ucfirst($action);
 if (isValidURL($page)) {
-	$page = ucfirst($page);
-	$action = ucfirst($action);
 	switch ($page) {
-		case "api":
+		case "Api":
 
 			// file does not exist
 			if (!file_exists("Private/Api/$action.php")) {

@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 
-global $settings;
 $last_friday = date("N") == 5 ? "today" : "last friday";
 $friday_beer = date("d-m-Y", strtotime($last_friday));
 $db = new DB("web");
@@ -23,5 +22,5 @@ while ($db->fetch()) {
 }
 
 ?>
-<link href="<?php print $settings['baseurl']; ?>/css/admin/fredagspils.css">
-<script type="text/javascript" src="<?php print $settings['baseurl']; ?>/js/admin/fredagspils.js"></script>
+<link href="<?php print Settings::get_instance()->get_baseurl(); ?>/css/admin/fredagspils.css">
+<script type="text/javascript" src="<?php print Settings::get_instance()->get_baseurl(); ?>/js/admin/fredagspils.js"></script>

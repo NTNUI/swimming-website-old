@@ -7,8 +7,7 @@ if (!$access_control->can_access("api", "translations")) {
 }
 
 $page = $_REQUEST['page'];
-global $settings;
-$dir = $settings["translations_dir"];
+$dir = Settings::get_instance()->get_translations_dir();
 
 if (file_put_contents("$dir/$page.json", file_get_contents("php://input")) === false){
 	log::message("Error: Could not save content to $page. Maybe you need to run 'chmod 774 translations/*.json'?", __FILE__, __LINE__);

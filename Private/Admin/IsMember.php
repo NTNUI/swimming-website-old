@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 
-global $settings;
 require_once("Library/Templates/Modal.php");
 ?>
 
@@ -28,4 +27,4 @@ require_once("Library/Templates/Modal.php");
 	</div>
 
 </div>
-<script src='<?php print $settings["baseurl"] . "/js/admin/isMember.js" ?>' type='module'></script>
+<script src='<?php print Settings::get_instance()->get_baseurl() . "/js/admin/isMember.js" ?>' type='module'></script>

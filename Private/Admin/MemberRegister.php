@@ -1,7 +1,6 @@
 <?php
 declare(strict_types=1);
 
-global $settings;
 require_once("Library/Templates/Content.php");
 
 print_content_header(
@@ -30,7 +29,6 @@ function createTime($year, $month, $day)
 }
 
 if (Authenticator::is_logged_in()) {
-	global $settings;
 	$db = new DB("member");
 
 	$sql = "SELECT id, first_name, surname, registration_date, email, licensee FROM member WHERE approved_date IS NULL OR YEAR(approved_date) <> DATE('y') ORDER BY id DESC";
@@ -70,4 +68,4 @@ if (Authenticator::is_logged_in()) {
 }
 
 ?>
-<script type="text/javascript" src="<?php print $settings['baseurl']; ?>/js/admin/member_register.js"></script>
+<script type="text/javascript" src="<?php print Settings::get_instance()->get_baseurl(); ?>/js/admin/member_register.js"></script>

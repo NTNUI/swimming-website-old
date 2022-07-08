@@ -1,10 +1,10 @@
 <?php
+
 declare(strict_types=1);
 
 require_once("Library/Util/Api.php");
 require_once("Library/Util/Enrollment.php");
 
-global $settings;
 function trim_space(string $text): string
 {
     $text = trim($text);
@@ -46,7 +46,6 @@ function get_age(DateTime $birthDate): int
 
 function valid_captcha(): bool
 {
-    global $settings;
     $secret = $_ENV["GOOGLE_CAPTCHA_KEY"];
     $token = $_POST['g-recaptcha-response'];
     $url = "https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=$token";
@@ -264,7 +263,7 @@ if ($input["dryrun"]) {
 }
 
 // block registration unless enrollment is open.
-if (!enrollment_is_active()) {
+if (!enrollment_is_active(Settings::get_instance()->get_enrollment())) {
     http_response_code(HTTP_FORBIDDEN);
     $input["message"] = "Enrollment is closed";
     print(json_encode($input));
@@ -300,11 +299,12 @@ $input["message"] = "Member has been registered successfully";
 if ($input["membership_status"] == "pending") {
     if (false && !$input["dryrun"]) {
         // notification to cashier
-        $sendTo = $settings["emails"]["analyst"];
+        $sendTo = Settings::get_instance()->get_email_address("analyst");
         $message = "A new member needs manual approval. Log in to admin pages and approve member.";
         mail($sendTo, "NTNUI-Swimming: New membership request", $message);
     }
-    $input["url"] =  $settings["baseurl"] . "/store?product_hash=" . $settings['license_product_hash'];
+    $input["url"] =  Settings::get_instance()->get_baseurl();
+    $input["url"] .= "/store?product_hash=" . Settings::get_instance()->get_license_product_hash();
 }
 
 print(json_encode($input));

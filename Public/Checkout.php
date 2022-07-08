@@ -3,9 +3,7 @@ declare(strict_types=1);
 
 // Libs
 require_once("Library/Util/Store.php");
-global $settings;
 $store = new Store($language);
-
 
 // Input data
 $source = $_REQUEST['source'];
@@ -33,9 +31,9 @@ $client_secret = $_REQUEST["client_secret"];
 	<h1>Noe gikk galt under behandligen av betalingen</h1>
 </div>
 
-<script type="text/javascript" src="<?php print $settings["baseurl"] . "/js/checkout.js"?>"></script>
+<script type="text/javascript" src="<?php print Settings::get_instance()->get_baseurl() . "/js/checkout.js"?>"></script>
 <script type="text/javascript">
-var status_url = "<?php print $settings["baseurl"] . "/api/order_status" ?>"; // BUG: entry point does not exists
+var status_url = "<?php print Settings::get_instance()->get_baseurl() . "/api/order_status" ?>"; // BUG: entry point does not exists
 var SOURCE_ID = "<?php print $source ?>";
 var CLIENT_SECRET = "<?php print $client_secret ?>";
 

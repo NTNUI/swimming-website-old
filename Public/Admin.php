@@ -52,7 +52,7 @@ if (Authenticator::pass_change_requested()) {
 	} else {
 		Authenticator::change_password($_SESSION["username"], $new_password);
 		Authenticator::log_out();
-		header("Location: " . $settings["baseurl"] . "/admin");
+		header("Location: " . $settings->get_baseurl() . "/admin");
 		exit;
 	}
 }

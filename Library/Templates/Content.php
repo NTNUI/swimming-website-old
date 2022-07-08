@@ -16,7 +16,6 @@ declare(strict_types=1);
  */
 function print_content_block(string $header, string $description, string $image_path, string $image_text, string $email = "", string $image_class = "", string $image_license = "NTNUI (CC BY 4.0)")
 {
-    global $settings;
 ?>
     <div class="box">
         <div class="<?php print $image_path ? "max-60 " : ""; ?>contents">
@@ -33,7 +32,7 @@ function print_content_block(string $header, string $description, string $image_
         if ($image_path && file_exists($image_path)) {
         ?>
             <div class="card">
-                <img class="<?php print($image_class); ?>" src="<?php print($settings["baseurl"] . "/" . $image_path); ?>" alt="<?php print($image_text); ?>">
+                <img class="<?php print($image_class); ?>" src="<?php print(Settings::get_instance()->get_baseurl() . "/" . $image_path); ?>" alt="<?php print($image_text); ?>">
                 <label class="card_content"><?php print($image_text); ?></label>
                 <?php
                 if ($email) {
@@ -75,15 +74,15 @@ function print_content_header(string $main_header, string $sub_header)
  */
 function style_and_script(string $caller)
 {
-    $caller = str_replace(".php", "", basename($caller));
-    $js_path = "js/" . $caller . ".js";
-    $css_path = "css/" . $caller . ".css";
-    
-    global $settings;
+    $settings = Settings::get_instance();
+    $caller = lcfirst(str_replace(".php", "", basename($caller)));
+    $js_path = $settings->get_baseurl() . "js/" . $caller . ".js";
+    $css_path = $settings->get_baseurl() . "css/" . $caller . ".css";
+
     if (file_exists($js_path)) {
-        print("<script defer type='text/javascript' src='${settings["baseurl"]}/$js_path'></script>");
+        print("<script defer type='text/javascript' src='$js_path'></script>");
     }
     if (file_exists($css_path)) {
-        print("<link rel='stylesheet' type='text/css' href='${settings["baseurl"]}/$css_path'></link>");
+        print("<link rel='stylesheet' type='text/css' href='$css_path'></link>");
     }
 }

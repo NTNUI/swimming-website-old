@@ -1,93 +1,97 @@
 <?php
+
 declare(strict_types=1);
+
+// This class is hard to debug because when there are issues this class returns empty values.
+// that means valid space and invalid space (errors) overlap.
+// TODO: create a custom Exception class than can be caught by users of this class.
+// fatal errors can throw regular \Exception exceptions when stuff really does not work
 
 class Translator
 {
-	private $page; 			// page name
-	private $language; 		// language code. Currently supporting "no" and "en"
-	private $translations; 	// global array of all translations
+	private array $translations = [];
 
-	function __construct(string $page, string $lang = "no", private string $directory = "translations")
-	{
+	function __construct(
+		string $page = "",
+		private string $language = "no",
+		private string $directory = "translations"
+	) {
 		$this->page = lcfirst($page);
-		$this->language = $lang;
 		$this->load_translation($this->page);
 	}
 
-	public function load_translation($page)
+	public function load_translation(string $page): void
 	{
 		$page = lcfirst($page);
-		$file = "$this->directory/$page.json";
-
-		if ($page == "api") {
+		if ($page === "api") {
 			return;
 		}
+		if (!empty($this->translations[$page])) {
+			log::message("translations for $page is already loaded", __FILE__, __LINE__);
+			// translations already loaded
+			return;
+		}
+		$file = "$this->directory/$page.json";
 
 		if (!file_exists($file)) {
 			log::message("Warning: Requesting a non existing page: $page", __FILE__, __LINE__);
 			return;
 		}
-
-		$decoded = json_decode(file_get_contents($file));
+		$file_content = file_get_contents($file);
+		if ($file_content === false) {
+			log::message("Warning: Could not read file contents", __FILE__, __LINE__);
+			return;
+		}
+		// json_decode needs increased depth. Otherwise some translations will not load
+		$decoded = json_decode($file_content, true, depth: 2024, flags: JSON_OBJECT_AS_ARRAY);
 		if ($decoded === NULL) {
-			log::message("Warning: Could not decode json file: $file, for page: $page", __FILE__, __LINE__);
+			log::message(json_last_error_msg(), __FILE__, __LINE__);
 			return;
 		}
 		$this->translations[$page] = $decoded;
 	}
 
-	public function get_translation($key, $page = ""): string
+	public function get_translation(string $key, ?string $page = NULL): string
 	{
-		$page = lcfirst($page);
-		$ret = "";
-
-		$language = $this->language;
-		if ($page == "") {
+		if (empty($page)) {
 			$page = $this->page;
 		}
+		$page = lcfirst($page);
+
+		$language = $this->language;
+		$ret = "";
 
 		// if translations for this page is not loaded, try to load them.
-		if (!isset($this->translations[$page])) {
+		if (empty($this->translations[$page])) {
 			$this->load_translation($page);
 		}
 
-		// if translations for this page is still not loaded return.
-		if (!isset($this->translations[$page])) {
-			// loading translation for a file that does not exist
-			return "";
+		// if translations for this page is still not loaded throw an exception.
+		if (empty($this->translations[$page])) {
+			throw new Exception("Could not load translation for page $page");
 		}
 
 		$translations_this_page = $this->translations[$page];
 
 		// try to get requested language
-		if (property_exists($translations_this_page->$language, $key)) {
-			$ret = $translations_this_page->$language->$key;
-		}
-
-		// if requested language is not set use norwegian as fallback 
-		if ($ret == "") {
-			if (property_exists($translations_this_page->no, $key)) {
-				$ret = $translations_this_page->no->$key;
-			}
-		}
-
-		if ($ret == "") {
+		if (array_key_exists($key, $translations_this_page[$language])) {
+			$ret = $translations_this_page[$language][$key];
+		} elseif (array_key_exists($key, $translations_this_page["no"])) {
+			// norwegian as fallback 
+			$ret = $translations_this_page["no"][$key];
+		} else {
 			log::message("Warning: page: $page does not have translations for $key", __FILE__, __LINE__);
 			$ret = "";
-		}
-
-		// Expand array keys
-		if (is_array($ret)) {
-			return implode("\n", $ret);
 		}
 		return $ret;
 	}
 
-	public function get_url($url)
+	public function get_url(string $page_name): string
 	{
-		global $settings;
-		$ret = $settings["baseurl"] . "/";
-		if ($this->language != "no") $ret .= $this->language . "/";
-		return $ret . ($url == "mainpage" ? "" : $url);
+		$ret = Settings::get_instance()->get_baseurl() . "/";
+		if ($this->language != "no") {
+			$ret .= $this->language . "/";
+		}
+		return $ret . ($page_name === "mainpage" ? "" : $page_name);
 	}
 }

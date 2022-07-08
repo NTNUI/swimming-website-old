@@ -7,8 +7,9 @@ declare(strict_types=1);
                 <?php
                 // Make image containers
                 $files = glob('img/sponsors/*.svg');
+                $settings = Settings::get_instance();
                 foreach ($files as $file) {
-                    $url = $settings["baseurl"] . "/" . $file;
+                    $url = $settings->get_baseurl() . "/" . $file;
                     $name = basename($url, ".svg");
                     $link = $t->get_translation("link_$name", "sponsors");
 

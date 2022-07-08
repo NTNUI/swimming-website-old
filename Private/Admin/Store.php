@@ -1,18 +1,17 @@
 <?php
 declare(strict_types=1);
 
-global $settings;
 require_once("Library/Templates/Modal.php");
 // TODO: remove unused html classes
 // TODO: implement translations
 ?>
 
-<link href="<?php print($settings['baseurl']); ?>/css/admin/store.css" />
+<link href="<?php print(Settings::get_instance()->get_baseurl()); ?>/css/admin/store.css" />
 <link href="https://unpkg.com/tabulator-tables@4.5.3/dist/css/tabulator.min.css" rel="stylesheet" />
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.5.0/css/all.css" integrity="sha384-B4dIYHKNBt8Bc12p+WXckhzcICo0wtJAoU8YZTY5qE0Id1GSseTk6S+L3BlXeVIU" crossorigin="anonymous">
 <script defer type="text/javascript" src="https://unpkg.com/tabulator-tables@4.5.3/dist/js/tabulator.min.js"></script>
 <script defer type="text/javascript" src="https://momentjs.com/downloads/moment.min.js"></script>
-<script type="module" src="<?php print($settings['baseurl']); ?>/js/admin/store.js"></script>
+<script type="module" src="<?php print(Settings::get_instance()->get_baseurl()); ?>/js/admin/store.js"></script>
 
 <div class="hidden">
 	<div class="box">
@@ -32,7 +31,7 @@ require_once("Library/Templates/Modal.php");
 <div id="add_container">
 	<div class="box">
 		<h3>Add a product to the store</h3>
-		<form id="form-add-product" action="<?php print $settings["baseurl"]; ?>/api/store" method="POST">
+		<form id="form-add-product" action="<?php print Settings::get_instance()->get_baseurl(); ?>/api/store" method="POST">
 			<div>
 				<label for="name_no">Title in Norwegian</label>
 				<input disabled name="name_no" type="text" required />

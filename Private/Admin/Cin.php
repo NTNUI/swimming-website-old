@@ -1,25 +1,24 @@
 <?php
-declare(strict_types=1);
 
-global $settings;
+declare(strict_types=1);
 require_once("Library/Templates/Modal.php");
 
 ?>
 
-<link rel="stylesheet" href="<?php print $settings['baseurl']; ?>/css/admin/cin.css">
-<script type="module" src="<?php print $settings['baseurl']; ?>/js/admin/cin.js"> </script>
+<link rel="stylesheet" href="<?php print Settings::get_instance()->get_baseurl(); ?>/css/admin/cin.css">
+<script type="module" src="<?php print Settings::get_instance()->get_baseurl(); ?>/js/admin/cin.js"> </script>
 
 <div class="box">
-    <h2>Generate <a href="https://ui.vision">UI Vision</a> script for bank transfer</h2>
+	<h2>Generate <a href="https://ui.vision">UI Vision</a> script for bank transfer</h2>
 
-    <label for="CIN_numbers">Following customer identification numbers has not been forwarded yet</label>
-    <textarea readonly id="CIN_numbers"></textarea>
+	<label for="CIN_numbers">Following customer identification numbers has not been forwarded yet</label>
+	<textarea readonly id="CIN_numbers"></textarea>
 
-    <textarea readonly id="output"></textarea>
+	<textarea readonly id="output"></textarea>
 
-    Total pending payments: <span id="paymentsGenerated">0</span><br>
-    <button disabled id="clipboard">Copy script 📋</button>
-    <button disabled id="btn-cin-mark-forwarded">Mark as forwarded ✅</button>
+	Total pending payments: <span id="paymentsGenerated">0</span><br>
+	<button disabled id="clipboard">Copy script 📋</button>
+	<button disabled id="btn-cin-mark-forwarded">Mark as forwarded ✅</button>
 	<button disabled id="btn-cin-options">Options ⚙</button>
 </div>
 

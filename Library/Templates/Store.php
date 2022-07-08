@@ -89,6 +89,6 @@ global $t;
 		</div>
 	</div>
 </template>
-<link rel="stylesheet" href="<?php global $settings; print($settings['baseurl']); ?>/css/store.css" type="text/css" />
-<link rel="stylesheet" href="<?php global $settings; print($settings['baseurl']); ?>/css/modal.css" type="text/css" />
-<script type="module" src="<?php global $settings; print($settings['baseurl']) ?>/js/modules/store.js"></script>
+<link rel="stylesheet" href="<?php print(Settings::get_instance()->get_baseurl()); ?>/css/store.css" type="text/css" />
+<link rel="stylesheet" href="<?php print(Settings::get_instance()->get_baseurl()); ?>/css/modal.css" type="text/css" />
+<script type="module" src="<?php print(Settings::get_instance()->get_baseurl()) ?>/js/modules/store.js"></script>
