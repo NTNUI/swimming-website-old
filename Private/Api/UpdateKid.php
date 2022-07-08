@@ -33,7 +33,7 @@ function save_CIN(int $member_id, int $CIN){
         $gender = "";
         $birthDate = 0;
         $phone = "";
-        $db->stmt->bind_result($gender, $birthDate, $phone);
+        $db->bind_result($gender, $birthDate, $phone);
         $hash = hash("sha256", (string)($birthDate . $phone . $gender == "Male" ? true : false));
     }
     // save CIN number
@@ -45,11 +45,11 @@ function save_CIN(int $member_id, int $CIN){
         $db->execute();
         if($db->num_rows()){
             // entry exists
-            $db->stmt->close();
+            $db->close();
             $sql = "UPDATE member_CIN SET NSF_CIN=?, last_used=NOW() WHERE hash=?";
         }else{
             // entry does not exist
-            $db->stmt->close();
+            $db->close();
             $sql = "INSERT INTO member_CIN (NSF_CIN, last_used, hash) VALUES (?,NOW(),?)";
         }
         $db->prepare($sql);

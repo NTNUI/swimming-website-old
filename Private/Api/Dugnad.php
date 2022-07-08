@@ -21,7 +21,7 @@ function getVolunteers($number)
 	$db->prepare($sql);
 	$db->bind_param("i", $number);
 	$db->execute();
-	$db->stmt->bind_result($id, $first, $last, $phone, $email, $volunteer_status);
+	$db->bind_result($id, $first, $last, $phone, $email, $volunteer_status);
 	$result = [];
 	while ($db->fetch()) {
 		$result[] = [
@@ -45,7 +45,7 @@ function search($name)
 	$db->prepare($sql);
 	$db->bind_param("s", $name);
 	$db->execute();
-	$db->stmt->bind_result($id, $first, $last, $phone, $email, $volunteer_status);
+	$db->bind_result($id, $first, $last, $phone, $email, $volunteer_status);
 	$result = [];
 	while ($db->fetch()) {
 		$result[] = [

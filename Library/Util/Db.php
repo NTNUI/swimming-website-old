@@ -8,7 +8,7 @@ declare(strict_types=1);
 class DB
 {
 	private mysqli $conn;
-	public mysqli_stmt $stmt;
+	private mysqli_stmt $stmt;
 	/**
 	 * Connect to a database. Credentials are automatically retrieved from environment variables.
 	 * @param string $database name
@@ -78,14 +78,13 @@ class DB
 
 	/**
 	 * Does not work. Cannot bind results to variable for some reason.
-	 * @deprecated use $db->stmt->bind_params() in stead. 
 	 * @param [type] $var1
 	 * @param [type] ...$_
 	 * @return void
 	 */
 	public function bind_result(&$var1, &...$_)
 	{
-		if (!$this->stmt->bind_result($var1, $_)) {
+		if (!$this->stmt->bind_result($var1, ...$_)) {
 			throw new \Exception($this->conn->error);
 		}
 	}
@@ -107,15 +106,11 @@ class DB
 	{
 		$ret = $this->stmt->reset();
 		if ($ret === false) {
-			throw new Exception($this->conn->error);
+			throw new \Exception($this->conn->error);
 		}
 		return $ret;
 	}
-
-	/**
-	 * Disconnect from the database when DB class gets out of scope.
-	 */
-	public function  __destruct()
+	public function close(): void
 	{
 		// close statement if present
 		if (isset($this->stmt)) {
@@ -123,6 +118,14 @@ class DB
 				throw new \Exception($this->conn->error);
 			}
 		}
+	}
+	/**
+	 * Disconnect from the database when DB class gets out of scope.
+	 */
+	public function  __destruct()
+	{
+		// close connection
+		$this->close();
 		if (isset($this->conn)) {
 			if (!$this->conn->close()) {
 				throw new \Exception($this->conn->error);

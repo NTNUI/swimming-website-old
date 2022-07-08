@@ -41,7 +41,7 @@ if ($db->num_rows() === 0) {
 $first_name;
 $surname;
 $result = [];
-$db->stmt->bind_result($first_name, $surname);
+$db->bind_result($first_name, $surname);
 
 // fetch result from database
 while ($db->fetch()) {

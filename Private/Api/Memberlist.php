@@ -16,7 +16,7 @@ $sql = "SELECT id, registration_date, surname, first_name, email FROM member WHE
 $db->prepare($sql);
 $db->execute();
 
-$db->stmt->bind_result($id, $registration_date, $surname, $name, $email);
+$db->bind_result($id, $registration_date, $surname, $name, $email);
 
 $result = [];
 while ($db->fetch()) {

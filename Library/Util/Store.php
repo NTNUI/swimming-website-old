@@ -149,7 +149,7 @@ class Store
 		$db->execute();
 
 		$result = array();
-		$db->stmt->bind_result(
+		$db->bind_result(
 			$id,
 			$product_hash,
 			$name,
@@ -282,7 +282,7 @@ class Store
 		$db->bind_param("s", $product_hash);
 		$db->execute();
 		$result = 0;
-		$db->stmt->bind_result($result);
+		$db->bind_result($result);
 		$db->fetch();
 		return $result;
 	}
@@ -326,7 +326,7 @@ class Store
 		$db->bind_param("s", $product_hash);
 		$db->execute();
 		$result = 0;
-		$db->stmt->bind_result($result);
+		$db->bind_result($result);
 		$db->fetch();
 		if ($result !== 0 && $result !== 1) {
 			throw new UnexpectedValueException((string)$result);
@@ -431,7 +431,7 @@ class Store
 		$db->bind_param("i", $product_id);
 		$db->execute();
 		$product_hash = "";
-		$db->stmt->bind_result($product_hash);
+		$db->bind_result($product_hash);
 		$db->fetch();
 		return $product_hash;
 	}
@@ -450,7 +450,7 @@ class Store
 		$db->stmt->bind_param("s", $paymentIntent_id);
 		$db->execute();
 		$result = 0;
-		$db->stmt->bind_result($result);
+		$db->bind_result($result);
 		$db->fetch();
 		return $result;
 	}
@@ -471,7 +471,7 @@ class Store
 		$db->prepare("SELECT id, products_id, phone AS products_id FROM orders WHERE source_id=?");
 		$db->bind_param("s", $payment_intent_id);
 		$db->execute();
-		$db->stmt->bind_result($order_id, $product_id, $phone);
+		$db->bind_result($order_id, $product_id, $phone);
 
 		if ($db->fetch() === NULL) {
 			throw new ProductNotFoundException();
@@ -537,7 +537,7 @@ class Store
 		$db->bind_param("s", $paymentIntent_id);
 		$db->execute();
 		$db->fetch();
-		$db->stmt->bind_result($order_status);
+		$db->bind_result($order_status);
 		if ($order_status !== 'FINALIZED' && $order_status !== 'DELIVERED' && $order_status !== 'FAILED') {
 			throw new OrderNotFoundException();
 		}
@@ -558,7 +558,7 @@ class Store
 		$db->bind_param("i", $order_id);
 		$db->execute();
 		$result = 0;
-		$db->stmt->bind_result($result);
+		$db->bind_result($result);
 		$db->fetch();
 		if ($result !== 0 && $result !== 1) {
 			throw new \Exception("Unexpected value received $result");
@@ -732,7 +732,7 @@ class Store
 		$db->prepare($sql);
 		$db->bind_param("ss", $product_hash, $phone);
 		$db->execute();
-		$db->stmt->bind_result($result);
+		$db->bind_result($result);
 		$db->fetch();
 		return $result;
 	}

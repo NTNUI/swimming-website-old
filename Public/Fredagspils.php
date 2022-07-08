@@ -11,7 +11,7 @@ $role_superadmin = 6;
 $db->prepare("SELECT users.name, beers.date FROM friday_beer as beers JOIN users ON users.id = beers.user_id WHERE (beers.date > ? AND users.role IN ($role_board_member, $role_cashier, $role_superadmin)) ORDER BY beers.user_id, beers.date");
 $db->bind_param("s", date("Y-m-d", $genfors));
 $db->execute();
-$db->stmt->bind_result($username, $date);
+$db->bind_result($username, $date);
 $result = [];
 while ($db->fetch()) {
 	$result[$username][] = $date;

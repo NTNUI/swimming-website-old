@@ -11,9 +11,9 @@ if (isset($_GET["register"])) {
 	$db->prepare("SELECT id FROM users WHERE username=?");
 	$db->bind_param("s", $username);
 	$db->execute();
-	$db->stmt->bind_result($id);
+	$db->bind_result($id);
 	if ($db->fetch()) {
-		$db->stmt->close();
+		$db->close();
 		// Generate friday
 		$last_friday = date("N") == 5 ? "today" : "last friday";
 		$friday = date("Y-m-d", strtotime($last_friday));
@@ -22,7 +22,7 @@ if (isset($_GET["register"])) {
 		$db->bind_param("is", $id, $friday);
 		$db->execute();
 		if (!$db->fetch()) {
-			$db->stmt->close();
+			$db->close();
 			$db->prepare("INSERT INTO friday_beer (user_id, date) VALUES (?, ?)");
 			$db->bind_param("is", $id, $friday);
 			$db->execute();
@@ -38,7 +38,7 @@ if (isset($_GET["register"])) {
 	$db = new DB("web");
 	$db->prepare("SELECT users.username, beers.date FROM friday_beer as beers JOIN users ON users.id = beers.user_id WHERE role IN (2, 5, 6)");
 	$db->execute();
-	$db->stmt->bind_result($username, $date);
+	$db->bind_result($username, $date);
 	$result = [];
 	while ($db->fetch()) {
 		$result[$username][] = $date;

@@ -217,7 +217,7 @@ class Authenticator
         $db->bind_param("s", $username);
         $db->execute();
         $name = "";
-        $db->stmt->bind_result($name);
+        $db->bind_result($name);
         if ($db->fetch() === NULL) {
             throw new UserNotFoundException();
         }
@@ -243,7 +243,7 @@ class Authenticator
         $password_hash = "";
         $password_date = "";
         $name = "";
-        $db->stmt->bind_result($name, $password_hash, $password_date);
+        $db->bind_result($name, $password_hash, $password_date);
         if ($db->fetch() === NULL) {
             throw new UserNotFoundException();
         }
@@ -273,7 +273,7 @@ class Authenticator
         $db->prepare("SELECT username FROM users WHERE id=?");
         $db->bind_param("i", $user_id);
         $db->execute();
-        $db->stmt->bind_result($username);
+        $db->bind_result($username);
         if ($db->fetch() === NULL) {
             throw new UserNotFoundException();
         }
@@ -323,7 +323,7 @@ class Authenticator
         $db->bind_param("s", $username);
         $result = 0;
         $db->execute();
-        if (!$db->stmt->bind_result($result)) {
+        if (!$db->bind_result($result)) {
             log::die("Could not bind results", __FILE__, __LINE__);
         }
         $db->fetch();

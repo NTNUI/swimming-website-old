@@ -244,7 +244,7 @@ function get_users_with_role_id(int $role_id): array
 	$db->bind_param("i", $role_id);
 	$db->execute();
 	$user_id = 0;
-	$db->stmt->bind_result($user_id);
+	$db->bind_result($user_id);
 	$result = [];
 	while ($db->fetch()) {
 		array_push($result, $user_id);
@@ -266,7 +266,7 @@ function get_roles(): array
 	$db->execute();
 	$user_id = "";
 	$role_name = "";
-	$db->stmt->bind_result($user_id, $role_name);
+	$db->bind_result($user_id, $role_name);
 	$roles = [];
 	while ($db->fetch()) {
 		$roles[$user_id] = $role_name;
@@ -288,7 +288,7 @@ function role_exists(string $name_role): bool
 	$db->bind_param("s", $name_role);
 	$db->execute();
 	$result = 0;
-	$db->stmt->bind_result($result);
+	$db->bind_result($result);
 	$db->fetch();
 	// convert amount to a boolean
 	return (bool)$result;
@@ -307,7 +307,7 @@ function role_id_to_usernames(int $role_id): array
 	$db->bind_param("i", $role_id);
 	$db->execute();
 	$result = [];
-	$db->stmt->bind_result($result);
+	$db->bind_result($result);
 	$db->fetch();
 	return $result;
 }
@@ -325,7 +325,7 @@ function role_id_to_string(int $role_id): string
 	$db->bind_param("i", $role_id);
 	$db->execute();
 	$result = "";
-	$db->stmt->bind_result($result);
+	$db->bind_result($result);
 	$db->fetch();
 	return $result;
 }
@@ -343,7 +343,7 @@ function role_string_to_id(string $role_name): int
 	$db->bind_param("s", $role_name);
 	$db->execute();
 	$result = 0;
-	$db->stmt->bind_result($result);
+	$db->bind_result($result);
 	$db->fetch();
 	return $result;
 }
@@ -361,7 +361,7 @@ function username_to_user_id(string $username): int
 	$db->bind_param("s", $username);
 	$db->execute();
 	$result = 0;
-	$db->stmt->bind_result($result);
+	$db->bind_result($result);
 	return $result;
 }
 
@@ -378,7 +378,7 @@ function user_id_to_username(int $user_id): string
 	$db->bind_param("i", $user_id);
 	$db->execute();
 	$result = "";
-	$db->stmt->bind_result($result);
+	$db->bind_result($result);
 	return $result;
 }
 
@@ -395,7 +395,7 @@ function user_id_to_name(int $user_id): string
 	$db->bind_param("i", $user_id);
 	$db->execute();
 	$result = "";
-	$db->stmt->bind_result($result);
+	$db->bind_result($result);
 	$db->fetch();
 	return $result;
 }
@@ -413,7 +413,7 @@ function user_id_to_user_role(int $user_id): int
 	$db->bind_param("i", $user_id);
 	$db->execute();
 	$result = 0;
-	$db->stmt->bind_result($result);
+	$db->bind_result($result);
 	return $result;
 }
 
@@ -434,7 +434,7 @@ function print_user_matrix()
 	$user_id = 0;
 	$username = "";
 	$role_id = 0;
-	$db->stmt->bind_result($user_id, $username, $name, $role_id);
+	$db->bind_result($user_id, $username, $name, $role_id);
 
 	// create a row with actions for each user. 
 ?>

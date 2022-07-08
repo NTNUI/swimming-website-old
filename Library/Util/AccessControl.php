@@ -32,7 +32,7 @@ class AccessControl
 
 		$type =  "";
 		$pattern = "";
-		$db->stmt->bind_result($type, $pattern);
+		$db->bind_result($type, $pattern);
 		while ($db->fetch()) {
 			$this->group_rules[] = ["type" => $type, "pattern" => $pattern];
 		}

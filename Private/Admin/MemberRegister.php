@@ -36,7 +36,7 @@ if (Authenticator::is_logged_in()) {
 	$db->prepare($sql);
 
 	$db->execute();
-	$db->stmt->bind_result($id, $first_name, $surname, $registration_date, $email, $licensee);
+	$db->bind_result($id, $first_name, $surname, $registration_date, $email, $licensee);
 	while ($db->fetch()) {
 		$surname = htmlspecialchars($surname);
 		$first_name = htmlspecialchars($first_name);

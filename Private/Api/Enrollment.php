@@ -224,7 +224,7 @@ $db->bind_param("s", $input["phone"]);
 $db->execute();
 $result = 0;
 $approved_date;
-$db->stmt->bind_result($approved_date, $result);
+$db->bind_result($approved_date, $result);
 $db->fetch();
 $input["user_exists"] = (bool)$result;
 $input["approved_date"] = isset($approved_date) ? $approved_date : NULL;
@@ -245,12 +245,12 @@ $input["CIN_hash"] = hash("sha256", $input["birthDate"] . $input["phone"] . $inp
 $db->bind_param("s", $input["CIN_hash"]);
 $db->execute();
 $CIN = 0;
-$db->stmt->bind_result($CIN);
+$db->bind_result($CIN);
 $db->fetch();
 $input["CIN"] = $CIN;
 if ($CIN && !$input["dryrun"]) {
     // update last valid date for CIN number
-    $db->stmt->close();
+    $db->close();
     $db->prepare("UPDATE member_CIN SET last_used=NOW() WHERE NSF_CIN=?");
     $db->bind_param("i", $CIN);
     $db->execute();

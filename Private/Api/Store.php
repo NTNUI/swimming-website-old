@@ -342,7 +342,7 @@ function handle_get(Store &$store, Response &$response): void
 			$phone = "";
 			$comment = "";
 			$status = "";
-			$db->stmt->bind_result($order_id, $name, $email, $phone, $comment, $status);
+			$db->bind_result($order_id, $name, $email, $phone, $comment, $status);
 			$result = [];
 			while ($db->fetch()) {
 				$row = [
@@ -370,7 +370,7 @@ function handle_get(Store &$store, Response &$response): void
 			$group_id = 0;
 			$name = "";
 			$groups = [];
-			$db->stmt->bind_result($group_id, $name);
+			$db->bind_result($group_id, $name);
 			while ($db->fetch()) {
 				$groups[$group_id] = $name;
 			}

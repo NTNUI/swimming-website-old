@@ -12,7 +12,7 @@ $roles = array(); {
 	$db->execute();
 	$role_id = 0;
 	$role_name = "";
-	$db->stmt->bind_result($role_id, $role_name);
+	$db->bind_result($role_id, $role_name);
 	while ($db->fetch()) {
 		$roles[$role_id] = $role_name;
 	}
@@ -26,7 +26,7 @@ $users = array(); {
 	$db->execute();
 	$user_id = 0;
 	$username = "";
-	$db->stmt->bind_result($user_id, $username);
+	$db->bind_result($user_id, $username);
 	while ($db->fetch()) {
 		$users[$user_id] = $username;
 	}
@@ -86,7 +86,7 @@ if ($role_id !== 0) {
 	$db->prepare("SELECT id, type, page FROM role_access WHERE role=?");
 	$db->bind_param("i", $role_id);
 	$db->execute();
-	$db->stmt->bind_result($role_access_id, $type, $page);
+	$db->bind_result($role_access_id, $type, $page);
 	while ($db->fetch()) {
 		$role_rules[] = array("id" => $role_access_id, "type" => $type, "page" => $page);
 	}

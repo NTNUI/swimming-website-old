@@ -121,7 +121,7 @@ function patch_cin(int $member_id, int $cin): void
     $birth_date = NULL;
     $phone = NULL;
     $gender = NULL;
-    $db->stmt->bind_result($birth_date, $phone, $gender);
+    $db->bind_result($birth_date, $phone, $gender);
     $db->stmt->fetch();
     if (empty($birth_date) || empty($phone) || empty($gender)) {
         throw new \Exception("Could not retrieve personal info");
@@ -157,11 +157,7 @@ function set_forwarded(int $cin_number): void
     $db->execute();
 }
 
-/**
- * Get all members with missing CIN number
- *
- * @return array
- */
+
 function get_missing(): array
 {
     $db = new DB("member");

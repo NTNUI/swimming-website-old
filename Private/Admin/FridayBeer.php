@@ -9,7 +9,7 @@ $db->prepare("SELECT users.username, users.name, friday_beer.hadbeer FROM users 
 $date = date("Y-m-d", strtotime($last_friday));
 $db->bind_param("s", $date);
 $db->execute();
-$db->stmt->bind_result($username, $name, $hadbeer);
+$db->bind_result($username, $name, $hadbeer);
 while ($db->fetch()) {
 	$nobeer = "nobeer" . ($hadbeer ? " hidden" : "");
 	$beer = "beer" . ($hadbeer ? "" : " hidden");

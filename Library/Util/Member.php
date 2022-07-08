@@ -33,7 +33,7 @@ class Member
         $first_name = "";
         $surname = "";
         $email = "";
-        $db->stmt->bind_result($first_name, $surname, $email);
+        $db->bind_result($first_name, $surname, $email);
         $db->fetch();
         log::message("Info: New member $first_name $surname approved", __FILE__, __LINE__);
 
@@ -65,7 +65,7 @@ class Member
         $db->bind_param("i", $member_id);
         $db->execute();
         $phone = "";
-        $db->stmt->bind_result($phone);
+        $db->bind_result($phone);
         $db->fetch();
         return $phone;
     }
@@ -83,7 +83,7 @@ class Member
         $db->prepare("SELECT approved_date FROM member WHERE phone=?");
         $db->bind_param("s", $phone);
         $db->execute();
-        $db->stmt->bind_result($approved_date);
+        $db->bind_result($approved_date);
         $db->fetch();
         return (bool)$approved_date;
     }
