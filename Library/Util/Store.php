@@ -196,8 +196,8 @@ class Store
 			}
 
 			// add timezone info
-			$available_from = $available_from ?? new DateTime($available_from, new DateTimeZone("Europe/Oslo"));
-			$available_until = $available_until ?? new DateTime($available_until, new DateTimeZone("Europe/Oslo"));
+			$available_from = $available_from === NULL ? NULL : new DateTime($available_from, new DateTimeZone("Europe/Oslo"));
+			$available_until = $available_until === NULL ? NULL: new DateTime($available_until, new DateTimeZone("Europe/Oslo"));
 
 			// create date with time zone info
 			$result[] = array(
@@ -207,8 +207,8 @@ class Store
 				"description" => $description,
 				"price" => intval($price) / 100,
 				"price_member" => intval($price_member) / 100,
-				"available_from" => gettype($available_from) === "NULL" ? NULL : $available_from->getTimestamp(),
-				"available_until" => gettype($available_until) === "NULL" ? NULL : $available_until->getTimestamp(),
+				"available_from" => $available_from === NULL ? NULL : $available_from->getTimestamp(),
+				"available_until" => $available_until === NULL ? NULL : $available_until->getTimestamp(),
 				"max_orders_per_customer_per_year" => $max_orders_per_customer_per_year,
 				"require_phone" => $require_phone,
 				"require_email" => $require_email,
