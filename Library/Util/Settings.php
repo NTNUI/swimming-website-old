@@ -12,7 +12,7 @@ class Settings
     private string $license_product_hash;
     private string $translation_directory;
     private const COOKIE_LIFETIME = 14400; // 4 hours
-    private self $instance = NULL;
+    private static ?self $instance = NULL;
 
 
     /**
