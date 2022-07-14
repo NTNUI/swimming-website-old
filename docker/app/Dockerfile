@@ -7,16 +7,16 @@ RUN apk add \
     openssl \
     apache2 \
     apache2-ssl \
-    php8 \
-    php8-apache2 \
-    php8-common \
-    php8-embed \
-    php8-session \
-    php8-json \
-    php8-mysqli \
-    php8-iconv \
-    php8-curl \
-    php8-mbstring \
+    php81 \
+    php81-apache2 \
+    php81-common \
+    php81-embed \
+    php81-session \
+    php81-json \
+    php81-mysqli \
+    php81-iconv \
+    php81-curl \
+    php81-mbstring \
     neovim \
     micro \
     perl \
