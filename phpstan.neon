@@ -1,0 +1,19 @@
+includes:
+	- phpstan-baseline.neon
+parameters:
+	level: 1
+	paths:
+		- index.php
+		- Library
+		- Private
+	excludePaths:
+		- Private/Admin
+		- Library/Templates
+		- Library/Helpers
+		- Public
+	exceptions:
+		#implicitThrows: false
+		check:
+			tooWideThrowType: true
+		uncheckedExceptionRegexes:
+			- '#^Exception$#' # Don't check Exception class handling only derived classes
