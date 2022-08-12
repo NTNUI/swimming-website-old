@@ -2,44 +2,28 @@
 
 declare(strict_types=1);
 
-define("HTTP_OK", 200);
-define("HTTP_INVALID_REQUEST", 400);
-define("HTTP_FORBIDDEN", 403);
-define("HTTP_NOT_FOUND", 404);
-define("HTTP_NOT_IMPLEMENTED", 501);
-define("HTTP_INTERNAL_SERVER_ERROR", 500);
+use Lukasoppermann\Httpstatus\Httpstatuscodes;
+use Lukasoppermann\Httpstatus\HttpStatus;
 
+class Response implements Httpstatuscodes
+{
+    public $HttpStatus = new HttpStatus();
+    public int $code;
+    /** @var ?array<mixed> $data */
+    public ?array $data = NULL;
 
-class Response{
-    public int $code = HTTP_INTERNAL_SERVER_ERROR;
-    public array $data = ["error" => true, "message" => "no data"];
-    
-    public function send(){
-        header("Content-type: application/json; charset=UTF-8");
-        http_response_code($this->code);
-        echo json_encode($this->data);
-    }
-
-    public function error(string $message, int $code = HTTP_INVALID_REQUEST){
-        $this->code = $code;
-        $this->data = [
-            "error" => true,
-            "success" => false,
-            "message" => $message
-        ];
-    }
-
-    public function success(string $message = "", int $code = HTTP_OK){
-        $this->code = $code;
-        $this->data = [
-            "error" => false,
-            "success" => true,
-            "message" => $message
-        ];
-    }
-
-    public function __construct()
+    public function sendJson(): void
     {
+        header("Content-type: application/json; charset=UTF-8");
+        if (!isset($this->code)) {
+            throw new Exception("response code not set");
+        }
+        http_response_code($this->code);
+        header($_SERVER["SERVER_PROTOCOL"] . " $this->code " . $this->HttpStatus->getReasonPhrase($this->code));
+        if (!empty($this->data)) {
+            echo json_encode($this->data, JSON_PRETTY_PRINT);
+        }
+        $this->data = NULL;
     }
 
 }

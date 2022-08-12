@@ -1,57 +1,60 @@
 <?php
+
+/**
+ * deprecated
+ */
+
 declare(strict_types=1);
 
 // Documentation: https://stripe.com/docs/webhooks
 require_once("Library/Util/Store.php");
+require_once("Library/Util/Order.php");
 
-$store = new Store("en");
+use Stripe\PaymentIntent;
+use libphonenumber\PhoneNumberUtil;
 
-$secret = $_ENV["STRIPE_SIGNING_KEY"];
-
-$data = @file_get_contents("php://input");
-$sig_header = $_SERVER['HTTP_STRIPE_SIGNATURE'];
-$event = NULL;
+$response = new Response();
 
 try {
-
+	if (argsURL("SERVER", "REQUEST_METHOD") !== "POST") {
+		throw new \Exception("accepting only post methods");
+	}
+	$secret = $_ENV["STRIPE_SIGNING_KEY"];
+	$data = file_get_contents("php://input");
+	if ($data === false) {
+		throw new \Exception();
+	}
+	$sigHeader = argsURL("SERVER", "HTTP_STRIPE_SIGNATURE");
+	if (empty($sigHeader)) {
+		throw new \InvalidArgumentException("signature invalid");
+	}
 	$event = \Stripe\Webhook::constructEvent(
 		$data,
-		$sig_header,
+		$sigHeader,
 		$secret
 	);
-} catch (\stripe\Exception\UnexpectedValueException $e) {
-	log::client_error("Bad Request", __FILE__, __LINE__);
-	exit();
-} catch (\stripe\Exception\SignatureVerificationException $e) {
-	log::client_error("Wrong signature", __FILE__, __LINE__);
-	exit();
-}
-try {
+
 	switch ($event["type"]) {
 		case "source.canceled":
 		case "charge.failed":
-			log::message("Info: Charge failed", __FILE__, __LINE__);
-			$store->set_order_status($event["data"]["object"]["payment_intent"], "FAILED");
+			Order::fromPaymentIntent(paymentIntent::retrieve($event["data"]["object"]["payment_intent"]))->setOrderStatus(OrderStatus::FAILED);
+			$response->code = Response::HTTP_OK;
 			break;
 		case "charge.succeeded":
-			log::message("Info: Charge succeeded", __FILE__, __LINE__);
-			$store->finalize_order($event["data"]["object"]["payment_intent"]);
-			if ($event["data"]["object"]["amount"] == 76500 && $event["data"]["object"]["description"] == "License in the NSF") {
-				// temporary hardcoded member approval
-				log::message("Info: Approving member with email:" . $event["data"]["object"]["receipt_email"]);
-				// FIXME: Member requires phone not email
-				Member::approve($event["data"]["object"]["receipt_email"]);
+			Order::fromPaymentIntent(paymentIntent::retrieve($event["data"]["object"]["payment_intent"]))->setOrderStatus(OrderStatus::FINALIZED);
+			if ($event["data"]["object"]["productHash"] === Settings::getInstance()->getLicenseProductHash()) {
+
+				$phone = PhoneNumberUtil::getInstance()->parse($event["data"]["object"]["phone"]);
+				Member::fromPhone($phone)->approveEnrollment();
 			}
+			$response->code = Response::HTTP_OK;
 			break;
 		default:
-			log::message("[Warning]: Unhandled Stripe callback: " . $event["type"] , __FILE__, __LINE__);
+			$response->code = Response::HTTP_BAD_REQUEST;
 			break;
 	}
-} catch (Exception $e) {
-	log::message($e, __FILE__, __LINE__);
-	print($e);
-	http_response_code(500);
-	return;
+} catch (\Throwable $ex) {
+	$response->code = Response::HTTP_INTERNAL_SERVER_ERROR;
 }
 
-http_response_code(200);
+$response->sendJson();

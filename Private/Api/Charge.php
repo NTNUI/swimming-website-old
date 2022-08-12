@@ -2,78 +2,107 @@
 
 declare(strict_types=1);
 
-require_once("Library/Util/Store.php");
 require_once("Library/Util/Api.php");
+require_once("Library/Util/Order.php");
+require_once("Library/Util/Product.php");
+require_once("Library/Util/Member.php");
 
+use libphonenumber\PhoneNumberUtil;
 use Stripe\Exception\ApiErrorException as StripeApiErrorException;
+use Stripe\PaymentIntent;
 
 
+$response = new Response();
 try {
-	$response = new Response();
-	$store = new Store("en");
-	$data = json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR);
+	\Stripe\Stripe::setApiKey($_ENV["STRIPE_SECRET_KEY"]);
 
-	// 3D secure charge
-	if (isset($data["payment_intent_id"])) {
-		$intent = $store->get_intent_by_id($data["payment_intent_id"]);
-		$intent->confirm();
-		
-		log::message(json_encode($intent));
+	$file_content = file_get_contents("php://input");
+	if ($file_content === false) {
+		throw new \Exception("could not read php://input");
+	}
 
-		if ($intent->status === "requires_action" && $intent->next_action->type === "use_stripe_sdk") {
-			// 3d secure step 1: give client secret	
-			$response->data = [
-				"requires_action" => true,
-				"payment_intent_client_secret" => $intent->client_secret,
-			];
-		} else if ($intent->status == "succeeded") {
-			// 3d secure step 2: save successful order
-			$store->finalize_order($intent["id"]);
-			$response->data = [
-				"success" => true,
-				"error" => false,
-				"message" => "Purchase succeeded.\nYou've been charged " . $intent["amount"] / 100 . " NOK",
-			];
-		} else {
-			log::message("Error: payment intent with id: " . $intent["id"] . "returned unexpected value.", __FILE__, __LINE__);
-			throw new \Exception("Unexpected payment intent status");
+	$request = json_decode($file_content, true, flags: JSON_THROW_ON_ERROR);
+
+	$intent = new \Stripe\PaymentIntent();
+
+	if (isset($request["payment_method_id"])) {
+
+
+		if (!array_key_exists("order", $request)) {
+			throw new \InvalidArgumentException("order is not set");
 		}
 
-		// non 3d secure charge
-	} elseif (isset($data["payment_method_id"])) {
-		// TODO: refactor create_order to accept order object
-		$response->data = $store->create_order($data["product_hash"], $data["payment_method_id"], $data["customer"], $data["comment"] ?? NULL);
+		if (!array_key_exists("customer", $request["order"])) {
+			throw new \InvalidArgumentException("customer is not set");
+		}
+
+		// stripe expects clients to send full name in name property. Everywhere else fullName is used.
+		foreach (["name", "email"] as $key) {
+			if (!array_key_exists($key, $request["order"]["customer"])) {
+				throw new \InvalidArgumentException("missing $key inside order");
+			}
+		}
+
+		if (!array_key_exists("productHash", $request["order"]["product"])) {
+			throw new \InvalidArgumentException("productHash is not set");
+		}
+		$product = Product::fromProductHash($request["order"]["product"]["productHash"]);
+
+		$phone = NULL;
+		if($request["order"]["customer"]["phone"]){
+			$phone = PhoneNumberUtil::getInstance()->parse($request["order"]["customer"]["phone"]);
+		}
+		$customer = new Customer($request["order"]["customer"]["name"], $request["order"]["customer"]["email"], $phone);
+
+		$order = Order::new($customer, $product, $request["payment_method_id"], $request["order"]["comment"] ?? "", OrderStatus::PLACED);
+		$intent = PaymentIntent::retrieve($order->intent_id);
+	} elseif (isset($request["payment_intent_id"])) {
+
+		$intent = PaymentIntent::retrieve($request["payment_intent_id"]);
+		$intent->confirm();
 	} else {
-		// todo: elseif customer and product attached: create a new paymentIntent, return client secret
-		throw new \InvalidArgumentException("Missing parameter, Expected payment_intent_id or payment_method_id");
+		throw new \InvalidArgumentException("payment_intent_id or payment_method_id needs to be set");
 	}
-	$response->code = HTTP_OK;
-	$response->send();
-	return;
 
-} catch (StripeApiErrorException | \JsonException | \InvalidArgumentException | StoreException $e) {
-	// Expected stripe errors that should be shown to users
-	$response = new Response();
-	$response->code = HTTP_INVALID_REQUEST;
+	if ($intent["status"] === "requires_action" && $intent["next_action"]["type"] === "use_stripe_sdk") {
+
+		$response->data = [
+			"requires_action" => true,
+			"payment_intent_client_secret" => $intent["client_secret"],
+		];
+	} else if ($intent["status"] === "succeeded") {
+
+		Order::fromPaymentIntent(PaymentIntent::retrieve($intent))->setOrderStatus(OrderStatus::FINALIZED);
+		$response->data = [
+			"success" => true,
+			"error" => false,
+			"message" => "Purchase succeeded.\nYou've been charged " . $intent["amount"] / 100 . " NOK",
+		];
+
+		// membership approval hook
+		if ($intent["metadata"]["productHash"] === Settings::getInstance()->getLicenseProductHash()) {
+			Member::fromPhone(PhoneNumberUtil::getInstance()->parse($request["order"]["customer"]["phone"]))->approveEnrollment();
+			$response->data["message"] .= "\nYour membership has been automatically approved.";
+			$response->data["redirect_url"] = "https://ntnui.slab.com/posts/welcome-to-ntnui-swimming-%F0%9F%92%A6-44w4p9pv";
+		}
+	}
+
+	$response->code = Response::HTTP_OK;
+} catch (StripeApiErrorException | \JsonException | \LogicException | StoreException | InvalidArgumentException $ex) {
+	$response->code = Response::HTTP_BAD_REQUEST;
 	$response->data = [
 		"error" => true,
 		"success" => false,
-		"message" => $e->getMessage(),
+		"message" => $ex->getMessage(),
+		"trace" => $ex->getTrace(),
 	];
-	$response->send();
-	return;
-
-} catch (Exception $e) {
-	// Unexpected errors on server
-	log::message(json_encode($e), __FILE__, __LINE__);
-
-	$response = new Response();
-	$response->code = HTTP_INTERNAL_SERVER_ERROR;
+} catch (\Throwable $ex) {
+	$response->code = Response::HTTP_INTERNAL_SERVER_ERROR;
 	$response->data = [
 		"error" => true,
 		"success" => false,
-		"message" => "Internal server error",
+		"message" => $ex->getMessage(),
+		"trace" => $ex->getTrace(),
 	];
-	$response->send();
-	return;
 }
+$response->sendJson();

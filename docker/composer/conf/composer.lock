@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "6b9a1bea56a6af8e3a056ae4f6857c68",
+    "content-hash": "4b41382a3f70df6a548b7283a7b5234e",
     "packages": [
         {
             "name": "giggsey/libphonenumber-for-php",
@@ -194,6 +194,64 @@
                 }
             ],
             "time": "2021-11-21T21:41:47+00:00"
+        },
+        {
+            "name": "lukasoppermann/http-status",
+            "version": "3.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/lukasoppermann/http-status.git",
+                "reference": "3dfb178f30c18865366b63f3c7a732397fe7f514"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/lukasoppermann/http-status/zipball/3dfb178f30c18865366b63f3c7a732397fe7f514",
+                "reference": "3dfb178f30c18865366b63f3c7a732397fe7f514",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.3.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^2.16",
+                "league/csv": "^7.1",
+                "php-coveralls/php-coveralls": "^2.4",
+                "phpunit/phpunit": "~9.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Lukasoppermann\\Httpstatus\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Lukas Oppermann",
+                    "email": "lukas@vea.re",
+                    "homepage": "http://vea.re",
+                    "role": "Developer"
+                }
+            ],
+            "description": "A minimal package for working with HTTP statuses.",
+            "homepage": "https://github.com/lukasoppermann/http-status",
+            "keywords": [
+                "httpstatus",
+                "status codes"
+            ],
+            "support": {
+                "issues": "https://github.com/lukasoppermann/http-status/issues",
+                "source": "https://github.com/lukasoppermann/http-status/tree/3.2.0"
+            },
+            "time": "2021-12-06T19:14:42+00:00"
         },
         {
             "name": "phpoption/phpoption",
@@ -668,5 +726,5 @@
     "platform-overrides": {
         "php": "8.1.2"
     },
-    "plugin-api-version": "2.3.0"
+    "plugin-api-version": "2.2.0"
 }

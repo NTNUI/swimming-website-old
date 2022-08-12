@@ -26,13 +26,13 @@ RUN apk add \
 WORKDIR /var/www/localhost/htdocs
 
 COPY img ./img
-COPY translations ./translations
+# COPY translations ./translations
 
 RUN rm index.html && \
     mkdir sessions
 # 100:101 is apache user
-RUN chown -R 100:101 sessions translations img
-RUN chmod -R 775 sessions translations img
+RUN chown -R 100:101 sessions img
+RUN chmod -R 775 sessions img
 
 # Logs are stored here. Faster access to logs when "docker exec -it app /bin/ash"
 WORKDIR /var/log/apache2/

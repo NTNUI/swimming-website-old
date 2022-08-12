@@ -4,16 +4,29 @@ declare(strict_types=1);
 
 class Settings
 {
+    /**
+     * associative array of emails
+     *
+     * @var array{leader: string, developer: string, analyst: string, coach: string, bot: string} $emails
+     */
     private array $emails;
-    private array $enrollment_settings;
-    private string $base_url;
-    private string $landing_page;
-    private string $language;
-    private string $license_product_hash;
-    private string $translation_directory;
+
+    /**
+     * associative array with enrollment settings
+     *
+     * @var array{  
+     *  open: "auto",
+     *  startMonth: string,
+     *  startDay: int,
+     *  endMonth: string,
+     *  endDay: int
+     * }|array{open: bool} $enrollmentSettings
+     */
+    private array $enrollmentSettings;
+    private string $baseUrl;
+    private string $licenseProductHash;
     private const COOKIE_LIFETIME = 14400; // 4 hours
     private static ?self $instance = NULL;
-
 
     /**
      * Create a new instance of Settings class. First call will run constructor
@@ -23,10 +36,10 @@ class Settings
      * @param string|null $config_path path to `settings.json`. Required on first call.
      * @return self the instance of Settings class 
      */
-    public static function get_instance(?string $config_path = NULL): self
+    public static function getInstance(?string $configPath = NULL): self
     {
         if (empty(self::$instance)) {
-            self::$instance = new self($config_path);
+            self::$instance = new self($configPath);
         }
         return self::$instance;
     }
@@ -37,20 +50,19 @@ class Settings
             throw new \Exception("file $path does not exists");
         }
 
-        $file_content = file_get_contents($path);
-        if (!$file_content) {
+        $fileContent = file_get_contents($path);
+        if (!$fileContent) {
             throw new \Exception("could not read contents of $path");
         }
 
-        $decoded = json_decode($file_content, true, flags: JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR);
+        $decoded = json_decode($fileContent, true, flags: JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR);
         $REQUIRED_KEYS = [
             "emails",
-            "baseurl",
-            "translations_dir",
+            "baseUrl",
             "emails",
             "enrollment",
             "defaults",
-            "license_product_hash",
+            "licenseProductHash",
         ];
         foreach ($REQUIRED_KEYS as $key) {
             if (!array_key_exists($key, $decoded)) {
@@ -64,40 +76,28 @@ class Settings
             "developer",
             "leader",
         ];
-        if (0 !== strpos($decoded["baseurl"], "https://")) {
-            throw new \Exception("decoded[baseurl] does not start with 'https://'. This will break links. decoded[baseurl] contains: " . $decoded["baseurl"]);
+        if (0 !== strpos($decoded["baseUrl"], "https://")) {
+            throw new \Exception("decoded[baseUrl] does not start with 'https://'. This will break links. decoded[baseUrl] contains: " . $decoded["baseUrl"]);
         }
-        $this->base_url = $decoded["baseurl"];
+        $this->baseUrl = $decoded["baseUrl"];
 
-        $emails_array = $decoded["emails"];
+        $emailsArray = $decoded["emails"];
         foreach ($REQUIRED_EMAIL_ROLES as $role) {
-            if (!array_key_exists($role, $emails_array)) {
+            if (!array_key_exists($role, $emailsArray)) {
                 throw new \Exception("key $role does not exists in emails");
             }
-            if (NULL === filter_var($emails_array[$role], FILTER_VALIDATE_EMAIL, FILTER_NULL_ON_FAILURE)) {
-                throw new \Exception("email " . $emails_array[$role] . " is not valid for role $role");
+            if (NULL === filter_var($emailsArray[$role], FILTER_VALIDATE_EMAIL, FILTER_NULL_ON_FAILURE)) {
+                throw new \Exception("email " . $emailsArray[$role] . " is not valid for role $role");
             }
         }
-        $this->emails = $emails_array;
+        /** @var array{leader: string, developer: string, analyst: string, coach: string, bot: string} $emailsArray */
+        $this->emails = $emailsArray;
 
-        $REQUIRED_DEFAULT_KEYS = [
-            "landing-page",
-            "language",
-        ];
-        foreach ($REQUIRED_DEFAULT_KEYS as $key) {
-            if (!array_key_exists($key, $decoded["defaults"])) {
-                throw new \Exception("key $key does not exists in settings['defaults']");
-            }
-        }
-        $this->language = $decoded["defaults"]["language"];
-        $this->landing_page = $decoded["defaults"]["landing-page"];
-
-        $this->enrollment_settings = $decoded["enrollment"];
-        $this->license_product_hash = $decoded["license_product_hash"];
-        $this->translation_directory = $decoded["translations_dir"];
+        $this->enrollmentSettings = $decoded["enrollment"];
+        $this->licenseProductHash = $decoded["licenseProductHash"];
     }
 
-    public function init_session(): void
+    public function initSession(): void
     {
         $err = session_save_path("sessions");
         if ($err === false) {
@@ -124,11 +124,20 @@ class Settings
             throw new \Exception("could not start session");
         }
     }
+    public function sessionDestroy(): void
+    {
+        if (!session_unset()) {
+            throw new Exception("could not unset session");
+        }
+        if (!session_destroy()) {
+            throw new Exception("could not destroy session");
+        }
+    }
 
-    public function test_settings(): void
+    public function testSettings(): void
     {
         // test access
-        foreach (["img/store", "/tmp", "sessions", "translations"] as $dir) {
+        foreach (["img/store", "/tmp", "sessions"] as $dir) {
             if (!is_writable($dir)) {
                 throw new \Exception("$dir is not writable");
             }
@@ -139,35 +148,35 @@ class Settings
             }
         }
     }
-    public function get_language(): string
+    public function getBaseurl(): string
     {
-        return $this->language;
+        return $this->baseUrl;
     }
-    public function get_landing_page(): string
+    public function getEmailAddress(string $role): string
     {
-        return $this->landing_page;
-    }
-    public function get_baseurl(): string
-    {
-        return $this->base_url;
-    }
-    public function get_email_address(string $role): string
-    {
-        if (!array_key_exists($role, ["developer", "analyst", "coach", "bot", "leader"])) {
-            throw new \Exception("email does not exists");
+        if (!in_array($role, ["developer", "analyst", "coach", "bot", "leader"])) {
+            throw new \Exception("$role email does not exists");
         }
         return $this->emails[$role];
     }
-    public function get_enrollment(): array
+
+    /**
+     * get enrollment settings
+     *
+     * @return array{  
+     *  open: "auto",
+     *  startMonth: string,
+     *  startDay: int,
+     *  endMonth: string,
+     *  endDay: int
+     * }|array{open: bool}
+     */
+    public function getEnrollment(): array
     {
-        return $this->enrollment_settings;
+        return $this->enrollmentSettings;
     }
-    public function get_license_product_hash(): string
+    public function getLicenseProductHash(): string
     {
-        return $this->license_product_hash;
-    }
-    public function get_translations_dir(): string
-    {
-        return $this->translation_directory;
+        return $this->licenseProductHash;
     }
 };

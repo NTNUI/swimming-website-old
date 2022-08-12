@@ -2,89 +2,653 @@
 
 declare(strict_types=1);
 
+require_once("Library/Util/Cin.php");
 require_once("Library/Util/Db.php");
+require_once("Library/Util/Gender.php");
+require_once("Library/Util/Hash.php");
+require_once("Library/Util/Log.php");
+
+use \libphonenumber\PhoneNumberUtil;
+use \libphonenumber\PhoneNumber;
+use \libphonenumber\PhoneNumberFormat;
+
+
+/**
+ * class Member
+ * 
+ * Create a new Member object by calling one of static constructors:
+ * - Member::new() creates a new member. New members are not active
+ * - Member::fromPhone() fetches one member from database by phone number
+ * - Member::fromId() fetches one member from database by row id
+ * default constructor is private and should only be called internally to guarantee that
+ * any instance of member correspond to a row in the database.
+ * 
+ * all modifiers are protected by login check using Authenticator class
+ *
+ */
 class Member
 {
+    const DATE_FORMAT = "Y-m-d H:i:s"; // https://www.php.net/manual/en/datetime.format.php
+    const TIME_ZONE = "Europe/Oslo";
+    const FILTER_OPTIONS_ZIP = [
+        "flag" => FILTER_NULL_ON_FAILURE,
+        "min_range" => 1000,
+        "max_range" => 9999
+    ];
+
+    #region constructor
 
     /**
-     * Approve member.
-     * Side effects:
-     * - log event
-     * - send the new member a confirmation email
-     * @param string $phone for the new member
-     * @return void
-     */
-    public static function approve(string $phone): void
-    {
-        if (!$phone) {
-            throw new InvalidArgumentException("phone is required");
-        }
-        // approve member
-        $db = new DB("member");
-        $db->prepare("UPDATE member SET approved_date=NOW() WHERE phone=?");
-        $db->bind_param("s", $phone);
-        $db->execute();
-        $db->reset();
-
-        // log success
-        $db->prepare("SELECT first_name, surname, email FROM member WHERE phone = ?");
-        $db->bind_param("s", $phone);
-        $db->execute();
-        $first_name = "";
-        $surname = "";
-        $email = "";
-        $db->bind_result($first_name, $surname, $email);
-        $db->fetch();
-        log::message("Info: New member $first_name $surname approved", __FILE__, __LINE__);
-
-        // send email
-        $subject = "NTNUI Swimming - membership approved";
-
-        $headers = "Confirmation of registration<br>";
-        $headers .= "<br>";
-        $headers .= "Congratulations, you have now a valid membership in NTNUI Swimming<br>";
-        $headers .= "Find information by visiting <a href='https://ntnui.slab.com/posts/welcome-to-ntnui-swimming-%F0%9F%92%A6-44w4p9pv'>this</a> link<br>";
-        $headers .= "<br>";
-        $headers .= "<br>";
-        $headers .= "Love from NTNUI Swimming";
-
-        // send mail
-        $mail_send_success = mail($email, $subject, $headers, "Content-type: text/html; charset=utf-8");
-        if (!$mail_send_success) {
-            // throw new \Exception("Could not send email");
-            // local testing cannot (and shouldn't) send random emails
-            log::message("[Warning]: failed sending approval mail", __FILE__, __LINE__);
-        }
-    }
-
-    public static function get_phone(int $member_id)
-    {
-        $db = new DB("member");
-        $sql = "SELECT phone FROM member WHERE id=?";
-        $db->prepare($sql);
-        $db->bind_param("i", $member_id);
-        $db->execute();
-        $phone = "";
-        $db->bind_result($phone);
-        $db->fetch();
-        return $phone;
-    }
-
-
-    /**
-     * Is customer with @param phone has a valid membership
+     * constructor
+     * 
+     * Constructs a new Member instance. Validates input upon creation
      *
-     * @param string $phone 
-     * @return boolean true if phone number has an active membership this year
+     * @param string $name
+     * @param DateTime $birthDate
+     * @param PhoneNumber $phone
+     * @param Gender $gender
+     * @param string $email
+     * @param string $address
+     * @param int $zip
+     * @param ?string $license
+     * @param ?DateTime $registrationDate
+     * @param ?DateTime $approvedDate
+     * @param bool $haveVolunteered
+     * @param bool $licenseForwarded
+     * @param ?int $cinDbRowId
+     * @param ?int $dbRowId
+     * 
+     * @throws MemberIsActiveException if a member already exists
+     * @throws InvalidArgumentException on input error
+     * @throws Exception on unrecoverable error
      */
-    public static function is_active(string $phone): bool
+    private function __construct(
+        private string $name,
+        private DateTime $birthDate,
+        private PhoneNumber $phone,
+        private Gender $gender,
+        private string $email,
+        private string $address,
+        private int $zip,
+        private ?string $license,
+        private DateTime $registrationDate = new DateTime('now', new DateTimeZone(self::TIME_ZONE)),
+        private ?DateTime $approvedDate = NULL,
+        private bool $haveVolunteered = false,
+        private bool $licenseForwarded = false,
+        private ?int $cinDbRowId = null,
+        private ?int $dbRowId = NULL
+    ) {
+        try {
+            if (self::exists($phone)) {
+                if (self::isActive($phone)) {
+                    throw new MemberIsActiveException();
+                }
+                // or should this also throw?
+                return self::fromPhone($phone);
+            }
+        } catch (MemberNotFoundException $_) {
+        }
+
+        // truncate strings
+        $name = htmlspecialchars(self::trimSpace($name));
+        $email = htmlspecialchars(self::trimSpace($email));
+        $address = htmlspecialchars(self::trimSpace($address));
+        $license = htmlspecialchars(self::trimSpace($license));
+
+
+        // validate ints
+        $zip = filter_var($zip, FILTER_VALIDATE_INT, self::FILTER_OPTIONS_ZIP);
+        $email = filter_var($email, FILTER_VALIDATE_EMAIL,  FILTER_NULL_ON_FAILURE);
+
+        // validate strings
+        if (strlen(self::getFirstName($name)) < 2) {
+            throw new \InvalidArgumentException("name too short");
+        }
+        if (strlen(self::getSurname($name)) < 3) {
+            throw new \InvalidArgumentException("name too short");
+        }
+        if (strlen($address) < 6) {
+            throw new \InvalidArgumentException("address too short");
+        }
+        if (strlen($name) > 40) {
+            throw new \InvalidArgumentException("name too long");
+        }
+        // Age validation
+        if (self::getAge($birthDate) < 18) {
+            throw new \InvalidArgumentException("user too young");
+        }
+
+        // licensee
+        $clubsPath = "assets/clubs.json";
+        $fileContents = file_get_contents($clubsPath);
+        if ($fileContents === false) {
+            throw new \Exception("could not read $clubsPath");
+        }
+        $clubs = NULL;
+        try {
+            $clubs = json_decode($fileContents, true, flags: JSON_THROW_ON_ERROR);
+        } catch (\JsonException $_) {
+            throw new \Exception(json_last_error_msg());
+        }
+
+        if (!in_array($license, $clubs, true) && $license === "NTNUI Triatlon" && $license !== "") {
+            throw new \InvalidArgumentException("license club does not exists");
+        }
+
+        // check for excising CIN number
+        $cinRowId = NULL;
+        try {
+            $memberHash = self::calculateHash($birthDate, $gender, $phone);
+            $cinRowId = Cin::updateLastUsedDate($memberHash);
+        } catch (CinNotFoundException $_) {
+            $cinRowId = NULL;
+        }
+
+        // block registration unless enrollment is open.
+        if (!enrollmentIsOpen(Settings::getInstance()->getEnrollment())) {
+            throw new \InvalidArgumentException("enrollment is currently closed");
+        }
+
+        $this->$name;
+        $this->gender = $gender;
+        $this->birthDate = $birthDate;
+        $this->phone = $phone;
+        $this->email = $email;
+        $this->address = $address;
+        $this->zip = $zip;
+        $this->license = $license;
+        $this->$cinRowId = $cinRowId;
+    }
+
+    public static function fromPhone(PhoneNumber $phone): self
     {
         $db = new DB("member");
-        $db->prepare("SELECT approved_date FROM member WHERE phone=?");
-        $db->bind_param("s", $phone);
+        $db->prepare("SELECT * FROM member where phone=?");
+
+        $db->bindParam("s", PhoneNumberUtil::getInstance()->format($phone, PhoneNumberFormat::E164));
         $db->execute();
-        $db->bind_result($approved_date);
-        $db->fetch();
-        return (bool)$approved_date;
+        $member = [];
+        $db->bindResult(
+            $member["memberId"],
+            $member["name"],
+            $member["gender"],
+            $member["birthDate"],
+            $member["phone"],
+            $member["email"],
+            $member["address"],
+            $member["zip"],
+            $member["licensee"],
+            $member["registrationDate"],
+            $member["approvedDate"],
+            $member["haveVolunteered"],
+            $member["licenseForwarded"],
+            $member["cinDbRowId"],
+        );
+        if ($db->fetch() === false) {
+            throw new MemberNotFoundException();
+        }
+        return new Member(
+            name: $member["name"],
+            birthDate: new DateTime($member["birthDate"], new DateTimeZone(self::TIME_ZONE)),
+            phone: PhoneNumberUtil::getInstance()->parse($member["phone"]),
+            gender: Gender::fromString($member["gender"]),
+            email: $member["email"],
+            address: $member["address"],
+            zip: $member["zip"],
+            license: $member["license"],
+            registrationDate: new DateTime($member["registrationDate"], new DateTimeZone(self::TIME_ZONE)),
+            approvedDate: new DateTime($member["approvedDate"], new DateTimeZone(self::TIME_ZONE)),
+            haveVolunteered: $member["haveVolunteered"],
+            licenseForwarded: $member["licenseForwarded"],
+            cinDbRowId: $member["cinDbRowId"],
+            dbRowId: $member["memberId"],
+        );
     }
+
+    public static function fromId(int $dbRowId): self
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+
+        $db = new DB("member");
+        $db->prepare("SELECT * FROM member WHERE id=?");
+        $db->bindParam("i", $dbRowId);
+        $db->execute();
+        $member = [];
+        $db->bindResult(
+            $member["memberId"],
+            $member["name"],
+            $member["gender"],
+            $member["birthDate"],
+            $member["phone"],
+            $member["email"],
+            $member["address"],
+            $member["zip"],
+            $member["licensee"],
+            $member["registrationDate"],
+            $member["approvedDate"],
+            $member["haveVolunteered"],
+            $member["licenseForwarded"],
+            $member["CIN"],
+        );
+        if ($db->fetch() === false) {
+            throw new MemberNotFoundException();
+        }
+        return new Member(
+            name: $member["name"],
+            birthDate: new DateTime($member["birthDate"], new DateTimeZone(self::TIME_ZONE)),
+            phone: PhoneNumberUtil::getInstance()->parse($member["phone"]),
+            gender: Gender::fromString($member["gender"]),
+            email: $member["email"],
+            address: $member["address"],
+            zip: $member["zip"],
+            license: $member["license"],
+            registrationDate: new DateTime($member["registrationDate"], new DateTimeZone(self::TIME_ZONE)),
+            approvedDate: new DateTime($member["approved_date"], new DateTimeZone(self::TIME_ZONE)),
+            haveVolunteered: $member["haveVolunteered"],
+            licenseForwarded: $member["licenseForwarded"],
+            cinDbRowId: $member["cinDbRowId"],
+            dbRowId: $member["memberId"],
+        );
+    }
+
+    public static function new(
+        string $name,
+        DateTime $birthDate,
+        PhoneNumber $phone,
+        Gender $gender,
+        string $email,
+        string $address,
+        int $zip,
+        ?string $license
+    ): self {
+        $member = new Member(
+            $name,
+            $birthDate,
+            $phone,
+            $gender,
+            $email,
+            $address,
+            $zip,
+            $license,
+        );
+        $db = new DB("member");
+        $sql = "INSERT INTO member (name, gender, birthDate, phone, email, address, zip, licensee, registrationDate) VALUES (?,?,?,?,?,?,?,?,?,NOW())";
+        $db->prepare($sql);
+        $birthDate = $birthDate->format("Y-m-d");
+        $gender = $gender->toString();
+        $phoneNumber = PhoneNumberUtil::getInstance()->format($phone, PhonenumberFormat::E164);
+        $db->bindParam(
+            "sssssssis",
+            $name,
+            $gender,
+            $birthDate,
+            $phoneNumber,
+            $email,
+            $address,
+            $zip,
+            $licensee
+        );
+        $db->execute();
+        $member->dbRowId = $db->insertedId();
+        return $member;
+    }
+
+    #endregion
+
+    #region getters
+    public function toArray(): array
+    {
+        return self::getByIdAsArray($this->dbRowId);
+    }
+
+    private function getHash(): Hash
+    {
+        return self::calculateHash($this->birthDate, $this->gender, $this->phone);
+    }
+
+    public function isMember(): bool
+    {
+        return isset($this->approvedDate);
+    }
+
+    #endregion
+
+    #region setters 
+    public function approveEnrollment(): void
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+        $this->setMembershipActive();
+        $this->sendApprovalEmail();
+    }
+
+    public function setLicenseForwarded(): void
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+        if (isset($this->licenseForwarded)) {
+            throw new \InvalidArgumentException("license has already been forwarded for this user. Call an admin");
+        }
+        if (!isset($this->cinDbRowId)) {
+            throw new \InvalidArgumentException("cin db row is not set");
+        }
+
+        // set approved date in db
+        $db = new DB("member");
+        $sql_update = <<<'SQL'
+        UPDATE member SET licenseForwarded=NOW() WHERE phone=?;
+        SQL;
+        $db->prepare($sql_update);
+        $phoneNumber = PhoneNumberUtil::getInstance()->format($this->phone, PhonenumberFormat::E164);
+        $db->bindParam("s", $phoneNumber);
+        $db->execute();
+
+        // this might cause data desync between this object and whatever is stored in db
+        $this->licenseForwarded = new DateTime();
+    }
+
+    public function setVolunteering(bool $state): void
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+
+        // set approved date in db
+        $db = new DB("member");
+        $sqlUpdate = <<<'SQL'
+        UPDATE member SET volunteering=? WHERE phone=?;
+        SQL;
+        $db->prepare($sqlUpdate);
+        $db->bindParam("i", (int)$state);
+        $db->execute();
+
+        $this->haveVolunteered = $state;
+    }
+
+    public function setCin(int $cin): void
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+        if (Cin::exists($cin)) {
+            Cin::updateLastUsedDate($this->getHash());
+            Cin::updateCin($cin, $this->getHash());
+        } else {
+            $this->cinDbRowId = Cin::create($cin, $this->getHash());
+            $db = new DB("member");
+            $db->prepare("UPDATE member SET cinId=? WHERE id=?");
+            $db->bindParam("ii", $this->cinDbRowId, $this->dbRowId);
+            $db->execute();
+        }
+    }
+
+    #endregion
+
+    #region handlers
+
+    public static function exists(PhoneNumber $phone): bool
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+        $db = new DB("member");
+        $sql = "SELECT COUNT(*) AS count FROM member WHERE phone=? GROUP BY approvedDate";
+        $db->prepare($sql);
+        $phoneNumber = \libphonenumber\PhoneNumberUtil::getInstance()->format($phone, PhonenumberFormat::E164);
+        $db->bindParam("s", $phoneNumber);
+        $db->execute();
+        $result = 0;
+        $db->bindResult($result);
+        $db->fetch();
+        return (bool)$result;
+    }
+
+    public function patchHandler(array $jsonObject): array
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+        $allowedPatches = ["volunteering", "cin"];
+        foreach ($jsonObject as $key) {
+            if (!in_array($key, $allowedPatches)) {
+                throw new \InvalidArgumentException("$key is not allowed");
+            }
+        }
+        if (array_key_exists("volunteering", $jsonObject)) {
+            $this->setVolunteering((bool)filter_var($jsonObject["volunteering"], FILTER_VALIDATE_BOOLEAN));
+        }
+        if (array_key_exists("cin", $jsonObject)) {
+            $this->setCin(Cin::create($jsonObject["cin"], $this->getHash()));
+        }
+        return [
+            "success" => true,
+            "error" => false,
+            "message" => "member successfully patched",
+        ];
+    }
+    public static function getAllAsArray(): array
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+        $sql = "SELECT * FROM member";
+        $members = self::fetchArray($sql);
+        foreach ($members as &$member) {
+            $member["licenseForwarded"] = (bool)$member["licenseForwarded"];
+        }
+        if (count($members) < 0) {
+            throw new MemberNotFoundException();
+        }
+        return $members;
+    }
+
+    public static function enroll(array $jsonRequest): array
+    {
+        Member::New(
+            name: $jsonRequest["name"],
+            birthDate: DateTime::createFromFormat(self::DATE_FORMAT, $jsonRequest["birthDate"], new DateTimeZone(self::TIME_ZONE)),
+            phone: PhoneNumberUtil::getInstance()->parse($jsonRequest["phone"]),
+            gender: Gender::fromString($jsonRequest["gender"]),
+            email: $jsonRequest["email"],
+            address: $jsonRequest["address"],
+            zip: (int)$jsonRequest["zip"],
+            license: $jsonRequest["license"],
+        );
+
+        return [
+            "success" => true,
+            "error" => false,
+            "message" => "membership registration successfully"
+        ];
+    }
+
+    public static function getAllActiveAsArray(): array
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+
+        $sql = "SELECT * FROM member WHERE approvedDate IS NOT NULL";
+        $members = self::fetchArray($sql);
+        if (count($members) < 1) {
+            throw new MemberNotFoundException();
+        }
+        return $members;
+    }
+
+    public static function getAllInactiveAsArray(): array
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+        $sql = "SELECT * FROM member WHERE approvedDate IS NULL";
+        $members = self::fetchArray($sql);
+        if (count($members) < 1) {
+            throw new MemberNotFoundException();
+        }
+        return $members;
+    }
+
+    #endregion
+
+    #region private
+
+    private static function getFirstName(string $name): string
+    {
+        return substr($name, 0, (strlen($name) - strpos(strrev($name), " ") - 1));
+    }
+
+    private static function getSurname(string $name): string
+    {
+        return substr($name, strlen($name) - strpos(strrev($name), " "));
+    }
+
+    private function getAge(): int
+    {
+        $now = new DateTime();
+        $interval = $now->diff($this->birthDate);
+        return $interval->y;
+    }
+
+    private static function calculateHash(DateTime $birthDate, Gender $gender, PhoneNumber $phone): Hash
+    {
+        $phoneString = PhoneNumberUtil::getInstance()->format($phone, PhoneNumberFormat::E164);
+        return new Hash($birthDate["birthDate"]->format("Y-m-d") . $phoneString . $gender->toString());
+    }
+
+    private static function trimSpace(string $text): string {
+        $text = trim($text);
+        while (true) {
+            $result = str_replace("  ", " ", $text);
+            if ($result === $text) {
+                return $text;
+            } else {
+                $text = $result;
+            }
+        }
+    }
+
+    private function setMembershipActive(): void
+    {
+        if (isset($this->approvedDate)) {
+            throw new Exception("member is already approved");
+        }
+
+        // set approved date in db
+        $db = new DB("member");
+        $sql_update = <<<'SQL'
+        UPDATE member SET approved_date=NOW() WHERE phone=?;
+        SQL;
+        $db->prepare($sql_update);
+        $phoneNumber = PhoneNumberUtil::getInstance()->format($this->phone, PhonenumberFormat::E164);
+        $db->bindParam("s", $phoneNumber);
+        $db->execute();
+
+        // this might cause data desync between this object and whatever is stored in db
+        $this->approvedDate = new DateTime();
+    }
+
+    private static function fetchArray(string $sql, ?string $bindTypes = NULL, ?mixed &$var1 = NULL, ?array &...$vars): array
+    {
+
+        $db = new DB("member");
+        $db->prepare($sql);
+        if (isset($bindTypes)) {
+            $db->bindParam($bindTypes, $var1, $args);
+        }
+        $db->execute();
+        $members = [];
+        $member = [];
+        $db->bindResult(
+            $member["MemberId"],
+            $member["name"],
+            $member["gender"],
+            $member["birthDate"],
+            $member["phone"],
+            $member["email"],
+            $member["address"],
+            $member["zip"],
+            $member["licensee"],
+            $member["registrationDate"],
+            $member["approvedDate"],
+            $member["haveVolunteered"],
+            $member["licenseForwarded"],
+            $member["CIN"],
+        );
+        while ($db->fetch()) {
+            array_push($members, $member);
+        }
+        return $members;
+    }
+
+
+
+    private static function isActive(PhoneNumber $phone): bool
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+        $db = new DB("member");
+        $sql = "SELECT approvedDate FROM member WHERE phone=?";
+        $db->prepare($sql);
+        $phoneNumber = \libphonenumber\PhoneNumberUtil::getInstance()->format($phone, PhonenumberFormat::E164);
+        $db->bindParam("s", $phoneNumber);
+        $db->execute();
+        $approvedDate = NULL;
+        $db->bindResult($approvedDate);
+        if (!$db->fetch()) {
+            throw new MemberNotFoundException();
+        }
+        return $approvedDate ?? false;
+    }
+
+    private static function getByIdAsArray(int $memberId): array
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+        $sql = "SELECT * FROM member WHERE id=?";
+        $members = self::fetchArray($sql, "i", $memberId);
+        if (count($members) < 1) {
+            throw new MemberNotFoundException();
+        }
+        return $members;
+    }
+
+    private function sendApprovalEmail(): void
+    {
+        if (!Authenticator::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+
+        $subject = "NTNUI Swimming - membership approved";
+        $from = Settings::getInstance()->getEmailAddress("bot");
+        $accountable = "svomming-medlem@ntnui.no"; // TODO: get from settings
+
+        $headers = <<<HEADERS
+        MIME-Version: 1.0
+        Content-type: text/html; charset=utf-8
+        From: NTNUI Swimming <"$from">
+        Reply-to: NTNUI Swimming Membership Accountable <$accountable>
+        HEADERS;
+
+        $bodyEmail = <<<'HTML'
+        Confirmation of registration
+    
+        Congratulations, you have now a valid membership in NTNUI Swimming!
+        All information about membership in NTNUI swimming is available through <a href='https://ntnui.slab.com/posts/welcome-to-ntnui-swimming-%F0%9F%92%A6-44w4p9pv'>this</a> link. Add it to book marks.
+
+        Love from NTNUI Swimming
+        
+        HTML;
+
+        // TODO: add mail service to devcontainer
+        @mail($this->email, $subject, nl2br($bodyEmail), str_replace("\n", "\r\n", $headers));
+    }
+    #endregion
+
 }

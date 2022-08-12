@@ -11,10 +11,25 @@ SET time_zone = "+00:00";
 CREATE DATABASE IF NOT EXISTS `svommer_member` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `svommer_member`;
 
+/*
+"id",
+"name",
+"gender",
+"birth_date",
+"phone",
+"email",
+"address",
+"zip",
+"licensee",
+"registration_date",
+"approved_date",
+"have_volunteered", 
+"license_forwarded",
+"cin_id",
+*/
 CREATE TABLE IF NOT EXISTS `member` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `first_name` text,
-  `surname` text,
+  `name` text,
   `gender` text,
   `birth_date` date DEFAULT NULL,
   `phone` varchar(15) NOT NULL,
@@ -26,10 +41,10 @@ CREATE TABLE IF NOT EXISTS `member` (
   `approved_date` date DEFAULT NULL COMMENT 'if date is set, then member is approved',
   `have_volunteered` tinyint(1) DEFAULT NULL COMMENT 'If true then this member has attended voulentary work',
   `license_forwarded` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'true if the license has been marked as forwarded to NSF',
-  `CIN` bigint(20) DEFAULT NULL COMMENT 'Customer identification number for NSF license payments',
+  `cin_id` int(11) DEFAULT NULL COMMENT, 
   PRIMARY KEY (`id`),
   UNIQUE KEY `phone` (`phone`),
-  UNIQUE KEY `CIN` (`CIN`)
+  UNIQUE KEY `cin_id` (`cin_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `member_CIN` (
@@ -70,7 +85,7 @@ CREATE TABLE IF NOT EXISTS `orders` (
   `source_id` text COMMENT 'intent_id',
   `charge_id` text COMMENT 'deprecated',
   `order_status` enum('PLACED','FINALIZED','DELIVERED','FAILED','REFUNDED') DEFAULT NULL,
-  `comment` text,
+  `comment` text default NULL,
   `timestamp` date NOT NULL COMMENT 'Timestamp of last order status change' DEFAULT NOW(),
   PRIMARY KEY (`id`),
   KEY `item_id` (`products_id`)

@@ -2,63 +2,45 @@
 
 declare(strict_types=1);
 
-// TODO: Add ability to disable crash alerts
-// Usage: log::message("Something important happen", __FILE__, __LINE__);
-// log will be visible on the root of the directory in php.log (settings are in .htaccess file)
-// remember to pass __FILE__ and __LINE__ arguments
-// Don't rely on log messages to be ordered in log! They will be from different users.
-// Recommend putting it inside conditionals that will crash the site.
-// TODO: add api friendly crasher. Return error and error message in json format (if logged in i guess)
-class log
+class Log
 {
-
-    // log event
-    static function message($message, $file = __FILE__, $line = __LINE__)
+    /**
+     * Log a message to file
+     *
+     * This function will log a message to log file with source file and line number on where the call has been made.
+     * 
+     * @param string|array<string> $message
+     * @return void
+     */
+    static function message(string|array $message): void
     {
-        error_log(basename($file) . ":" . $line . " " . $message);
-    }
+        // replace full file path with relative from project root
+        $ex = new Exception();
+        $file = str_replace($_SERVER["DOCUMENT_ROOT"] . "/", "", $ex->getTrace()[0]["file"]);
+        $line = $ex->getTrace()[0]["line"];
 
-    // Crash the server, write a log and alert the developer about the incident.
-    static function die($message, $file = __FILE__, $line = __LINE__, bool $api = false)
-    {
-        http_response_code(500);
-        error_log(basename($file) . ":" . $line . " " . $message);
-        error_log(print_r(debug_backtrace(), true));
-        mail(
-            Settings::get_instance()->get_email_address("developer"),
-            "Error on web server",
-            "Error occurred. Please check the logs. Have fun fixing bugs btw."
-        );
-        if ($api) {
-            json_encode(["error" => "true"]);
+        // print message
+        if (is_array($message)) {
+            foreach ($message as $key => $value) {
+                self::print("$key=$value", $file, $line);
+            }
         } else {
-            print("<script>alert('The site has crashed. The developers have now been informed and will resolve the issue as soon as possible. Sorry for the inconvenience.')</script>");
+            self::print($message, $file, $line);
         }
-        throw new \Exception($message);
     }
 
-    // return 400 Bad request to client and log the event
-    static function client_error($message = "Bad request", $file = __FILE__, $line = __LINE__)
+    private static function print(string $message, string $file, int $line): void
     {
-        http_response_code(400);
-        print($message);
-        error_log(basename($file) . ":", $line, $message);
-    }
-
-    // Return 403 Forbidden to client and log the event
-    static function forbidden($message = "Forbidden", $file = __FILE__, $line = __LINE__)
-    {
-        http_response_code(403);
-        print($message);
-        error_log(basename($file) . ":" . $line . " " . $message);
-        die();
-    }
-
-    // Log $message and javascript.alert($message) to the client
-    static function alert($message, $file = __FILE__, $line = __LINE__)
-    {
-        $message = htmlspecialchars($message);
-        error_log(basename($file) . ":" . $line . " " . $message);
-        print("<script>alert('$message')</script>");
+        $message_lines = explode("\n", $message);
+        if (count($message_lines) > 1) {
+            error_log("$file:$line");
+            foreach ($message_lines as $msg) {
+                error_log("$msg");
+            }
+            error_log(" ");
+        } else {
+            error_log("$file:$line $message");
+            error_log(" ");
+        }
     }
 }

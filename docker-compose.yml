@@ -5,8 +5,8 @@ services:
         container_name: composer
         command: [ "composer", "install" ]
         volumes:
-            - ./docker/composer/conf/composer.json:/app/composer.json:ro
-            - ./docker/composer/conf/composer.lock:/app/composer.lock:ro
+            - ./docker/composer/conf/composer.json:/app/composer.json
+            - ./docker/composer/conf/composer.lock:/app/composer.lock
             - ./docker/storage/vendor:/app/vendor
 
     app:
@@ -28,10 +28,12 @@ services:
             - ./docker/app/conf/.htaccess:/var/www/localhost/htdocs/.htaccess:ro
             - ./docker/app/conf/httpd.conf:/etc/apache2/httpd.conf:ro
             - ./docker/app/conf/settings.json:/var/www/localhost/htdocs/settings/settings.json:ro
+            - ./docker/app/conf/ssl.conf:/etc/apache2/conf.d/ssl.conf:ro
             - ./docker/storage/self_signed_certificate/server.crt:/etc/apache2/conf.d/server.crt
             - ./docker/storage/self_signed_certificate/server.key:/etc/apache2/conf.d/server.key
             - ./docker/storage/vendor:/var/www/localhost/htdocs/vendor:ro
             - ./index.php:/var/www/localhost/htdocs/index.php:ro
+            - ./translations:/var/www/localhost/htdocs/translations:ro
             - ./js:/var/www/localhost/htdocs/js:ro
             - ./Library:/var/www/localhost/htdocs/Library:ro
             - ./Private:/var/www/localhost/htdocs/Private:ro
