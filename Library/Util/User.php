@@ -62,7 +62,7 @@ class User
 		$db = new DB('web');
 		$db->prepare('DELETE FROM users WHERE id=?');
 		$id = $this->dbRowId;
-		$db->bind_param('i', $id);
+		$db->bindParam('i', $id);
 		$db->execute();
 		// hope this works
 		unset($this);
@@ -96,9 +96,9 @@ class User
 
 		$db = new DB('web');
 		$db->prepare('INSERT INTO users VALUES name=?, username=?');
-		$db->bind_param('ss', $name, $username);
+		$db->bindParam('ss', $name, $username);
 		$db->execute();
-		$user->DbRowId = $db->inserted_id();
+		$user->DbRowId = $db->insertedId();
 
 		$randomPassword = substr(md5((string)mt_rand()), 0, 9);
 
@@ -116,9 +116,9 @@ class User
 	{
 		$db = new DB('web');
 		$db->prepare('SELECT name, username, lastPassword FROM users WHERE id=?');
-		$db->bind_param('i', $dbRowId);
+		$db->bindParam('i', $dbRowId);
 		$db->execute();
-		$db->bind_result($name, $username, $lastPassword);
+		$db->bindResult($name, $username, $lastPassword);
 		if (!$db->fetch()) {
 			throw new UserNotFoundException();
 		}
@@ -130,9 +130,9 @@ class User
 	{
 		$db = new DB('web');
 		$db->prepare('SELECT id, name, lastPassword FROM users WHERE username=?');
-		$db->bind_param('s', $username);
+		$db->bindParam('s', $username);
 		$db->execute();
-		$db->bind_result($id, $name, $lastPassword);
+		$db->bindResult($id, $name, $lastPassword);
 		if (!$db->fetch()) {
 			throw new UserNotFoundException();
 		}
@@ -166,7 +166,7 @@ class User
 		$db = new DB('web');
 		$db->prepare('UPDATE users SET name=? WHERE id=?');
 		$id = $this->dbRowId;
-		$db->bind_param('is', $id, $name);
+		$db->bindParam('is', $id, $name);
 		$db->execute();
 		$db->fetch();
 		$this->name = $name;
@@ -187,7 +187,7 @@ class User
 		$db = new DB('web');
 		$db->prepare('UPDATE users SET username=? WHERE id=?');
 		$id = $this->dbRowId;
-		$db->bind_param('is', $id, $username);
+		$db->bindParam('is', $id, $username);
 		$db->execute();
 		$db->fetch();
 		$this->username = $username;
@@ -219,10 +219,10 @@ class User
 		$db = new DB('web');
 		$db->prepare('SELECT passwd FROM users WHERE id=?');
 		$id = $this->dbRowId;
-		$db->bind_param('i', $id);
+		$db->bindParam('i', $id);
 		$db->execute();
 		$passwordHash = "";
-		$db->bind_result($passwordHash);
+		$db->bindResult($passwordHash);
 		$db->fetch();		
         return password_verify($password, $passwordHash);
 	}
@@ -236,10 +236,10 @@ class User
 	{
 		$db = new DB("web");
 		$db->prepare("SELECT COUNT(*) FROM users WHERE username=?");
-		$db->bind_param("s", $username);
+		$db->bindParam("s", $username);
 		$result = 0;
 		$db->execute();
-		$db->bind_result($result);
+		$db->bindResult($result);
 		$db->fetch();
 		return (bool)$result;
 	}
@@ -275,7 +275,7 @@ class User
 		$name = 0;
 		$username = "";
 		$lastPassword = NULL;
-		$db->bind_result($id, $name, $username, $lastPassword);
+		$db->bindResult($id, $name, $username, $lastPassword);
 		$users = [];
 		$user = [];
 		while ($db->fetch()) {

@@ -7,7 +7,6 @@ use Lukasoppermann\Httpstatus\HttpStatus;
 
 class Response implements Httpstatuscodes
 {
-    public $HttpStatus = new HttpStatus();
     public int $code;
     /** @var ?array<mixed> $data */
     public ?array $data = NULL;
@@ -19,7 +18,7 @@ class Response implements Httpstatuscodes
             throw new Exception("response code not set");
         }
         http_response_code($this->code);
-        header($_SERVER["SERVER_PROTOCOL"] . " $this->code " . $this->HttpStatus->getReasonPhrase($this->code));
+        header($_SERVER["SERVER_PROTOCOL"] . " $this->code " . ((new Lukasoppermann\Httpstatus\HttpStatus())->getReasonPhrase($this->code)));
         if (!empty($this->data)) {
             echo json_encode($this->data, JSON_PRETTY_PRINT);
         }

@@ -88,7 +88,7 @@ try {
 	}
 
 	$response->code = Response::HTTP_OK;
-} catch (StripeApiErrorException | \JsonException | \LogicException | StoreException | InvalidArgumentException $ex) {
+} catch (StripeApiErrorException | \JsonException |  InvalidArgumentException $ex) {
 	$response->code = Response::HTTP_BAD_REQUEST;
 	$response->data = [
 		"error" => true,
@@ -96,7 +96,7 @@ try {
 		"message" => $ex->getMessage(),
 		"trace" => $ex->getTrace(),
 	];
-} catch (\Throwable $ex) {
+} catch (\LogicException | \Throwable $ex) {
 	$response->code = Response::HTTP_INTERNAL_SERVER_ERROR;
 	$response->data = [
 		"error" => true,

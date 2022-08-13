@@ -37,7 +37,7 @@ CREATE TABLE IF NOT EXISTS `members` (
   `address` text NOT NULL,
   `zip` int(4) DEFAULT NULL,
   `licensee` text DEFAULT NULL COMMENT 'lisenced under club',
-  `registrationDate` date DEFAULT NULL COMMENT 'date when the form was filled out',
+  `registrationDate` date DEFAULT NOW() NOT NULL COMMENT 'date when the form was filled out',
   `approvedDate` date DEFAULT NULL COMMENT 'if date is set, then member is approved',
   `haveVolunteered` tinyint(1) DEFAULT NULL COMMENT 'If true then this member has attended voulentary work',
   `licenseForwarded` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'true if the license has been marked as forwarded to NSF',
@@ -51,7 +51,7 @@ CREATE TABLE IF NOT EXISTS `cin` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Row identification',
   `memberHash` text NOT NULL COMMENT 'Hashed sum of stable personal data',
   `cin` bigint(11) NOT NULL COMMENT 'Customer Identification number for norwegian swimming federation',
-  `lastUsed` date NOT NULL COMMENT 'Last time this row was active',
+  `lastUsed` date DEFAULT NOW() NOT NULL COMMENT 'Last time this row was active',
   PRIMARY KEY (`id`),
   UNIQUE KEY `memberHash` (`memberHash`),
   UNIQUE KEY `cin` (`cin`)
@@ -90,50 +90,34 @@ CREATE TABLE IF NOT EXISTS `products` (
   `requireActiveMembership` tinyint(1) NOT NULL DEFAULT '0',
   `amountAvailable` int(11) DEFAULT NULL,
   `image` text,
-  `visible` tinyint(1) NOT NULL DEFAULT '0',
+  `visible` tinyint(1) NOT NULL DEFAULT '1',
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `api_id` (`hash`)
+  UNIQUE KEY `api_id` (`productHash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-INSERT INTO `products` (
+INSERT INTO `products`(
   `productHash`,
   `name`,
   `description`,
   `price`,
-  `availableFrom`,
-  `availableUntil`,
-  `maxOrdersPerCustomerPerYear`,
-  `requirePhone`,
-  `requireEmail`,
-  `requireComment`,
-  `requireActiveMembership`,
-  `amountAvailable`,
   `image`,
-  `visible`,
+  `visible`
 ) VALUES
 (
   '31e61c8253b54cdde3b9',
   '{\"no\":\"NSF Lisens\",\"en\":\"NSF License\"}',
   '{\"no\":\"Lisensen gir deg adgang til nasjonsale stevner og obligatorisk treningsforsikring. Lisensen har en gyldighet i ett kalender år fra januar til desember.\",\"en\":\"Norwegian Swimming license is required for practices and national competitions. License is valid max one year from January until December.\"}',
   76500,
-  NULL,
-  NULL,
-  1,
-  1,
-  1,
-  0,
-  0,
-  NULL,
   '31e61c8253b54cdde3b9.jpg',
-  0,
+  0
 );
 
 CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `username` varchar(32) NOT NULL DEFAULT '',
-  `passwd` varchar(100) NOT NULL DEFAULT '',
-  `name` varchar(32) NOT NULL DEFAULT '',
+  `username` varchar(32) NOT NULL,
+  `passwd` varchar(100) NOT NULL,
+  `name` varchar(32) NOT NULL,
   `lastPassword` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)

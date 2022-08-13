@@ -19,7 +19,7 @@ class MissingCredentialsException extends AuthenticationException
 {
     /** @var string $message */
     protected $message = "missing credentials";
-    protected int $httpCode = HTTP_UNAUTHORIZED;
+    protected int $httpCode = Response::HTTP_UNAUTHORIZED;
 
 }
 
@@ -27,19 +27,19 @@ class InvalidCredentialsException extends AuthenticationException
 {
     /** @var string $message */
     protected $message = "invalid credentials";
-    protected int $httpCode = HTTP_UNAUTHORIZED;
+    protected int $httpCode = Response::HTTP_UNAUTHORIZED;
 }
 
 class ForbiddenException extends AuthenticationException
 {
     /** @var string $message */
     protected $message = "access denied";
-    protected int $httpCode = HTTP_FORBIDDEN;
+    protected int $httpCode = Response::HTTP_FORBIDDEN;
 }
 
 class UnauthorizedException extends AuthenticationException
 {
     /** @var string $message */
     protected $message = "Unauthorized. Please log in";
-    protected int $httpCode = HTTP_UNAUTHORIZED;
+    protected int $httpCode = Response::HTTP_UNAUTHORIZED;
 }

@@ -120,7 +120,7 @@ class Product
         SQL;
         $db->prepare($sql);
 
-        $db->bind_param(
+        $db->bindParam(
             "sssiissiiiiiisiii",
             $productHash,
             $name,
@@ -143,7 +143,7 @@ class Product
 
         // construct object and return
         return new Product(
-            dbRowId: $db->inserted_id(),
+            dbRowId: $db->insertedId(),
             productHash: $productHash,
             nameJson: $nameJson,
             descriptionJson: $descriptionJson,
@@ -171,9 +171,9 @@ class Product
         $db = new DB("web");
         $sql = "SELECT * FROM products WHERE hash=?";
         $db->prepare($sql);
-        $db->bind_param("s", $productHash);
+        $db->bindParam("s", $productHash);
         $db->execute();
-        $db->bind_result(
+        $db->bindResult(
             $dbRowId,
             $productHash,
             $nameJson,
@@ -367,7 +367,7 @@ class Product
         $db = new DB("web");
         $db->prepare("UPDATE products SET image=? WHERE id=?");
         $dbRowId = $this->dbRowId;
-        $db->bind_param("si", $imagePath, $dbRowId);
+        $db->bindParam("si", $imagePath, $dbRowId);
         $db->execute();
         $this->image = $imagePath;
     }
@@ -383,11 +383,11 @@ class Product
             $db->prepare("UPDATE products SET availableFrom=? WHERE id=?");
             $timeString = $availableFrom->format(self::DATE_FORMAT);
             $dbRowId = $this->dbRowId;
-            $db->bind_param("ss", $timeString, $dbRowId);
+            $db->bindParam("ss", $timeString, $dbRowId);
         } else {
             $db->prepare("UPDATE products SET availableFrom=NULL WHERE id=?");
             $dbRowId = $this->dbRowId;
-            $db->bind_param("s", $dbRowId);
+            $db->bindParam("s", $dbRowId);
         }
         $db->execute();
         $this->availableFrom = $availableFrom;
@@ -398,7 +398,7 @@ class Product
         $db = new DB("web");
         $db->prepare("UPDATE products SET visibility=? WHERE id=?");
         $dbRowId = $this->dbRowId;
-        $db->bind_param("ii", $visible, $dbRowId);
+        $db->bindParam("ii", $visible, $dbRowId);
         $db->execute();
         $this->visible = $visible;
     }
@@ -408,10 +408,10 @@ class Product
         $db = new DB("web");
         if (isset($inventoryCount)) {
             $db->prepare("UPDATE products SET amountAvailable=? WHERE id=?");
-            $db->bind_param("ii", $inventoryCount, $dbRowId);
+            $db->bindParam("ii", $inventoryCount, $dbRowId);
         } else {
             $db->prepare("UPDATE products SET amountAvailable=NULL WHERE id=?");
-            $db->bind_param("i", $dbRowId);
+            $db->bindParam("i", $dbRowId);
         }
         $dbRowId = $this->dbRowId;
         $db->execute();
@@ -428,11 +428,11 @@ class Product
             $db->prepare("UPDATE products SET availableUntil=? WHERE id=?");
             $time_string = $availableUntil->format(self::DATE_FORMAT);
             $dbRowId = $this->dbRowId;
-            $db->bind_param("ss", $time_string, $dbRowId);
+            $db->bindParam("ss", $time_string, $dbRowId);
         } else {
             $db->prepare("UPDATE products SET availableUntil=NULL WHERE id=?");
             $dbRowId = $this->dbRowId;
-            $db->bind_param("s", $dbRowId);
+            $db->bindParam("s", $dbRowId);
         }
         $db->execute();
         $this->availableUntil = $availableUntil;
@@ -447,7 +447,7 @@ class Product
         $db = new DB("web");
         $db->prepare("UPDATE products SET price=? WHERE id=?");
         $dbRowId = $this->dbRowId;
-        $db->bind_param("ii", $price, $dbRowId);
+        $db->bindParam("ii", $price, $dbRowId);
         $db->execute();
         $this->price = $price;
     }
@@ -459,7 +459,7 @@ class Product
         if (!isset($priceMember)) {
             $db->prepare("UPDATE products SET price=NULL WHERE id=?");
             $dbRowId = $this->dbRowId;
-            $db->bind_param("i", $dbRowId);
+            $db->bindParam("i", $dbRowId);
             $db->execute();
             $this->priceMember = NULL;
             return;
@@ -470,7 +470,7 @@ class Product
         $priceMember *= 100; // convert from NOK to øre
         $db->prepare("UPDATE products SET price=? WHERE id=?");
         $dbRowId = $this->dbRowId;
-        $db->bind_param("ii", $priceMember, $dbRowId);
+        $db->bindParam("ii", $priceMember, $dbRowId);
         $db->execute();
         $this->priceMember = $priceMember;
     }
@@ -524,7 +524,7 @@ class Product
         $db = new DB('web');
         $db->prepare('DELETE FROM products WHERE id=?');
         $id = $this->dbRowId;
-        $db->bind_param('i', $id);
+        $db->bindParam('i', $id);
         $db->execute();
         unset($this);
 
@@ -543,10 +543,10 @@ class Product
     {
         $db = new DB("web");
         $db->prepare("SELECT COUNT(*) FROM products WHERE hash=?");
-        $db->bind_param("s", $productHash);
+        $db->bindParam("s", $productHash);
         $db->execute();
         $result = 0;
-        $db->bind_result($result);
+        $db->bindResult($result);
         $db->fetch();
         return (bool)$result;
     }
@@ -555,10 +555,10 @@ class Product
     {
         $db = new DB("web");
         $db->prepare("SELECT COUNT(*) FROM products WHERE id=?");
-        $db->bind_param("i", $rowId);
+        $db->bindParam("i", $rowId);
         $db->execute();
         $result = 0;
-        $db->bind_result($result);
+        $db->bindResult($result);
         $db->fetch();
         return (bool)$result;
     }
@@ -573,11 +573,11 @@ class Product
         (SELECT inventoryCount FROM products WHERE productHash=?)
         SQL;
         $db->prepare($sql);
-        $db->bind_param('ss', $productHash, $productHash);
+        $db->bindParam('ss', $productHash, $productHash);
         $db->execute();
         $completedOrders = 0;
         $inventoryCount = 0;
-        $db->bind_result($completedOrders, $inventoryCount);
+        $db->bindResult($completedOrders, $inventoryCount);
         if(!$db->fetch()){
             throw new OrderNotFoundException();
         }
@@ -612,7 +612,7 @@ class Product
         $db = new DB("web");
         $db->prepare("SELECT * FROM products");
         $db->execute();
-        $db->bind_result(
+        $db->bindResult(
             $_, // hide product id to clients
             $productHash,
             $nameJson,
