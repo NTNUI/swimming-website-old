@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-require_once("Library/Exception/Order.php");
-require_once("Library/Exception/Store.php");
-require_once("Library/Util/Customer.php");
-require_once("Library/Util/Product.php");
+require_once(__DIR__ . "/../Exception/Order.php");
+require_once(__DIR__ . "/../Exception/Store.php");
+require_once(__DIR__ . "/Customer.php");
+require_once(__DIR__ . "/Product.php");
 
 use \libphonenumber\PhoneNumber;
 use \libphonenumber\PhoneNumberUtil;

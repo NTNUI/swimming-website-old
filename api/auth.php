@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-require_once("Library/Exceptions/Authentication.php");
-require_once("Library/Util/Authenticator.php");
-require_once("Library/Util/Api.php");
+require_once(__DIR__ . "/../Library/Exceptions/Authentication.php");
+require_once(__DIR__ . "/../Library/Util/Authenticator.php");
+require_once(__DIR__ . "/../Library/Util/Api.php");
 
 global $args;
 
@@ -62,8 +62,15 @@ try {
         "success" => false,
         "error" => true,
         "message" => "internal server error",
-        "args" => $args,
     ];
+    if (boolval(filter_var($_ENV["DEBUG"], FILTER_VALIDATE_BOOLEAN))) {
+        $response->data["message"] = $ex->getMessage();
+        $response->data["code"] = $ex->getCode();
+        $response->data["file"] = $ex->getFile();
+        $response->data["line"] = $ex->getLine();
+        $response->data["args"] = $args;
+        $response->data["backtrace"] = $ex->getTrace();
+    }
 }
 
 $response->sendJson();

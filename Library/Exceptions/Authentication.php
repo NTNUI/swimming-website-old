@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once("Library/Util/Api.php");
+require_once(__DIR__ . "/Api.php");
 
 abstract class AuthenticationException extends \Exception
 {

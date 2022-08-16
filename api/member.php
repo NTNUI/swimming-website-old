@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-require_once("Library/Exceptions/Authentication.php");
-require_once("Library/Exceptions/Api.php");
-require_once("Library/Exceptions/Member.php");
-require_once("Library/Util/Authenticator.php");
-require_once("Library/Util/Api.php");
-require_once("Library/Util/Member.php");
+require_once(__DIR__ . "/../Library/Exceptions/Authentication.php");
+require_once(__DIR__ . "/../Library/Exceptions/Api.php");
+require_once(__DIR__ . "/../Library/Exceptions/Member.php");
+require_once(__DIR__ . "/../Library/Util/Authenticator.php");
+require_once(__DIR__ . "/../Library/Util/Api.php");
+require_once(__DIR__ . "/../Library/Util/Member.php");
 
 /**
  * * GET /api/member
@@ -53,7 +53,7 @@ try {
             NULL => Member::enroll(json_decode(file_get_contents('php://input'), true, flags: JSON_THROW_ON_ERROR)),
 
             // * POST /api/member/{memberId}/approve
-            (string)(int)$memberId . "/approve" => Member::fromId((int)$memberId)->approveEnrollment() ?? ["success" => true, "error" => false, "message" => "member approved successfully"], 
+            (string)(int)$memberId . "/approve" => Member::fromId((int)$memberId)->approveEnrollment() ?? ["success" => true, "error" => false, "message" => "member approved successfully"],
 
             // * POST /api/member/{memberId}/licenseForwarded
             (string)(int)$memberId . "/licenseForwarded" => Member::fromId((int)$memberId)->setLicenseForwarded() ?? ["success" => true, "error" => false, "message" => "license forwarded has been set"],
@@ -63,7 +63,7 @@ try {
         "PATCH" => match ($memberId) {
             // * PATCH /api/member/{memberId}/volunteering/{bool}
             (string)(int)$memberId . "/volunteering/" => Member::fromId((int)$memberId)->patchHandler(json_decode(file_get_contents("php:://input"), true, flags: JSON_THROW_ON_ERROR)),
-            
+
             // * PATCH /api/member/{memberId}/cin/{cin}
             (string)(int)$memberId . "/cin/" => Member::fromId((int)$memberId)->patchHandler(json_decode(file_get_contents("php:://input"), true, flags: JSON_THROW_ON_ERROR)),
 
@@ -87,6 +87,14 @@ try {
         "error" => true,
         "message" => "internal server error"
     ];
+    if (boolval(filter_var($_ENV["DEBUG"], FILTER_VALIDATE_BOOLEAN))) {
+        $response->data["message"] = $ex->getMessage();
+        $response->data["code"] = $ex->getCode();
+        $response->data["file"] = $ex->getFile();
+        $response->data["line"] = $ex->getLine();
+        $response->data["args"] = $args;
+        $response->data["backtrace"] = $ex->getTrace();
+    }
 }
 
 $response->sendJson();

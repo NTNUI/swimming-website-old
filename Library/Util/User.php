@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-require_once("Library/Util/Db.php");
-require_once("Library/Util/Authenticator.php");
-require_once("Library/Util/Log.php");
+require_once(__DIR__ . "/Db.php");
+require_once(__DIR__ . "/Authenticator.php");
+require_once(__DIR__ . "/Log.php");
 
 class User
 {
@@ -59,13 +59,13 @@ class User
 	// 
 	public function deleteHandler(): array
 	{
+		throw new NotImplementedException("delete handler not implemented yet");
+		// after db deletion this instance needs to be deleted. unset($this) does not work
 		$db = new DB('web');
 		$db->prepare('DELETE FROM users WHERE id=?');
 		$id = $this->dbRowId;
 		$db->bindParam('i', $id);
 		$db->execute();
-		// hope this works
-		unset($this);
 		return [
 			"success" => true,
 			"error" => false,

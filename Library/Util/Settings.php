@@ -27,7 +27,13 @@ class Settings
     private string $licenseProductHash;
     private const COOKIE_LIFETIME = 14400; // 4 hours
     private static ?self $instance = NULL;
-
+    const REQUIRED_EMAIL_ROLES = [
+            "analyst",
+            "bot",
+            "coach",
+            "developer",
+            "leader",
+        ];
     /**
      * Create a new instance of Settings class. First call will run constructor
      * and require @param $config_path. Subsequent calls will not use @param
@@ -57,11 +63,9 @@ class Settings
 
         $decoded = json_decode($fileContent, true, flags: JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR);
         $REQUIRED_KEYS = [
-            "emails",
             "baseUrl",
             "emails",
             "enrollment",
-            "defaults",
             "licenseProductHash",
         ];
         foreach ($REQUIRED_KEYS as $key) {
@@ -69,20 +73,14 @@ class Settings
                 throw new \Exception("key $key does not exists in settings");
             }
         }
-        $REQUIRED_EMAIL_ROLES = [
-            "analyst",
-            "bot",
-            "coach",
-            "developer",
-            "leader",
-        ];
+        
         if (0 !== strpos($decoded["baseUrl"], "https://")) {
             throw new \Exception("decoded[baseUrl] does not start with 'https://'. This will break links. decoded[baseUrl] contains: " . $decoded["baseUrl"]);
         }
         $this->baseUrl = $decoded["baseUrl"];
 
         $emailsArray = $decoded["emails"];
-        foreach ($REQUIRED_EMAIL_ROLES as $role) {
+        foreach (self::REQUIRED_EMAIL_ROLES as $role) {
             if (!array_key_exists($role, $emailsArray)) {
                 throw new \Exception("key $role does not exists in emails");
             }
@@ -99,7 +97,7 @@ class Settings
 
     public function initSession(): void
     {
-        $err = session_save_path("sessions");
+        $err = session_save_path("../sessions");
         if ($err === false) {
             throw new \Exception("could not start session");
         }
@@ -137,12 +135,12 @@ class Settings
     public function testSettings(): void
     {
         // test access
-        foreach (["img/store", "/tmp", "sessions"] as $dir) {
+        foreach (["/tmp", "../sessions"] as $dir) {
             if (!is_writable($dir)) {
                 throw new \Exception("$dir is not writable");
             }
         }
-        foreach (["css", "js", "Library", "Private", "Public", "vendor", "assets"] as $dir) {
+        foreach (["../assets", "../Library"] as $dir) {
             if (!is_readable($dir)) {
                 throw new \Exception("$dir is not readable");
             }
@@ -154,7 +152,7 @@ class Settings
     }
     public function getEmailAddress(string $role): string
     {
-        if (!in_array($role, ["developer", "analyst", "coach", "bot", "leader"])) {
+        if (!in_array($role, self::REQUIRED_EMAIL_ROLES)) {
             throw new \Exception("$role email does not exists");
         }
         return $this->emails[$role];

@@ -2,11 +2,11 @@
 
 declare(strict_types=1);
 
-require_once("Library/Util/Cin.php");
-require_once("Library/Util/Db.php");
-require_once("Library/Util/Gender.php");
-require_once("Library/Util/Hash.php");
-require_once("Library/Util/Log.php");
+require_once(__DIR__ . "/Cin.php");
+require_once(__DIR__ . "/Db.php");
+require_once(__DIR__ . "/Gender.php");
+require_once(__DIR__ . "/Hash.php");
+require_once(__DIR__ . "/Log.php");
 
 use \libphonenumber\PhoneNumberUtil;
 use \libphonenumber\PhoneNumber;

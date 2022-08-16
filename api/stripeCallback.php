@@ -55,6 +55,14 @@ try {
 	}
 } catch (\Throwable $ex) {
 	$response->code = Response::HTTP_INTERNAL_SERVER_ERROR;
+	if (boolval(filter_var($_ENV["DEBUG"], FILTER_VALIDATE_BOOLEAN))) {
+		$response->data["message"] = $ex->getMessage();
+		$response->data["code"] = $ex->getCode();
+		$response->data["file"] = $ex->getFile();
+		$response->data["line"] = $ex->getLine();
+		$response->data["args"] = $args;
+		$response->data["backtrace"] = $ex->getTrace();
+	}
 }
 
 $response->sendJson();

@@ -23,12 +23,12 @@ try {
 		throw new UnauthorizedException();
 	}
 
-    $userId = array_pop($args);
+	$userId = array_pop($args);
 
 	$response->data = match ($_SERVER["REQUEST_METHOD"]) {
 		"GET" => match ($userId) {
 			// * GET /api/user
-			NULL => User::getAllAsArray(), 
+			NULL => User::getAllAsArray(),
 
 			// * GET /api/user/{userId}
 			(string)(int)$userId => User::fromId((int)$userId)->toArray(),
@@ -37,13 +37,13 @@ try {
 		},
 		"POST" => match ($userId) {
 			// * POST /api/user
-			NULL => User::postHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)), 
+			NULL => User::postHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)),
 
 			default => throw new EndpointDoesNotExist(),
 		},
 		"PATCH" => match ($userId) {
 			// * PATCH /api/user/{userId}
-			(string)(int)$userId => User::fromId((int)$userId)->patchHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)), 
+			(string)(int)$userId => User::fromId((int)$userId)->patchHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)),
 
 			default => throw new EndpointDoesNotExist(),
 		},
@@ -79,6 +79,14 @@ try {
 		"error" => true,
 		"message" => "internal server error",
 	];
+	if (boolval(filter_var($_ENV["DEBUG"], FILTER_VALIDATE_BOOLEAN))) {
+		$response->data["message"] = $ex->getMessage();
+		$response->data["code"] = $ex->getCode();
+		$response->data["file"] = $ex->getFile();
+		$response->data["line"] = $ex->getLine();
+		$response->data["args"] = $args;
+		$response->data["backtrace"] = $ex->getTrace();
+	}
 }
 
 $response->sendJson();

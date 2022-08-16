@@ -44,19 +44,19 @@ try {
         },
         "POST" => match ($productHash) {
             // * POST /api/product
-            NULL => Product::postHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)), 
+            NULL => Product::postHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)),
 
             default => throw new EndpointDoesNotExist(),
         },
         "PATCH" => match ($productHash) {
             // * PATCH /api/product/{productHash}
-            (string)$productHash => Product::fromProductHash($productHash)->patchHandler(json_decode(file_get_contents("php://input"), true, flags:JSON_THROW_ON_ERROR)),
+            (string)$productHash => Product::fromProductHash($productHash)->patchHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)),
 
             default => throw new EndpointDoesNotExist(),
         },
         "DELETE" => match ($productHash) {
             // * DELETE /api/product/{productHash}
-            (string)$productHash => Product::fromProductHash($productHash)->deleteHandler(), 
+            (string)$productHash => Product::fromProductHash($productHash)->deleteHandler(),
 
             default => throw new EndpointDoesNotExist(),
         },
@@ -79,6 +79,14 @@ try {
         "error" => true,
         "message" => "internal server error"
     ];
+    if (boolval(filter_var($_ENV["DEBUG"], FILTER_VALIDATE_BOOLEAN))) {
+        $response->data["message"] = $ex->getMessage();
+        $response->data["code"] = $ex->getCode();
+        $response->data["file"] = $ex->getFile();
+        $response->data["line"] = $ex->getLine();
+        $response->data["args"] = $args;
+        $response->data["backtrace"] = $ex->getTrace();
+    }
 }
 
 $response->sendJson();

@@ -2,9 +2,9 @@
 
 declare(strict_types=1);
 
-require_once("Library/Exceptions/User.php");
-require_once("Library/Exceptions/Authentication.php");
-require_once("Library/Util/User.php");
+require_once(__DIR__ . "/../Exceptions/User.php");
+require_once(__DIR__ . "/../Exceptions/Authentication.php");
+require_once(__DIR__ . "/User.php");
 
 class Authenticator
 {

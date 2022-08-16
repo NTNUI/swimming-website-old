@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-require_once("Library/Util/Api.php");
-require_once("Library/Util/Order.php");
-require_once("Library/Util/Product.php");
-require_once("Library/Util/Member.php");
+require_once(__DIR__ . "/../Library/Util/Api.php");
+require_once(__DIR__ . "/../Library/Util/Order.php");
+require_once(__DIR__ . "/../Library/Util/Product.php");
+require_once(__DIR__ . "/../Library/Util/Member.php");
 
 use libphonenumber\PhoneNumberUtil;
 use Stripe\Exception\ApiErrorException as StripeApiErrorException;
@@ -49,7 +49,7 @@ try {
 		$product = Product::fromProductHash($request["order"]["product"]["productHash"]);
 
 		$phone = NULL;
-		if($request["order"]["customer"]["phone"]){
+		if ($request["order"]["customer"]["phone"]) {
 			$phone = PhoneNumberUtil::getInstance()->parse($request["order"]["customer"]["phone"]);
 		}
 		$customer = new Customer($request["order"]["customer"]["name"], $request["order"]["customer"]["email"], $phone);
@@ -101,8 +101,15 @@ try {
 	$response->data = [
 		"error" => true,
 		"success" => false,
-		"message" => $ex->getMessage(),
-		"trace" => $ex->getTrace(),
+		"message" => "internal server error",
 	];
+	if (boolval(filter_var($_ENV["DEBUG"], FILTER_VALIDATE_BOOLEAN))) {
+		$response->data["message"] = $ex->getMessage();
+		$response->data["code"] = $ex->getCode();
+		$response->data["file"] = $ex->getFile();
+		$response->data["line"] = $ex->getLine();
+		$response->data["args"] = $args;
+		$response->data["backtrace"] = $ex->getTrace();
+	}
 }
 $response->sendJson();

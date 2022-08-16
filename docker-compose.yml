@@ -22,6 +22,7 @@ services:
             - self_signed_certificate
         volumes:
             - ./.env:/var/www/localhost/htdocs/.env:ro
+            - ./api:/var/www/localhost/htdocs/api:ro
             - ./assets:/var/www/localhost/htdocs/assets:ro
             - ./docker/app/conf/.htaccess:/var/www/localhost/htdocs/.htaccess:ro
             - ./docker/app/conf/httpd.conf:/etc/apache2/httpd.conf:ro
@@ -30,9 +31,8 @@ services:
             - ./docker/storage/self_signed_certificate/server.crt:/etc/apache2/conf.d/server.crt
             - ./docker/storage/self_signed_certificate/server.key:/etc/apache2/conf.d/server.key
             - ./docker/storage/vendor:/var/www/localhost/htdocs/vendor:ro
-            - ./index.php:/var/www/localhost/htdocs/index.php:ro
             - ./Library:/var/www/localhost/htdocs/Library:ro
-            - ./Private:/var/www/localhost/htdocs/Private:ro
+            - ./public:/var/www/localhost/htdocs/public:ro
 
     self_signed_certificate:
         build:

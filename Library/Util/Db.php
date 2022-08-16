@@ -25,8 +25,7 @@ class DB
 		$username = $_ENV["DB_USERNAME"];
 		$password = $_ENV["DB_PASSWORD"];
 
-		// TODO: remove "svommer_" from table names in database
-		$this->conn = new mysqli($hostname, $username, $password, "svommer_" . $database);
+		$this->conn = new mysqli($hostname, $username, $password, $database);
 		if (!$this->conn->set_charset("utf8")) {
 			throw new \Exception($this->conn->error);
 		}
