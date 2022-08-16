@@ -8,7 +8,7 @@ require_once(__DIR__ . "/Log.php");
 
 class User
 {
-	const DATE_FORMAT = "Y-m-d H:i:s"; // https://www.php.net/manual/en/datetime.format.php
+	const DATE_FORMAT = "Y-m-d"; // https://www.php.net/manual/en/datetime.format.php
 	const TIME_ZONE = "Europe/Oslo";
 
 	// allow read access for all member variables but disallow setting them freely
@@ -136,8 +136,7 @@ class User
 		if (!$db->fetch()) {
 			throw new UserNotFoundException();
 		}
-
-		return new self($name, $username, $lastPassword, $id);
+		return new self($name, $username, DateTime::createFromFormat(self::DATE_FORMAT,$lastPassword), $id);
 	}
 	#endregion
 
