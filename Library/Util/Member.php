@@ -163,7 +163,7 @@ class Member
     public static function fromPhone(PhoneNumber $phone): self
     {
         $db = new DB("member");
-        $db->prepare("SELECT * FROM member where phone=?");
+        $db->prepare("SELECT * FROM members where phone=?");
 
         $db->bindParam("s", PhoneNumberUtil::getInstance()->format($phone, PhoneNumberFormat::E164));
         $db->execute();
@@ -212,7 +212,7 @@ class Member
         }
 
         $db = new DB("member");
-        $db->prepare("SELECT * FROM member WHERE id=?");
+        $db->prepare("SELECT * FROM members WHERE id=?");
         $db->bindParam("i", $dbRowId);
         $db->execute();
         $member = [];
@@ -340,7 +340,7 @@ class Member
         // set approved date in db
         $db = new DB("member");
         $sql_update = <<<'SQL'
-        UPDATE member SET licenseForwarded=NOW() WHERE phone=?;
+        UPDATE members SET licenseForwarded=NOW() WHERE phone=?;
         SQL;
         $db->prepare($sql_update);
         $phoneNumber = PhoneNumberUtil::getInstance()->format($this->phone, PhonenumberFormat::E164);
@@ -360,7 +360,7 @@ class Member
         // set approved date in db
         $db = new DB("member");
         $sqlUpdate = <<<'SQL'
-        UPDATE member SET volunteering=? WHERE phone=?;
+        UPDATE members SET volunteering=? WHERE phone=?;
         SQL;
         $db->prepare($sqlUpdate);
         $db->bindParam("i", (int)$state);
@@ -380,7 +380,7 @@ class Member
         } else {
             $this->cinDbRowId = Cin::create($cin, $this->getHash());
             $db = new DB("member");
-            $db->prepare("UPDATE member SET cinId=? WHERE id=?");
+            $db->prepare("UPDATE members SET cinId=? WHERE id=?");
             $db->bindParam("ii", $this->cinDbRowId, $this->dbRowId);
             $db->execute();
         }
@@ -396,7 +396,7 @@ class Member
             throw new UnauthorizedException();
         }
         $db = new DB("member");
-        $sql = "SELECT COUNT(*) AS count FROM member WHERE phone=? GROUP BY approvedDate";
+        $sql = "SELECT COUNT(*) AS count FROM members WHERE phone=? GROUP BY approvedDate";
         $db->prepare($sql);
         $phoneNumber = \libphonenumber\PhoneNumberUtil::getInstance()->format($phone, PhonenumberFormat::E164);
         $db->bindParam("s", $phoneNumber);
@@ -435,7 +435,7 @@ class Member
         if (!Authenticator::isLoggedIn()) {
             throw new UnauthorizedException();
         }
-        $sql = "SELECT * FROM member";
+        $sql = "SELECT * FROM members";
         $members = self::fetchArray($sql);
         foreach ($members as &$member) {
             $member["licenseForwarded"] = (bool)$member["licenseForwarded"];
@@ -483,7 +483,7 @@ class Member
             throw new UnauthorizedException();
         }
 
-        $sql = "SELECT * FROM member WHERE approvedDate IS NOT NULL";
+        $sql = "SELECT * FROM members WHERE approvedDate IS NOT NULL";
         $members = self::fetchArray($sql);
         if (count($members) < 1) {
             throw new MemberNotFoundException();
@@ -496,7 +496,7 @@ class Member
         if (!Authenticator::isLoggedIn()) {
             throw new UnauthorizedException();
         }
-        $sql = "SELECT * FROM member WHERE approvedDate IS NULL";
+        $sql = "SELECT * FROM members WHERE approvedDate IS NULL";
         $members = self::fetchArray($sql);
         if (count($members) < 1) {
             throw new MemberNotFoundException();
@@ -553,7 +553,7 @@ class Member
         // set approved date in db
         $db = new DB("member");
         $sql_update = <<<'SQL'
-        UPDATE member SET approved_date=NOW() WHERE phone=?;
+        UPDATE members SET approved_date=NOW() WHERE phone=?;
         SQL;
         $db->prepare($sql_update);
         $phoneNumber = PhoneNumberUtil::getInstance()->format($this->phone, PhonenumberFormat::E164);
@@ -605,7 +605,7 @@ class Member
             throw new UnauthorizedException();
         }
         $db = new DB("member");
-        $sql = "SELECT approvedDate FROM member WHERE phone=?";
+        $sql = "SELECT approvedDate FROM members WHERE phone=?";
         $db->prepare($sql);
         $phoneNumber = \libphonenumber\PhoneNumberUtil::getInstance()->format($phone, PhonenumberFormat::E164);
         $db->bindParam("s", $phoneNumber);
@@ -623,7 +623,7 @@ class Member
         if (!Authenticator::isLoggedIn()) {
             throw new UnauthorizedException();
         }
-        $sql = "SELECT * FROM member WHERE id=?";
+        $sql = "SELECT * FROM members WHERE id=?";
         $members = self::fetchArray($sql, "i", $memberId);
         if (count($members) < 1) {
             throw new MemberNotFoundException();
