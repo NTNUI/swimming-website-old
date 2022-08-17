@@ -207,10 +207,6 @@ class Member
 
     public static function fromId(int $dbRowId): self
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
-
         $db = new DB("member");
         $db->prepare("SELECT * FROM members WHERE id=?");
         $db->bindParam("i", $dbRowId);
@@ -318,18 +314,12 @@ class Member
     #region setters 
     public function approveEnrollment(): void
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
         $this->setMembershipActive();
         $this->sendApprovalEmail();
     }
 
     public function setLicenseForwarded(): void
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
         if (isset($this->licenseForwarded)) {
             throw new \InvalidArgumentException("license has already been forwarded for this user. Call an admin");
         }
@@ -353,10 +343,6 @@ class Member
 
     public function setVolunteering(bool $state): void
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
-
         // set approved date in db
         $db = new DB("member");
         $sqlUpdate = <<<'SQL'
@@ -390,11 +376,28 @@ class Member
 
     #region handlers
 
+    public static function enrollmentApproveHandler(int $memberId): array
+    {
+        self::fromId($memberId)->approveEnrollment();
+        return [
+            "success" => true,
+            "error" => false,
+            "message" => "member approved successfully"
+        ];
+    }
+
+    public static function licenseHandler(int $memberId): array
+    {
+        self::fromId($memberId)->setLicenseForwarded();
+        return [
+            "success" => true,
+            "error" => false,
+            "message" => "license forwarded has been set",
+        ];
+    }
+
     public static function exists(PhoneNumber $phone): bool
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
         $db = new DB("member");
         $sql = "SELECT COUNT(*) AS count FROM members WHERE phone=? GROUP BY approvedDate";
         $db->prepare($sql);
@@ -409,9 +412,6 @@ class Member
 
     public function patchHandler(array $jsonObject): array
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
         $allowedPatches = ["volunteering", "cin"];
         foreach ($jsonObject as $key) {
             if (!in_array($key, $allowedPatches)) {
@@ -432,9 +432,6 @@ class Member
     }
     public static function getAllAsArray(): array
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
         $sql = "SELECT * FROM members";
         $members = self::fetchArray($sql);
         foreach ($members as &$member) {
@@ -479,10 +476,6 @@ class Member
 
     public static function getAllActiveAsArray(): array
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
-
         $sql = "SELECT * FROM members WHERE approvedDate IS NOT NULL";
         $members = self::fetchArray($sql);
         if (count($members) < 1) {
@@ -493,9 +486,6 @@ class Member
 
     public static function getAllInactiveAsArray(): array
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
         $sql = "SELECT * FROM members WHERE approvedDate IS NULL";
         $members = self::fetchArray($sql);
         if (count($members) < 1) {
@@ -601,9 +591,6 @@ class Member
 
     private static function isActive(PhoneNumber $phone): bool
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
         $db = new DB("member");
         $sql = "SELECT approvedDate FROM members WHERE phone=?";
         $db->prepare($sql);
@@ -620,9 +607,6 @@ class Member
 
     private static function getByIdAsArray(int $memberId): array
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
         $sql = "SELECT * FROM members WHERE id=?";
         $members = self::fetchArray($sql, "i", $memberId);
         if (count($members) < 1) {
@@ -633,10 +617,6 @@ class Member
 
     private function sendApprovalEmail(): void
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
-
         $subject = "NTNUI Swimming - membership approved";
         $from = Settings::getInstance()->getEmailAddress("bot");
         $accountable = "svomming-medlem@ntnui.no"; // TODO: get from settings

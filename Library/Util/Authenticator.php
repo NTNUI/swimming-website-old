@@ -80,5 +80,13 @@ class Authenticator
             "message" => "log out successful",
         ];
     }
+
+    static public function protect(callable $protectedFunction): mixed
+    {
+        if (!self::isLoggedIn()) {
+            throw new UnauthorizedException();
+        }
+        return $protectedFunction();
+    }
     #endregion
 };
