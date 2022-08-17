@@ -15,15 +15,16 @@ class DB
 
 	/**
 	 * Connect to a database. Credentials are automatically retrieved from environment variables.
-	 * @param string $database name
+	 * @param string $_ unused
 	 */
-	public function __construct(string $database)
+	public function __construct(string $_)
 	{
 		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
 		$hostname = $_ENV["DB_HOSTNAME"];
 		$username = $_ENV["DB_USERNAME"];
 		$password = $_ENV["DB_PASSWORD"];
+		$database = $_ENV["DB_DATABASE"];
 
 		$this->conn = new mysqli($hostname, $username, $password, $database);
 		if (!$this->conn->set_charset("utf8")) {

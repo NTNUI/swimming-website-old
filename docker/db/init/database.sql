@@ -8,8 +8,8 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
-CREATE DATABASE IF NOT EXISTS `member` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `member`;
+CREATE DATABASE IF NOT EXISTS `swimming` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
+USE `swimming`;
 
 /*
 "id",
@@ -57,9 +57,6 @@ CREATE TABLE IF NOT EXISTS `cin` (
   UNIQUE KEY `cin` (`cin`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE DATABASE IF NOT EXISTS `web` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
-USE `web`;
-
 CREATE TABLE IF NOT EXISTS `orders` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `productId` int(11) NOT NULL,
@@ -93,7 +90,7 @@ CREATE TABLE IF NOT EXISTS `products` (
   `visible` tinyint(1) NOT NULL DEFAULT '1',
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `api_id` (`productHash`)
+  UNIQUE KEY `productHash` (`productHash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO `products`(

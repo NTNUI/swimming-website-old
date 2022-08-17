@@ -29,7 +29,8 @@ $dotenv->required(
 		'STRIPE_SIGNING_KEY',
 		"DB_HOSTNAME",
 		"DB_USERNAME",
-		"DB_PASSWORD"
+		"DB_PASSWORD",
+		"DB_DATABASE",
 	]
 )->notEmpty();
 
