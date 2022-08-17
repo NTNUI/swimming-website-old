@@ -50,7 +50,7 @@ try {
         },
         "POST" => match ($memberId) {
             // * POST /api/member
-            NULL => Member::enroll(json_decode(file_get_contents('php://input'), true, flags: JSON_THROW_ON_ERROR)),
+            NULL => Member::enroll(Response::getJsonInput()),
 
             // * POST /api/member/{memberId}/approve
             (string)(int)$memberId . "/approve" => Member::fromId((int)$memberId)->approveEnrollment() ?? ["success" => true, "error" => false, "message" => "member approved successfully"],
@@ -62,10 +62,10 @@ try {
         },
         "PATCH" => match ($memberId) {
             // * PATCH /api/member/{memberId}/volunteering/{bool}
-            (string)(int)$memberId . "/volunteering/" => Member::fromId((int)$memberId)->patchHandler(json_decode(file_get_contents("php:://input"), true, flags: JSON_THROW_ON_ERROR)),
+            (string)(int)$memberId . "/volunteering/" => Member::fromId((int)$memberId)->patchHandler(Response::getJsonInput()),
 
             // * PATCH /api/member/{memberId}/cin/{cin}
-            (string)(int)$memberId . "/cin/" => Member::fromId((int)$memberId)->patchHandler(json_decode(file_get_contents("php:://input"), true, flags: JSON_THROW_ON_ERROR)),
+            (string)(int)$memberId . "/cin/" => Member::fromId((int)$memberId)->patchHandler(Response::getJsonInput()),
 
             default => throw new EndpointDoesNotExist(),
         },

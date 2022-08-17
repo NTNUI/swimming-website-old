@@ -28,7 +28,7 @@ use \libphonenumber\PhoneNumberFormat;
  */
 class Member
 {
-    const DATE_FORMAT = "Y-m-d H:i:s"; // https://www.php.net/manual/en/datetime.format.php
+    const DATE_FORMAT = "Y-m-d"; // https://www.php.net/manual/en/datetime.format.php
     const TIME_ZONE = "Europe/Oslo";
     const FILTER_OPTIONS_ZIP = [
         "flag" => FILTER_NULL_ON_FAILURE,
@@ -274,9 +274,9 @@ class Member
             $license,
         );
         $db = new DB("member");
-        $sql = "INSERT INTO member (name, gender, birthDate, phone, email, address, zip, licensee, registrationDate) VALUES (?,?,?,?,?,?,?,?,?,NOW())";
+        $sql = "INSERT INTO members (name, gender, birthDate, phone, email, address, zip, licensee, registrationDate) VALUES (?,?,?,?,?,?,?,?,?,NOW())";
         $db->prepare($sql);
-        $birthDate = $birthDate->format("Y-m-d");
+        $birthDate = $birthDate->format(self::DATE_FORMAT);
         $gender = $gender->toString();
         $phoneNumber = PhoneNumberUtil::getInstance()->format($phone, PhonenumberFormat::E164);
         $db->bindParam(
@@ -448,7 +448,19 @@ class Member
 
     public static function enroll(array $jsonRequest): array
     {
-        Member::New(
+        $missing_keys = [];
+        foreach (["name", "birthDate", "phone", "gender", "email", "address", "zip"] as $key) {
+            if ($jsonRequest[$key] === NULL) {
+                $missing_keys[] = $key;
+            }
+        }
+        if (count($missing_keys) > 0) {
+            throw new \InvalidArgumentException("Following input are missing: [" . implode(", ", $missing_keys) . "]");
+        }
+        // DateTime does not throw exceptions when failing to create a DateTime object.
+        // in stead it returns boolean false which triggers a TypeError since Member::new expects a DateTime object
+        // consider moving to Moment library which will throw appropriate exception.
+        Member::new(
             name: $jsonRequest["name"],
             birthDate: DateTime::createFromFormat(self::DATE_FORMAT, $jsonRequest["birthDate"], new DateTimeZone(self::TIME_ZONE)),
             phone: PhoneNumberUtil::getInstance()->parse($jsonRequest["phone"]),
@@ -458,7 +470,6 @@ class Member
             zip: (int)$jsonRequest["zip"],
             license: $jsonRequest["license"],
         );
-
         return [
             "success" => true,
             "error" => false,
@@ -517,10 +528,11 @@ class Member
     private static function calculateHash(DateTime $birthDate, Gender $gender, PhoneNumber $phone): Hash
     {
         $phoneString = PhoneNumberUtil::getInstance()->format($phone, PhoneNumberFormat::E164);
-        return new Hash($birthDate["birthDate"]->format("Y-m-d") . $phoneString . $gender->toString());
+        return new Hash($birthDate["birthDate"]->format(self::DATE_FORMAT) . $phoneString . $gender->toString());
     }
 
-    private static function trimSpace(string $text): string {
+    private static function trimSpace(string $text): string
+    {
         $text = trim($text);
         while (true) {
             $result = str_replace("  ", " ", $text);
@@ -552,7 +564,7 @@ class Member
         $this->approvedDate = new DateTime();
     }
 
-    private static function fetchArray(string $sql, ?string $bindTypes = NULL, ?mixed &$var1 = NULL, ?array &...$vars): array
+    private static function fetchArray(string $sql, ?string $bindTypes = NULL, mixed &$var1 = NULL, ?array &...$vars): array
     {
 
         $db = new DB("member");
