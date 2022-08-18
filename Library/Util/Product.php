@@ -95,7 +95,7 @@ class Product
         $dateEnd = $availableUntil == NULL ? NULL : $availableUntil->format(self::DATE_FORMAT);
 
         // save to db
-        $db = new DB("web");
+        $db = new DB();
         $sql = <<<'SQL'
         INSERT INTO products
         (
@@ -168,7 +168,7 @@ class Product
         if (!self::productHashExists($productHash)) {
             throw new ProductNotFoundException();
         }
-        $db = new DB("web");
+        $db = new DB();
         $sql = "SELECT * FROM products WHERE hash=?";
         $db->prepare($sql);
         $db->bindParam("s", $productHash);
@@ -364,7 +364,7 @@ class Product
         if (!is_readable($imagePath)) {
             throw new \Exception("file $imagePath is not readable");
         }
-        $db = new DB("web");
+        $db = new DB();
         $db->prepare("UPDATE products SET image=? WHERE id=?");
         $dbRowId = $this->dbRowId;
         $db->bindParam("si", $imagePath, $dbRowId);
@@ -374,7 +374,7 @@ class Product
 
     public function setAvailableFrom(?DateTime $availableFrom): void
     {
-        $db = new DB("web");
+        $db = new DB();
         if (isset($availableFrom)) {
             if (!empty($this->availableUntil) && $availableFrom > $this->availableUntil) {
                 throw new \Exception("cannot set available from past available until");
@@ -395,7 +395,7 @@ class Product
 
     public function setVisibility(bool $visible): void
     {
-        $db = new DB("web");
+        $db = new DB();
         $db->prepare("UPDATE products SET visibility=? WHERE id=?");
         $dbRowId = $this->dbRowId;
         $db->bindParam("ii", $visible, $dbRowId);
@@ -405,7 +405,7 @@ class Product
 
     public function setInventoryCount(?int $inventoryCount): void
     {
-        $db = new DB("web");
+        $db = new DB();
         if (isset($inventoryCount)) {
             $db->prepare("UPDATE products SET amountAvailable=? WHERE id=?");
             $db->bindParam("ii", $inventoryCount, $dbRowId);
@@ -420,7 +420,7 @@ class Product
 
     public function setAvailableUntil(?DateTime $availableUntil): void
     {
-        $db = new DB("web");
+        $db = new DB();
         if (isset($availableUntil)) {
             if (!empty($this->availableFrom) && $this->availableFrom > $availableUntil) {
                 throw new \InvalidArgumentException("cannot set availableUntil before availableFrom");
@@ -444,7 +444,7 @@ class Product
             throw new \InvalidArgumentException("invalid price"); // TODO: product create exception
         }
         $price *= 100; // convert from NOK to øre
-        $db = new DB("web");
+        $db = new DB();
         $db->prepare("UPDATE products SET price=? WHERE id=?");
         $dbRowId = $this->dbRowId;
         $db->bindParam("ii", $price, $dbRowId);
@@ -455,7 +455,7 @@ class Product
 
     public function setPriceMember(?int $priceMember): void
     {
-        $db = new DB("web");
+        $db = new DB();
         if (!isset($priceMember)) {
             $db->prepare("UPDATE products SET price=NULL WHERE id=?");
             $dbRowId = $this->dbRowId;
@@ -541,7 +541,7 @@ class Product
 
     static public function productHashExists(string $productHash): bool
     {
-        $db = new DB("web");
+        $db = new DB();
         $db->prepare("SELECT COUNT(*) FROM products WHERE hash=?");
         $db->bindParam("s", $productHash);
         $db->execute();
@@ -553,7 +553,7 @@ class Product
 
     static public function rowIdExists(int $rowId): bool
     {
-        $db = new DB("web");
+        $db = new DB();
         $db->prepare("SELECT COUNT(*) FROM products WHERE id=?");
         $db->bindParam("i", $rowId);
         $db->execute();
@@ -609,7 +609,7 @@ class Product
      */
     static public function getAllAsArray(): array
     {
-        $db = new DB("web");
+        $db = new DB();
         $db->prepare("SELECT * FROM products");
         $db->execute();
         $db->bindResult(

@@ -138,7 +138,7 @@ class Order
                 "isMember" => Member::fromPhone($customer->phone)->isMember(),
             ],
         ]);
-        $db = new DB("web");
+        $db = new DB();
         $sql = "INSERT INTO orders (productId, name, email, phone, intentId, orderStatus, comment) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $db->prepare($sql);
         $productDbRowId = $product->dbRowId;
@@ -175,7 +175,7 @@ class Order
 
     public static function FromDbRowId(int $dbRowId): self
     {
-        $db = new DB("web");
+        $db = new DB();
         $db->prepare("SELECT * FROM orders WHERE id=?");
         $db->bindParam("i", $dbRowId);
         $db->execute();
@@ -209,7 +209,7 @@ class Order
 
     public static function fromPaymentIntent(PaymentIntent $paymentIntent): self
     {
-        $db = new DB("web");
+        $db = new DB();
         $db->prepare("SELECT * FROM orders WHERE intentId=?");
         $id = $paymentIntent["id"];
         $db->bindParam("i", $id);
@@ -246,7 +246,7 @@ class Order
     #region setters
     public function setOrderStatus(OrderStatus $orderStatus): void
     {
-        $db = new DB("web");
+        $db = new DB();
         $db->prepare("UPDATE orders SET orderStatus = ? WHERE id = ?");
         $orderStatusString = $orderStatus->toString();
         $dbRowId = $this->dbRowId;
@@ -270,7 +270,7 @@ class Order
 
     static public function existsFromDbRowId(int $orderId): bool
     {
-        $db = new DB("web");
+        $db = new DB();
         $db->prepare("SELECT COUNT(*) FROM orders WHERE id=?");
         $db->bindParam("i", $orderId);
         $db->execute();
@@ -297,7 +297,7 @@ class Order
      */
     public static function getCompletedAsArray(?string $productHash = NULL, ?PhoneNumber $phoneNumber = NULL): array
     {
-        $db = new DB("web");
+        $db = new DB();
 
         $sql = <<<'SQL'
         SELECT * FROM orders WHERE (orderStatus='FINALIZED' OR orderStatus='DELIVERED')

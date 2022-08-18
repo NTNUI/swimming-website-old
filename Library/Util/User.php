@@ -233,7 +233,7 @@ class User
 
 	public static function usernameExists(string $username): bool
 	{
-		$db = new DB("web");
+		$db = new DB();
 		$db->prepare("SELECT COUNT(*) FROM users WHERE username=?");
 		$db->bindParam("s", $username);
 		$result = 0;

@@ -162,7 +162,7 @@ class Member
 
     public static function fromPhone(PhoneNumber $phone): self
     {
-        $db = new DB("member");
+        $db = new DB();
         $db->prepare("SELECT * FROM members where phone=?");
 
         $db->bindParam("s", PhoneNumberUtil::getInstance()->format($phone, PhoneNumberFormat::E164));
@@ -207,7 +207,7 @@ class Member
 
     public static function fromId(int $dbRowId): self
     {
-        $db = new DB("member");
+        $db = new DB();
         $db->prepare("SELECT * FROM members WHERE id=?");
         $db->bindParam("i", $dbRowId);
         $db->execute();
@@ -269,7 +269,7 @@ class Member
             $zip,
             $license,
         );
-        $db = new DB("member");
+        $db = new DB();
         $sql = "INSERT INTO members (name, gender, birthDate, phone, email, address, zip, licensee, registrationDate) VALUES (?,?,?,?,?,?,?,?,?,NOW())";
         $db->prepare($sql);
         $birthDate = $birthDate->format(self::DATE_FORMAT);
@@ -328,7 +328,7 @@ class Member
         }
 
         // set approved date in db
-        $db = new DB("member");
+        $db = new DB();
         $sql_update = <<<'SQL'
         UPDATE members SET licenseForwarded=NOW() WHERE phone=?;
         SQL;
@@ -344,7 +344,7 @@ class Member
     public function setVolunteering(bool $state): void
     {
         // set approved date in db
-        $db = new DB("member");
+        $db = new DB();
         $sqlUpdate = <<<'SQL'
         UPDATE members SET volunteering=? WHERE phone=?;
         SQL;
@@ -365,7 +365,7 @@ class Member
             Cin::updateCin($cin, $this->getHash());
         } else {
             $this->cinDbRowId = Cin::create($cin, $this->getHash());
-            $db = new DB("member");
+            $db = new DB();
             $db->prepare("UPDATE members SET cinId=? WHERE id=?");
             $db->bindParam("ii", $this->cinDbRowId, $this->dbRowId);
             $db->execute();
@@ -398,7 +398,7 @@ class Member
 
     public static function exists(PhoneNumber $phone): bool
     {
-        $db = new DB("member");
+        $db = new DB();
         $sql = "SELECT COUNT(*) AS count FROM members WHERE phone=? GROUP BY approvedDate";
         $db->prepare($sql);
         $phoneNumber = \libphonenumber\PhoneNumberUtil::getInstance()->format($phone, PhonenumberFormat::E164);
@@ -541,7 +541,7 @@ class Member
         }
 
         // set approved date in db
-        $db = new DB("member");
+        $db = new DB();
         $sql_update = <<<'SQL'
         UPDATE members SET approved_date=NOW() WHERE phone=?;
         SQL;
@@ -557,7 +557,7 @@ class Member
     private static function fetchArray(string $sql, ?string $bindTypes = NULL, mixed &$var1 = NULL, ?array &...$vars): array
     {
 
-        $db = new DB("member");
+        $db = new DB();
         $db->prepare($sql);
         if (isset($bindTypes)) {
             $db->bindParam($bindTypes, $var1, $args);
@@ -591,7 +591,7 @@ class Member
 
     private static function isActive(PhoneNumber $phone): bool
     {
-        $db = new DB("member");
+        $db = new DB();
         $sql = "SELECT approvedDate FROM members WHERE phone=?";
         $db->prepare($sql);
         $phoneNumber = \libphonenumber\PhoneNumberUtil::getInstance()->format($phone, PhonenumberFormat::E164);

@@ -17,7 +17,7 @@ class DB
 	 * Connect to a database. Credentials are automatically retrieved from environment variables.
 	 * @param string $_ unused
 	 */
-	public function __construct(string $_)
+	public function __construct()
 	{
 		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
 
