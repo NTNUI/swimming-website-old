@@ -61,6 +61,8 @@ class Member
      * @throws MemberIsActiveException if a member already exists
      * @throws InvalidArgumentException on input error
      * @throws Exception on unrecoverable error
+     * 
+     * TODO: check if $id can be required by caller
      */
     private function __construct(
         private string $name,
@@ -167,22 +169,23 @@ class Member
         $db = new DB();
         $db->prepare("SELECT * FROM members where phone=?");
 
-        $db->bindParam("s", PhoneNumberUtil::getInstance()->format($phone, PhoneNumberFormat::E164));
+        $phoneString = PhoneNumberUtil::getInstance()->format($phone, PhoneNumberFormat::E164);
+        $db->bindParam("s", $phoneString);
         $db->execute();
         $member = [];
-        $member["id"] = NULL;
-        $member["name"] = NULL;
-        $member["gender"] = NULL;
-        $member["birthDate"] = NULL;
-        $member["phone"] = NULL;
-        $member["email"] = NULL;
-        $member["address"] = NULL;
-        $member["zip"] = NULL;
-        $member["license"] = NULL;
-        $member["registrationDate"] = NULL;
-        $member["approvedDate"] = NULL;
-        $member["haveVolunteered"] = NULL;
-        $member["licenseForwarded"] = NULL;
+        $member["id"] = 0;
+        $member["name"] = "";
+        $member["gender"] = "";
+        $member["birthDate"] = "";
+        $member["phone"] = "";
+        $member["email"] = "";
+        $member["address"] = "";
+        $member["zip"] = 0;
+        $member["license"] = "";
+        $member["registrationDate"] = "";
+        $member["approvedDate"] = "";
+        $member["haveVolunteered"] = false;
+        $member["licenseForwarded"] = false;
         $member["cinId"] = NULL;
 
         $db->bindResult(
@@ -205,6 +208,7 @@ class Member
             throw new MemberNotFoundException();
         }
         return new Member(
+            id: $member["id"],
             name: $member["name"],
             birthDate: new DateTime($member["birthDate"], new DateTimeZone(self::TIME_ZONE)),
             phone: PhoneNumberUtil::getInstance()->parse($member["phone"]),
@@ -218,7 +222,6 @@ class Member
             haveVolunteered: $member["haveVolunteered"],
             licenseForwarded: $member["licenseForwarded"],
             cinId: $member["cinId"],
-            id: $member["id"],
         );
     }
 
@@ -229,20 +232,22 @@ class Member
         $db->bindParam("i", $dbRowId);
         $db->execute();
         $member = [];
-        $member["id"] = NULL;
-        $member["name"] = NULL;
-        $member["gender"] = NULL;
-        $member["birthDate"] = NULL;
-        $member["phone"] = NULL;
-        $member["email"] = NULL;
-        $member["address"] = NULL;
-        $member["zip"] = NULL;
-        $member["license"] = NULL;
-        $member["registrationDate"] = NULL;
-        $member["approvedDate"] = NULL;
-        $member["haveVolunteered"] = NULL;
-        $member["licenseForwarded"] = NULL;
+        
+        $member["id"] = 0;
+        $member["name"] = "";
+        $member["gender"] = "";
+        $member["birthDate"] = "";
+        $member["phone"] = "";
+        $member["email"] = "";
+        $member["address"] = "";
+        $member["zip"] = 0;
+        $member["license"] = "";
+        $member["registrationDate"] = "";
+        $member["approvedDate"] = "";
+        $member["haveVolunteered"] = false;
+        $member["licenseForwarded"] = false;
         $member["cinId"] = NULL;
+
         $db->bindResult(
             $member["id"],
             $member["name"],
@@ -379,7 +384,8 @@ class Member
         UPDATE members SET volunteering=? WHERE phone=?;
         SQL;
         $db->prepare($sqlUpdate);
-        $db->bindParam("i", (int)$state);
+        $state = (int)$state;
+        $db->bindParam("i", $state);
         $db->execute();
 
         $this->haveVolunteered = $state;

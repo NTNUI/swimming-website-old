@@ -72,7 +72,7 @@ try {
 		];
 	} else if ($intent["status"] === "succeeded") {
 
-		Order::fromPaymentIntent(PaymentIntent::retrieve($intent))->setOrderStatus(OrderStatus::FINALIZED);
+		Order::fromPaymentIntent(PaymentIntent::retrieve($intent["id"]))->setOrderStatus(OrderStatus::FINALIZED);
 		$response->data = [
 			"success" => true,
 			"error" => false,

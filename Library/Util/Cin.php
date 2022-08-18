@@ -43,16 +43,16 @@ class Cin
 
         $db = new DB();
         $db->prepare('INSERT INTO cin VALUES cin=?, memberHash=?');
-        $db->bindParam('is', $cin, $memberHash->get());
+        $hash = $memberHash->get();
+        $db->bindParam('is', $cin, $hash);
         $db->execute();
         $cinId = $db->insertedId();
         $db->prepare("SELECT * FROM cin WHERE id=?");
         $db->bindParam("i", $cinId);
         $cin = 0;
         $lastUsedString = "";
-        $hash = "";
         $db->execute();
-        $db->bindResult($id, $cin, $hash, $lastUsedString);
+        $db->bindResult($id, $cin, $_, $lastUsedString);
         $db->fetch();
         return new self(
             id: $id,
@@ -108,7 +108,8 @@ class Cin
     {
         $db = new DB();
         $db->prepare('UPDATE cin SET lastUsed=NOW() WHERE id=?');
-        $db->bindParam("i", $this->id);
+        $cinId = $this->id;
+        $db->bindParam("i", $cinId);
         $db->execute();
     }
 
@@ -119,7 +120,8 @@ class Cin
         }
         $db = new DB();
         $db->prepare("UPDATE cin SET VALUE cin=? WHERE id=?");
-        $db->bindParam("ii", $cin, $this->id);
+        $cinId = $this->id;
+        $db->bindParam("ii", $cin, $cinId);
         $db->execute();
     }
 }
