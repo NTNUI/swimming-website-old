@@ -83,8 +83,7 @@ class Member
                 if (self::isActive($phone)) {
                     throw new MemberIsActiveException();
                 }
-                // or should this also throw?
-                return self::fromPhone($phone);
+                throw new \Exception("user has registered but is not active yet"); // TODO: create new exception
             }
         } catch (MemberNotFoundException $_) {
         }
@@ -118,7 +117,7 @@ class Member
             throw new \InvalidArgumentException("user too young");
         }
 
-        // licensee
+        // license
         $clubsPath = "assets/clubs.json";
         $fileContents = file_get_contents($clubsPath);
         if ($fileContents === false) {
@@ -171,6 +170,21 @@ class Member
         $db->bindParam("s", PhoneNumberUtil::getInstance()->format($phone, PhoneNumberFormat::E164));
         $db->execute();
         $member = [];
+        $member["id"] = NULL;
+        $member["name"] = NULL;
+        $member["gender"] = NULL;
+        $member["birthDate"] = NULL;
+        $member["phone"] = NULL;
+        $member["email"] = NULL;
+        $member["address"] = NULL;
+        $member["zip"] = NULL;
+        $member["license"] = NULL;
+        $member["registrationDate"] = NULL;
+        $member["approvedDate"] = NULL;
+        $member["haveVolunteered"] = NULL;
+        $member["licenseForwarded"] = NULL;
+        $member["cinId"] = NULL;
+
         $db->bindResult(
             $member["id"],
             $member["name"],
@@ -180,7 +194,7 @@ class Member
             $member["email"],
             $member["address"],
             $member["zip"],
-            $member["licensee"],
+            $member["license"],
             $member["registrationDate"],
             $member["approvedDate"],
             $member["haveVolunteered"],
@@ -215,6 +229,20 @@ class Member
         $db->bindParam("i", $dbRowId);
         $db->execute();
         $member = [];
+        $member["id"] = NULL;
+        $member["name"] = NULL;
+        $member["gender"] = NULL;
+        $member["birthDate"] = NULL;
+        $member["phone"] = NULL;
+        $member["email"] = NULL;
+        $member["address"] = NULL;
+        $member["zip"] = NULL;
+        $member["license"] = NULL;
+        $member["registrationDate"] = NULL;
+        $member["approvedDate"] = NULL;
+        $member["haveVolunteered"] = NULL;
+        $member["licenseForwarded"] = NULL;
+        $member["cinId"] = NULL;
         $db->bindResult(
             $member["id"],
             $member["name"],
@@ -224,7 +252,7 @@ class Member
             $member["email"],
             $member["address"],
             $member["zip"],
-            $member["licensee"],
+            $member["license"],
             $member["registrationDate"],
             $member["approvedDate"],
             $member["haveVolunteered"],
@@ -244,7 +272,7 @@ class Member
             zip: $member["zip"],
             license: $member["license"],
             registrationDate: new DateTime($member["registrationDate"], new DateTimeZone(self::TIME_ZONE)),
-            approvedDate: new DateTime($member["approved_date"], new DateTimeZone(self::TIME_ZONE)),
+            approvedDate: new DateTime($member["approvedDate"], new DateTimeZone(self::TIME_ZONE)),
             haveVolunteered: $member["haveVolunteered"],
             licenseForwarded: $member["licenseForwarded"],
             cinId: $member["cinId"],
@@ -273,7 +301,7 @@ class Member
             $license,
         );
         $db = new DB();
-        $sql = "INSERT INTO members (name, gender, birthDate, phone, email, address, zip, licensee, registrationDate) VALUES (?,?,?,?,?,?,?,?,?,NOW())";
+        $sql = "INSERT INTO members (name, gender, birthDate, phone, email, address, zip, license, registrationDate) VALUES (?,?,?,?,?,?,?,?,?,NOW())";
         $db->prepare($sql);
         $birthDate = $birthDate->format(self::DATE_FORMAT);
         $gender = $gender->toString();
@@ -287,7 +315,7 @@ class Member
             $email,
             $address,
             $zip,
-            $licensee
+            $license
         );
         $db->execute();
         $member->id = $db->insertedId();
@@ -333,15 +361,14 @@ class Member
         // set approved date in db
         $db = new DB();
         $sqlUpdate = <<<'SQL'
-        UPDATE members SET licenseForwarded=NOW() WHERE phone=?;
+        UPDATE members SET licenseForwarded=1 WHERE phone=?;
         SQL;
         $db->prepare($sqlUpdate);
         $phoneNumber = PhoneNumberUtil::getInstance()->format($this->phone, PhonenumberFormat::E164);
         $db->bindParam("s", $phoneNumber);
         $db->execute();
 
-        // this might cause data desync between this object and whatever is stored in db
-        $this->licenseForwarded = new DateTime();
+        $this->licenseForwarded = true;
     }
 
     public function setVolunteering(bool $state): void
@@ -560,6 +587,20 @@ class Member
         $db->execute();
         $members = [];
         $member = [];
+        $member["id"] = NULL;
+        $member["name"] = NULL;
+        $member["gender"] = NULL;
+        $member["birthDate"] = NULL;
+        $member["phone"] = NULL;
+        $member["email"] = NULL;
+        $member["address"] = NULL;
+        $member["zip"] = NULL;
+        $member["license"] = NULL;
+        $member["registrationDate"] = NULL;
+        $member["approvedDate"] = NULL;
+        $member["haveVolunteered"] = NULL;
+        $member["licenseForwarded"] = NULL;
+        $member["cinId"] = NULL;
         $db->bindResult(
             $member["id"],
             $member["name"],
@@ -569,7 +610,7 @@ class Member
             $member["email"],
             $member["address"],
             $member["zip"],
-            $member["licensee"],
+            $member["license"],
             $member["registrationDate"],
             $member["approvedDate"],
             $member["haveVolunteered"],
