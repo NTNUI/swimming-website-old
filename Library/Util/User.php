@@ -239,21 +239,20 @@ class User
 		];
 	}
 
-	public function deleteHandler(): array
-	{
-		throw new NotImplementedException("delete handler not implemented yet");
-		// TODO: after db deletion this instance needs to be deleted. unset($this) does not work
-		$db = new DB();
-		$db->prepare('DELETE FROM users WHERE id=?');
-		$userId = $this->id;
-		$db->bindParam('i', $userId);
-		$db->execute();
-		return [
-			"success" => true,
-			"error" => false,
-			"message" => "user deleted successfully",
-		];
-	}
+	// This function needs to delete current instance. unset($this) is not allowed. disabling function for now.
+	// 	public function deleteHandler(): array
+	// 	{
+	// 		$db = new DB();
+	// 		$db->prepare('DELETE FROM users WHERE id=?');
+	// 		$userId = $this->id;
+	// 		$db->bindParam('i', $userId);
+	// 		$db->execute();
+	// 		return [
+	// 			"success" => true,
+	// 			"error" => false,
+	// 			"message" => "user deleted successfully",
+	// 		];
+	// 	}
 
 	#endregion
 

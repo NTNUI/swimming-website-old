@@ -151,7 +151,7 @@ class Member
             throw new \InvalidArgumentException("enrollment is currently closed");
         }
 
-        $this->$name;
+        $this->$name = $name;
         $this->gender = $gender;
         $this->birthDate = $birthDate;
         $this->phone = $phone;
@@ -459,7 +459,7 @@ class Member
         foreach ($members as &$member) {
             $member["licenseForwarded"] = (bool)$member["licenseForwarded"];
         }
-        if (count($members) < 0) {
+        if (count($members) === 0) {
             throw new MemberNotFoundException();
         }
         return $members;

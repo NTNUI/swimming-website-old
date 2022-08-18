@@ -12,7 +12,7 @@ require_once("Library/Util/Users.php");
  * 
  * * PATCH /api/user/{userId}
  * 
- * * DELETE /api/user/{userId}
+ * // * DELETE /api/user/{userId}
  */
 
 global $args;
@@ -47,12 +47,12 @@ try {
 
 			default => throw new EndpointDoesNotExist(),
 		},
-		"DELETE" => match ($userId) {
-			// * DELETE /api/user/{userId}
-			(string)(int)$userId => User::fromId((int)$userId)->deleteHandler(),
-
-			default => throw new EndpointDoesNotExist(),
-		},
+			// "DELETE" => match ($userId) {
+			// // * DELETE /api/user/{userId}
+			// (string)(int)$userId => User::fromId((int)$userId)->deleteHandler(),
+			//
+			// 	default => throw new EndpointDoesNotExist(),
+			// },
 
 		default => throw new MethodNotAllowedException(),
 	};
