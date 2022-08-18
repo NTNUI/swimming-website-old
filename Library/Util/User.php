@@ -25,7 +25,7 @@ class User
 		private string $name,
 		private string $username,
 		private ?DateTime $passwordSetDate = NULL,
-		private ?int $dbRowId = NULL,
+		private ?int $id = NULL,
 	) {
 		// length limitations are there just in case
 		if (strlen($name) > 40) {
@@ -63,8 +63,8 @@ class User
 		// after db deletion this instance needs to be deleted. unset($this) does not work
 		$db = new DB();
 		$db->prepare('DELETE FROM users WHERE id=?');
-		$id = $this->dbRowId;
-		$db->bindParam('i', $id);
+		$userId = $this->id;
+		$db->bindParam('i', $userId);
 		$db->execute();
 		return [
 			"success" => true,
@@ -98,7 +98,7 @@ class User
 		$db->prepare('INSERT INTO users VALUES name=?, username=?');
 		$db->bindParam('ss', $name, $username);
 		$db->execute();
-		$user->DbRowId = $db->insertedId();
+		$user->id = $db->insertedId();
 
 		$randomPassword = substr(md5((string)mt_rand()), 0, 9);
 
@@ -109,21 +109,21 @@ class User
 	/**
 	 * get a user object from database
 	 *
-	 * @param integer $dbRowId
+	 * @param integer $userId database row id
 	 * @return self
 	 */
-	public static function fromId(int $dbRowId): self
+	public static function fromId(int $userId): self
 	{
 		$db = new DB();
 		$db->prepare('SELECT name, username, lastPassword FROM users WHERE id=?');
-		$db->bindParam('i', $dbRowId);
+		$db->bindParam('i', $userId);
 		$db->execute();
 		$db->bindResult($name, $username, $lastPassword);
 		if (!$db->fetch()) {
 			throw new UserNotFoundException();
 		}
 
-		return new self($name, $username, $lastPassword, $dbRowId);
+		return new self($name, $username, $lastPassword, $userId);
 	}
 	
 	public static function fromUsername(string $username): self
@@ -132,11 +132,11 @@ class User
 		$db->prepare('SELECT id, name, lastPassword FROM users WHERE username=?');
 		$db->bindParam('s', $username);
 		$db->execute();
-		$db->bindResult($id, $name, $lastPassword);
+		$db->bindResult($userId, $name, $lastPassword);
 		if (!$db->fetch()) {
 			throw new UserNotFoundException();
 		}
-		return new self($name, $username, DateTime::createFromFormat(self::DATE_FORMAT,$lastPassword), $id);
+		return new self($name, $username, DateTime::createFromFormat(self::DATE_FORMAT,$lastPassword), $userId);
 	}
 	#endregion
 
@@ -144,7 +144,7 @@ class User
 	public function toArray(): array
 	{
 		return [
-			"id" => $this->dbRowId,
+			"id" => $this->id,
 			"name" => $this->name,
 			"username" => $this->username,
 			"lastPasswordDate" => $this->passwordSetDate,
@@ -164,8 +164,8 @@ class User
 
 		$db = new DB();
 		$db->prepare('UPDATE users SET name=? WHERE id=?');
-		$id = $this->dbRowId;
-		$db->bindParam('is', $id, $name);
+		$userId = $this->id;
+		$db->bindParam('is', $userId, $name);
 		$db->execute();
 		$db->fetch();
 		$this->name = $name;
@@ -185,8 +185,8 @@ class User
 		}
 		$db = new DB();
 		$db->prepare('UPDATE users SET username=? WHERE id=?');
-		$id = $this->dbRowId;
-		$db->bindParam('is', $id, $username);
+		$userId = $this->id;
+		$db->bindParam('is', $userId, $username);
 		$db->execute();
 		$db->fetch();
 		$this->username = $username;
@@ -217,8 +217,8 @@ class User
 	{
 		$db = new DB();
 		$db->prepare('SELECT passwd FROM users WHERE id=?');
-		$id = $this->dbRowId;
-		$db->bindParam('i', $id);
+		$userId = $this->id;
+		$db->bindParam('i', $userId);
 		$db->execute();
 		$passwordHash = "";
 		$db->bindResult($passwordHash);
@@ -247,7 +247,7 @@ class User
 	{
 		$emailTitle = "NTNUI Swimming: New user";
 
-		$html = <<<'HTML'
+		$html = <<<HTML
 		Your user account has been created.
 		Password: $randomPassword
 		
@@ -270,16 +270,16 @@ class User
 		$db = new DB();
 		$db->prepare('SELECT id, name, username, lastPassword FROM users');
 		$db->execute();
-		$id = 0;
+		$userId = 0;
 		$name = 0;
 		$username = "";
 		$lastPassword = NULL;
-		$db->bindResult($id, $name, $username, $lastPassword);
+		$db->bindResult($userId, $name, $username, $lastPassword);
 		$users = [];
 		$user = [];
 		while ($db->fetch()) {
 			$user = [
-				"id" => $id,
+				"id" => $userId,
 				"name" => $name,
 				"username" => $username,
 				"lastPassword" => $lastPassword

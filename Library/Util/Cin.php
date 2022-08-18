@@ -21,18 +21,18 @@ class Cin
     }
 
     private function __construct(
-        int $id,
+        int $cinId,
         int $cin,
         string $memberHash,
-        DateTime $lastUsed,
+        string $lastUsed,
     ) {
         if ($cin > 99999999 || $cin < 10000000) {
             throw new cinInvalidException();
         }
-        $this->id = $id;
+        $this->id = $cinId;
         $this->cin = $cin;
         $this->memberHash = new Hash($memberHash);
-        $this->lastUsed = $lastUsed;
+        $this->lastUsed = DateTime::createFromFormat(self::DATE_FORMAT, $lastUsed, new DateTimeZone(self::TIME_ZONE));
     }
 
     public static function new(int $cin, Hash $memberHash): self
@@ -42,67 +42,55 @@ class Cin
         $db->prepare('INSERT INTO cin VALUES cin=?, memberHash=?');
         $db->bindParam('is', $cin, $memberHash->get());
         $db->execute();
-        $id = 0;
+        $cinId = $db->insertedId();
+        $db->prepare("SELECT * FROM cin WHERE id=?");
+        $db->bindParam("i", $cinId);
         $cin = 0;
-        $lastUsed = "";
+        $lastUsedString = "";
         $hash = "";
-        $db->bindResult($id, $cin, $hash, $lastUsed);
+        $db->execute();
+        $db->bindResult($id, $cin, $hash, $lastUsedString);
         $db->fetch();
-        return new self($id, $cin, $hash, DateTime::createFromFormat(self::DATE_FORMAT, $lastUsed, new DateTimeZone(self::TIME_ZONE)));
+        return new self($id, $cin, $hash, $lastUsedString);
     }
 
-    public static function fromId(int $id): self
+    public static function fromId(int $cinId): self
     {
         $db = new DB();
         $db->prepare('SELECT * FROM cin WHERE id=?');
-        $db->bindParam('i', $id);
+        $db->bindParam('i', $cinId);
         $db->execute();
-        $id = 0;
         $cin = 0;
-        $lastUsed = "";
+        $lastUsedString = "";
         $hash = "";
-        $db->bindResult($id, $cin, $hash, $lastUsed);
+        $db->bindResult($_, $cin, $hash, $lastUsedString);
         $db->fetch();
-        return new self($id, $cin, $hash, DateTime::createFromFormat(self::DATE_FORMAT, $lastUsed, new DateTimeZone(self::TIME_ZONE)));
+        return new self($cinId, $cin, $hash, $lastUsedString);
     }
-
-    // public static function fromCin(int $cin): self
-    // {
-    //     $db = new DB();
-    //     $db->prepare('SELECT * FROM cin WHERE cin=?');
-    //     $db->bindParam('i', $cin);
-    //     $db->execute();
-    //     $id = 0;
-    //     $cin = 0;
-    //     $lastUsed = 0;
-    //     $hash = "";
-    //     $db->bindResult($id, $cin, $hash, $lastUsed);
-    //     $db->fetch();
-    //     return new self($id, $cin, $hash, $lastUsed);
-    // }
 
     public static function fromMemberHash(Hash $memberHash): self
     {
         $db = new DB();
         $db->prepare('SELECT * FROM cin WHERE memberHash=?');
-        $db->bindParam('s', $memberHash->get());
+        $hash = $memberHash->get();
+        $db->bindParam('s', $hash);
         $db->execute();
-        $id = 0;
+        $cinId = 0;
         $cin = 0;
-        $lastUsed = "";
-        $hash = "";
-        $db->bindResult($id, $cin, $hash, $lastUsed);
+        $lastUsedString = "";
+        $db->bindResult($cinId, $cin, $_, $lastUsedString);
         if (!$db->fetch()) {
             // no rows were fetched.
             throw new CinNotFoundException();
         }
-        return new self($id, $cin, $hash, DateTime::createFromFormat(self::DATE_FORMAT, $lastUsed, new DateTimeZone(self::TIME_ZONE)));
+        return new self($cinId, $cin, $hash, $lastUsedString);
     }
 
     public function touch(): void
     {
         $db = new DB();
-        $db->prepare('UPDATE cin SET lastUsed=NOW() WHERE id=' . $this->id);
+        $db->prepare('UPDATE cin SET lastUsed=NOW() WHERE id=?');
+        $db->bindParam("i", $this->id);
         $db->execute();
     }
 

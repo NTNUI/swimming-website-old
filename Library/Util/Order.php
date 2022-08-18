@@ -49,8 +49,8 @@ class Order
 {
     private function __construct(
         public readonly Customer $customer,
-        public readonly int $dbRowId,
-        public readonly int $productRowId,
+        public readonly int $id,
+        public readonly int $productId,
         public readonly string $intentId,
         public readonly ?string $comment = NULL,
         private OrderStatus $orderStatus = OrderStatus::PLACED,
@@ -141,47 +141,49 @@ class Order
         $db = new DB();
         $sql = "INSERT INTO orders (productId, name, email, phone, intentId, orderStatus, comment) VALUES (?, ?, ?, ?, ?, ?, ?)";
         $db->prepare($sql);
-        $productDbRowId = $product->dbRowId;
+        $productId = $product->id;
         $phoneString = $customer->getPhoneAsString();
 
         $fullName = $customer->fullName;
         $email = $customer->email;
 
         $orderStatusString = $orderStatus->toString();
+        $intentId = $intent["id"];
         $db->bindParam(
             "issssss",
-            $productDbRowId,
+            $productId,
             $fullName,
             $email,
             $phoneString,
-            $intent["id"],
+            $intentId,
             $orderStatusString,
             $comment,
         );
         $db->execute();
 
-        \Stripe\PaymentIntent::update($intent["id"], ["metadata" => ["orderId" => $db->insertedId()]]);
+        $orderId = $db->insertedId();
+        \Stripe\PaymentIntent::update($intent["id"], ["metadata" => ["orderId" => $orderId]]);
 
         return new self(
-            $customer,
-            $db->insertedId(),
-            $product->dbRowId,
-            $intent["id"],
-            $comment,
-            $orderStatus
+            customer: $customer,
+            id: $orderId,
+            productId: $productId,
+            intentId: $intentId,
+            comment: $comment,
+            orderStatus: $orderStatus
         );
     }
 
 
-    public static function FromDbRowId(int $dbRowId): self
+    public static function fromId(int $orderId): self
     {
         $db = new DB();
         $db->prepare("SELECT * FROM orders WHERE id=?");
-        $db->bindParam("i", $dbRowId);
+        $db->bindParam("i", $orderId);
         $db->execute();
         $db->bindResult(
-            $dbRowId,
-            $productRowId,
+            $orderId,
+            $productId,
             $customerName,
             $customerEmail,
             $customerPhone,
@@ -197,12 +199,12 @@ class Order
         }
 
         return new Order(
-            new Customer($customerName, $customerEmail, $phoneObject),
-            $dbRowId,
-            $productRowId,
-            $intentId,
-            $orderStatus,
-            $comment,
+            customer: new Customer($customerName, $customerEmail, $phoneObject),
+            id: $orderId,
+            productId: $productId,
+            intentId: $intentId,
+            orderStatus: $orderStatus,
+            comment: $comment,
         );
     }
 
@@ -214,8 +216,8 @@ class Order
         $id = $paymentIntent["id"];
         $db->bindParam("i", $id);
         $db->bindResult(
-            $dbRowId,
-            $productRowId,
+            $orderId,
+            $productId,
             $customerName,
             $customerEmail,
             $customerPhone,
@@ -233,11 +235,11 @@ class Order
         }
         return new self(
             new Customer($customerName, $customerEmail, $phoneObject),
-            $dbRowId,
-            $productRowId,
-            $intentId,
-            $comment,
-            OrderStatus::fromString($orderStatus),
+            id: $orderId,
+            productId: $productId,
+            intentId: $intentId,
+            comment: $comment,
+            orderStatus: OrderStatus::fromString($orderStatus),
         );
     }
 
@@ -249,8 +251,8 @@ class Order
         $db = new DB();
         $db->prepare("UPDATE orders SET orderStatus = ? WHERE id = ?");
         $orderStatusString = $orderStatus->toString();
-        $dbRowId = $this->dbRowId;
-        $db->bindParam("si", $orderStatusString, $dbRowId);
+        $orderId = $this->id;
+        $db->bindParam("si", $orderStatusString, $orderId);
         $db->execute();
         $this->orderStatus = $orderStatus;
     }
@@ -268,7 +270,7 @@ class Order
 
     #region static
 
-    static public function existsFromDbRowId(int $orderId): bool
+    static public function idExists(int $orderId): bool
     {
         $db = new DB();
         $db->prepare("SELECT COUNT(*) FROM orders WHERE id=?");
@@ -282,10 +284,10 @@ class Order
     /**
      * get completed orders as array
      *
-     * @param ?string $product_hash if set, will return only orders matching that product_hash
+     * @param ?string $productHash if set, will return only orders matching that productHash
      * @param ?PhoneNumber $phoneNumber if set, will return only orders matching that product_hash
      * @return array<int, array{
-     *      dbRowId: int,
+     *      id: int,
      *      productId: int,
      *      customerName: string,
      *      customerEmail: string,
@@ -306,7 +308,7 @@ class Order
         $db->prepare($sql);
         $db->execute();
         $db->bindResult(
-            $dbRowId,
+            $orderId,
             $productId,
             $customerName,
             $customerEmail,
@@ -319,7 +321,7 @@ class Order
         $orders = [];
         while ($db->fetch()) {
             $order = [
-                "dbRowId" => $dbRowId,
+                "id" => $orderId,
                 "productId" => $productId,
                 "customerName" => $customerName,
                 "customerEmail" => $customerEmail,

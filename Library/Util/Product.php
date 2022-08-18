@@ -12,7 +12,7 @@ class Product
     #region constructor
 
     private function __construct(
-        public readonly int $dbRowId,
+        public readonly int $id,
         public readonly string $productHash,
         private string $nameJson,
         private string $descriptionJson,
@@ -143,7 +143,7 @@ class Product
 
         // construct object and return
         return new Product(
-            dbRowId: $db->insertedId(),
+            id: $db->insertedId(),
             productHash: $productHash,
             nameJson: $nameJson,
             descriptionJson: $descriptionJson,
@@ -174,7 +174,7 @@ class Product
         $db->bindParam("s", $productHash);
         $db->execute();
         $db->bindResult(
-            $dbRowId,
+            $productId,
             $productHash,
             $nameJson,
             $descriptionJson,
@@ -201,8 +201,8 @@ class Product
             $availableUntil = DateTime::createFromFormat(self::DATE_FORMAT, $availableUntil, new DateTimeZone(self::TIME_ZONE));
         }
 
-        return new Product(
-            dbRowId: $dbRowId,
+        return new self(
+            id: $productId,
             productHash: $productHash,
             nameJson: $nameJson,
             descriptionJson: $descriptionJson,
@@ -267,7 +267,7 @@ class Product
      * Get an associative array of the product.
      *
      * @return array{
-     *      dbRowId: int,
+     *      id: int,
      *      productHash: string,
      *      nameJson: string,
      *      descriptionJson: string,
@@ -289,7 +289,7 @@ class Product
     public function toArray(): array
     {
         return [
-            "dbRowId" => $this->dbRowId,
+            "id" => $this->id,
             "productHash" => $this->productHash,
             "nameJson" => $this->nameJson,
             "descriptionJson" => $this->descriptionJson,
@@ -366,8 +366,8 @@ class Product
         }
         $db = new DB();
         $db->prepare("UPDATE products SET image=? WHERE id=?");
-        $dbRowId = $this->dbRowId;
-        $db->bindParam("si", $imagePath, $dbRowId);
+        $productId = $this->id;
+        $db->bindParam("si", $imagePath, $productId);
         $db->execute();
         $this->image = $imagePath;
     }
@@ -375,6 +375,7 @@ class Product
     public function setAvailableFrom(?DateTime $availableFrom): void
     {
         $db = new DB();
+        $productId = $this->id;
         if (isset($availableFrom)) {
             if (!empty($this->availableUntil) && $availableFrom > $this->availableUntil) {
                 throw new \Exception("cannot set available from past available until");
@@ -382,12 +383,10 @@ class Product
 
             $db->prepare("UPDATE products SET availableFrom=? WHERE id=?");
             $timeString = $availableFrom->format(self::DATE_FORMAT);
-            $dbRowId = $this->dbRowId;
-            $db->bindParam("ss", $timeString, $dbRowId);
+            $db->bindParam("ss", $timeString, $productId);
         } else {
             $db->prepare("UPDATE products SET availableFrom=NULL WHERE id=?");
-            $dbRowId = $this->dbRowId;
-            $db->bindParam("s", $dbRowId);
+            $db->bindParam("s", $productId);
         }
         $db->execute();
         $this->availableFrom = $availableFrom;
@@ -397,8 +396,8 @@ class Product
     {
         $db = new DB();
         $db->prepare("UPDATE products SET visibility=? WHERE id=?");
-        $dbRowId = $this->dbRowId;
-        $db->bindParam("ii", $visible, $dbRowId);
+        $productId = $this->id;
+        $db->bindParam("ii", $visible, $productId);
         $db->execute();
         $this->visible = $visible;
     }
@@ -406,14 +405,14 @@ class Product
     public function setInventoryCount(?int $inventoryCount): void
     {
         $db = new DB();
+        $productId = $this->id;
         if (isset($inventoryCount)) {
             $db->prepare("UPDATE products SET amountAvailable=? WHERE id=?");
-            $db->bindParam("ii", $inventoryCount, $dbRowId);
+            $db->bindParam("ii", $inventoryCount, $productId);
         } else {
             $db->prepare("UPDATE products SET amountAvailable=NULL WHERE id=?");
-            $db->bindParam("i", $dbRowId);
+            $db->bindParam("i", $productId);
         }
-        $dbRowId = $this->dbRowId;
         $db->execute();
         $this->inventoryCount = $inventoryCount;
     }
@@ -421,18 +420,17 @@ class Product
     public function setAvailableUntil(?DateTime $availableUntil): void
     {
         $db = new DB();
+        $productId = $this->id;
         if (isset($availableUntil)) {
             if (!empty($this->availableFrom) && $this->availableFrom > $availableUntil) {
                 throw new \InvalidArgumentException("cannot set availableUntil before availableFrom");
             }
             $db->prepare("UPDATE products SET availableUntil=? WHERE id=?");
-            $time_string = $availableUntil->format(self::DATE_FORMAT);
-            $dbRowId = $this->dbRowId;
-            $db->bindParam("ss", $time_string, $dbRowId);
+            $timeString = $availableUntil->format(self::DATE_FORMAT);
+            $db->bindParam("si", $timeString, $productId);
         } else {
             $db->prepare("UPDATE products SET availableUntil=NULL WHERE id=?");
-            $dbRowId = $this->dbRowId;
-            $db->bindParam("s", $dbRowId);
+            $db->bindParam("i", $productId);
         }
         $db->execute();
         $this->availableUntil = $availableUntil;
@@ -446,8 +444,8 @@ class Product
         $price *= 100; // convert from NOK to øre
         $db = new DB();
         $db->prepare("UPDATE products SET price=? WHERE id=?");
-        $dbRowId = $this->dbRowId;
-        $db->bindParam("ii", $price, $dbRowId);
+        $productId = $this->id;
+        $db->bindParam("ii", $price, $productId);
         $db->execute();
         $this->price = $price;
     }
@@ -458,8 +456,8 @@ class Product
         $db = new DB();
         if (!isset($priceMember)) {
             $db->prepare("UPDATE products SET price=NULL WHERE id=?");
-            $dbRowId = $this->dbRowId;
-            $db->bindParam("i", $dbRowId);
+            $productId = $this->id;
+            $db->bindParam("i", $productId);
             $db->execute();
             $this->priceMember = NULL;
             return;
@@ -469,8 +467,8 @@ class Product
         }
         $priceMember *= 100; // convert from NOK to øre
         $db->prepare("UPDATE products SET price=? WHERE id=?");
-        $dbRowId = $this->dbRowId;
-        $db->bindParam("ii", $priceMember, $dbRowId);
+        $productId = $this->id;
+        $db->bindParam("ii", $priceMember, $productId);
         $db->execute();
         $this->priceMember = $priceMember;
     }
@@ -523,8 +521,8 @@ class Product
     {
         $db = new DB();
         $db->prepare('DELETE FROM products WHERE id=?');
-        $id = $this->dbRowId;
-        $db->bindParam('i', $id);
+        $productId = $this->id;
+        $db->bindParam('i', $productId);
         $db->execute();
         unset($this);
 
@@ -551,17 +549,6 @@ class Product
         return (bool)$result;
     }
 
-    static public function rowIdExists(int $rowId): bool
-    {
-        $db = new DB();
-        $db->prepare("SELECT COUNT(*) FROM products WHERE id=?");
-        $db->bindParam("i", $rowId);
-        $db->execute();
-        $result = 0;
-        $db->bindResult($result);
-        $db->fetch();
-        return (bool)$result;
-    }
     // TODO: place in store class
     static public function getInventoryCount(string $productHash): int
     {
@@ -578,7 +565,7 @@ class Product
         $completedOrders = 0;
         $inventoryCount = 0;
         $db->bindResult($completedOrders, $inventoryCount);
-        if(!$db->fetch()){
+        if (!$db->fetch()) {
             throw new OrderNotFoundException();
         }
         return $completedOrders - $inventoryCount;
@@ -612,6 +599,10 @@ class Product
         $db = new DB();
         $db->prepare("SELECT * FROM products");
         $db->execute();
+        // we don't want users to be able to predict an identifier like id for a product.
+        // some products can be hidden and accessible only through a link and thus predictable
+        // id's are not suitable for this. productHash is a random string which uniquely identifies
+        // each product.
         $db->bindResult(
             $_, // hide product id to clients
             $productHash,
@@ -654,6 +645,7 @@ class Product
         }
         return $products;
     }
+
     public static function isValidPrice(int $price): bool
     {
         if ($price > 2000) { // failsafe 2000 NOK
@@ -665,6 +657,5 @@ class Product
         return true;
     }
     #endregion
-
 
 }

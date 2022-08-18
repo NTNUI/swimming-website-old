@@ -55,7 +55,7 @@ try {
 		$customer = new Customer($request["order"]["customer"]["name"], $request["order"]["customer"]["email"], $phone);
 
 		$order = Order::new($customer, $product, $request["payment_method_id"], $request["order"]["comment"] ?? "", OrderStatus::PLACED);
-		$intent = PaymentIntent::retrieve($order->intent_id);
+		$intent = PaymentIntent::retrieve($order->intentId);
 	} elseif (isset($request["payment_intent_id"])) {
 
 		$intent = PaymentIntent::retrieve($request["payment_intent_id"]);

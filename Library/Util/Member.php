@@ -55,8 +55,8 @@ class Member
      * @param ?DateTime $approvedDate
      * @param bool $haveVolunteered
      * @param bool $licenseForwarded
-     * @param ?int $cinDbRowId
-     * @param ?int $dbRowId
+     * @param ?int $cinId database cin row id
+     * @param ?int $id database member row id
      * 
      * @throws MemberIsActiveException if a member already exists
      * @throws InvalidArgumentException on input error
@@ -75,8 +75,8 @@ class Member
         private ?DateTime $approvedDate = NULL,
         private bool $haveVolunteered = false,
         private bool $licenseForwarded = false,
-        private ?int $cinDbRowId = null,
-        private ?int $dbRowId = NULL
+        private ?int $cinId = null,
+        private ?int $id = NULL
     ) {
         try {
             if (self::exists($phone)) {
@@ -136,16 +136,16 @@ class Member
         }
 
         // save cin number to member if exists
-        $cinRowId = NULL;
+        $cinId = NULL;
         try {
             $memberHash = self::calculateHash($birthDate, $gender, $phone);
             $cin = Cin::fromMemberHash($memberHash);
             $cin->touch();
-            $cinRowId = $cin->id;
+            $cinId = $cin->id;
         } catch (CinNotFoundException $_) {
             // has probably not been a member before and cin has never been created for this user
         }
-        $this->cinDbRowId = $cinRowId;
+        $this->cinId = $cinId;
 
         // block registration unless enrollment is open.
         if (!enrollmentIsOpen(Settings::getInstance()->getEnrollment())) {
@@ -160,7 +160,7 @@ class Member
         $this->address = $address;
         $this->zip = $zip;
         $this->license = $license;
-        $this->$cinRowId = $cinRowId;
+        $this->$cinId = $cinId;
     }
 
     public static function fromPhone(PhoneNumber $phone): self
@@ -172,7 +172,7 @@ class Member
         $db->execute();
         $member = [];
         $db->bindResult(
-            $member["memberId"],
+            $member["id"],
             $member["name"],
             $member["gender"],
             $member["birthDate"],
@@ -185,7 +185,7 @@ class Member
             $member["approvedDate"],
             $member["haveVolunteered"],
             $member["licenseForwarded"],
-            $member["cinDbRowId"],
+            $member["cinId"],
         );
         if ($db->fetch() === false) {
             throw new MemberNotFoundException();
@@ -203,8 +203,8 @@ class Member
             approvedDate: new DateTime($member["approvedDate"], new DateTimeZone(self::TIME_ZONE)),
             haveVolunteered: $member["haveVolunteered"],
             licenseForwarded: $member["licenseForwarded"],
-            cinDbRowId: $member["cinDbRowId"],
-            dbRowId: $member["memberId"],
+            cinId: $member["cinId"],
+            id: $member["id"],
         );
     }
 
@@ -216,7 +216,7 @@ class Member
         $db->execute();
         $member = [];
         $db->bindResult(
-            $member["memberId"],
+            $member["id"],
             $member["name"],
             $member["gender"],
             $member["birthDate"],
@@ -229,7 +229,7 @@ class Member
             $member["approvedDate"],
             $member["haveVolunteered"],
             $member["licenseForwarded"],
-            $member["CIN"],
+            $member["cinId"],
         );
         if ($db->fetch() === false) {
             throw new MemberNotFoundException();
@@ -247,8 +247,8 @@ class Member
             approvedDate: new DateTime($member["approved_date"], new DateTimeZone(self::TIME_ZONE)),
             haveVolunteered: $member["haveVolunteered"],
             licenseForwarded: $member["licenseForwarded"],
-            cinDbRowId: $member["cinDbRowId"],
-            dbRowId: $member["memberId"],
+            cinId: $member["cinId"],
+            id: $member["id"],
         );
     }
 
@@ -290,7 +290,7 @@ class Member
             $licensee
         );
         $db->execute();
-        $member->dbRowId = $db->insertedId();
+        $member->id = $db->insertedId();
         return $member;
     }
 
@@ -299,7 +299,7 @@ class Member
     #region getters
     public function toArray(): array
     {
-        return self::getByIdAsArray($this->dbRowId);
+        return self::getByIdAsArray($this->id);
     }
 
     private function getHash(): Hash
@@ -326,16 +326,16 @@ class Member
         if (isset($this->licenseForwarded)) {
             throw new \InvalidArgumentException("license has already been forwarded for this user. Call an admin");
         }
-        if (!isset($this->cinDbRowId)) {
-            throw new \InvalidArgumentException("cin db row is not set");
+        if (!isset($this->cinId)) {
+            throw new \InvalidArgumentException("cinId is not set");
         }
 
         // set approved date in db
         $db = new DB();
-        $sql_update = <<<'SQL'
+        $sqlUpdate = <<<'SQL'
         UPDATE members SET licenseForwarded=NOW() WHERE phone=?;
         SQL;
-        $db->prepare($sql_update);
+        $db->prepare($sqlUpdate);
         $phoneNumber = PhoneNumberUtil::getInstance()->format($this->phone, PhonenumberFormat::E164);
         $db->bindParam("s", $phoneNumber);
         $db->execute();
@@ -360,8 +360,8 @@ class Member
 
     public function setCin(int $cin): void
     {
-        if (isset($this->cinDbRowId)) {
-            Cin::fromId($this->cinDbRowId)->updateCin($cin); // might throw on duplication error
+        if (isset($this->cinId)) {
+            Cin::fromId($this->cinId)->updateCin($cin); // might throw on duplication error
         } else {
             Cin::new($cin, $this->getHash()); // might throw on duplication error
         }
@@ -538,12 +538,11 @@ class Member
 
         // set approved date in db
         $db = new DB();
-        $sql_update = <<<'SQL'
-        UPDATE members SET approved_date=NOW() WHERE phone=?;
+        $sqlUpdate = <<<'SQL'
+        UPDATE members SET approvedDate=NOW() WHERE id=?;
         SQL;
-        $db->prepare($sql_update);
-        $phoneNumber = PhoneNumberUtil::getInstance()->format($this->phone, PhonenumberFormat::E164);
-        $db->bindParam("s", $phoneNumber);
+        $db->prepare($sqlUpdate);
+        $db->bindParam("i", $this->id);
         $db->execute();
 
         // this might cause data desync between this object and whatever is stored in db
@@ -562,7 +561,7 @@ class Member
         $members = [];
         $member = [];
         $db->bindResult(
-            $member["MemberId"],
+            $member["id"],
             $member["name"],
             $member["gender"],
             $member["birthDate"],
@@ -575,7 +574,7 @@ class Member
             $member["approvedDate"],
             $member["haveVolunteered"],
             $member["licenseForwarded"],
-            $member["CIN"],
+            $member["cinId"],
         );
         while ($db->fetch()) {
             array_push($members, $member);
