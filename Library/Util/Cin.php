@@ -39,7 +39,7 @@ class Cin
 
     public static function new(int $cin, Hash $memberHash): self
     {
-        $db = new DB('web');
+        $db = new DB();
         $db->prepare('INSERT INTO cin VALUES cin=?, memberHash=?, lastUsed');
         $db->bindParam('s', $memberHash->get());
         $db->execute();
@@ -54,7 +54,7 @@ class Cin
 
     public static function fromId(int $id): self
     {
-        $db = new DB('web');
+        $db = new DB();
         $db->prepare('SELECT * FROM cin WHERE id=?');
         $db->bindParam('i',$id); 
         $db->execute();
@@ -69,7 +69,7 @@ class Cin
 
     public static function fromCin(int $cin): self
     {
-        $db = new DB('web');
+        $db = new DB();
         $db->prepare('SELECT * FROM cin WHERE cin=?');
         $db->bindParam('i', $cin);
         $db->execute();
@@ -84,7 +84,7 @@ class Cin
 
     public static function fromMemberHash(Hash $memberHash): self
     {
-        $db = new DB('web');
+        $db = new DB();
         $db->prepare('SELECT * FROM cin WHERE memberHash=?');
         $db->bindParam('s', $memberHash->get());
         $db->execute();

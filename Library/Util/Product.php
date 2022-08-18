@@ -521,7 +521,7 @@ class Product
 
     public function deleteHandler(): array
     {
-        $db = new DB('web');
+        $db = new DB();
         $db->prepare('DELETE FROM products WHERE id=?');
         $id = $this->dbRowId;
         $db->bindParam('i', $id);
@@ -565,7 +565,7 @@ class Product
     // TODO: place in store class
     static public function getInventoryCount(string $productHash): int
     {
-        $db = new DB('web');
+        $db = new DB();
         $sql = <<<'SQL'
         SELECT 
         (SELECT COUNT(*) FROM orders WHERE productHash=? AND orderStatus=PLACED OR orderStatus=FINALIZED)

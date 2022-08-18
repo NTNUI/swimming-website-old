@@ -61,7 +61,7 @@ class User
 	{
 		throw new NotImplementedException("delete handler not implemented yet");
 		// after db deletion this instance needs to be deleted. unset($this) does not work
-		$db = new DB('web');
+		$db = new DB();
 		$db->prepare('DELETE FROM users WHERE id=?');
 		$id = $this->dbRowId;
 		$db->bindParam('i', $id);
@@ -94,7 +94,7 @@ class User
 		$user = new self($name, $username);
 
 
-		$db = new DB('web');
+		$db = new DB();
 		$db->prepare('INSERT INTO users VALUES name=?, username=?');
 		$db->bindParam('ss', $name, $username);
 		$db->execute();
@@ -114,7 +114,7 @@ class User
 	 */
 	public static function fromId(int $dbRowId): self
 	{
-		$db = new DB('web');
+		$db = new DB();
 		$db->prepare('SELECT name, username, lastPassword FROM users WHERE id=?');
 		$db->bindParam('i', $dbRowId);
 		$db->execute();
@@ -128,7 +128,7 @@ class User
 	
 	public static function fromUsername(string $username): self
 	{
-		$db = new DB('web');
+		$db = new DB();
 		$db->prepare('SELECT id, name, lastPassword FROM users WHERE username=?');
 		$db->bindParam('s', $username);
 		$db->execute();
@@ -162,7 +162,7 @@ class User
 			throw new \InvalidArgumentException("name too short");
 		}
 
-		$db = new DB('web');
+		$db = new DB();
 		$db->prepare('UPDATE users SET name=? WHERE id=?');
 		$id = $this->dbRowId;
 		$db->bindParam('is', $id, $name);
@@ -183,7 +183,7 @@ class User
 		if (self::usernameExists($username)) {
 			throw new \InvalidArgumentException(); // TODO: new exception that represents this error.
 		}
-		$db = new DB('web');
+		$db = new DB();
 		$db->prepare('UPDATE users SET username=? WHERE id=?');
 		$id = $this->dbRowId;
 		$db->bindParam('is', $id, $username);
@@ -215,7 +215,7 @@ class User
 
 	public function verifyPassword(string $password): bool
 	{
-		$db = new DB('web');
+		$db = new DB();
 		$db->prepare('SELECT passwd FROM users WHERE id=?');
 		$id = $this->dbRowId;
 		$db->bindParam('i', $id);
@@ -267,7 +267,7 @@ class User
 
 	public static function getAllAsArray(): array
 	{
-		$db = new DB('web');
+		$db = new DB();
 		$db->prepare('SELECT id, name, username, lastPassword FROM users');
 		$db->execute();
 		$id = 0;
