@@ -338,7 +338,7 @@ class Order
                 }
             }
         }
-        if (isset($product_hash)) {
+        if (isset($productHash)) {
             foreach ($orders as $orderIndex => $order) {
                 if ($order["productId"] !== Product::fromProductHash($productHash)->dbRowId) {
                     unset($orders[$orderIndex]);

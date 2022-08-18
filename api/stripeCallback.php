@@ -14,7 +14,7 @@ use Stripe\PaymentIntent;
 use libphonenumber\PhoneNumberUtil;
 
 $response = new Response();
-
+global $args;
 try {
 	if (argsURL("SERVER", "REQUEST_METHOD") !== "POST") {
 		throw new \Exception("accepting only post methods");

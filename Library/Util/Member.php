@@ -135,14 +135,17 @@ class Member
             throw new \InvalidArgumentException("license club does not exists");
         }
 
-        // check for excising CIN number
+        // save cin number to member if exists
         $cinRowId = NULL;
         try {
             $memberHash = self::calculateHash($birthDate, $gender, $phone);
-            $cinRowId = Cin::updateLastUsedDate($memberHash);
+            $cin = Cin::fromMemberHash($memberHash);
+            $cin->touch();
+            $cinRowId = $cin->id;
         } catch (CinNotFoundException $_) {
-            $cinRowId = NULL;
+            // has probably not been a member before and cin has never been created for this user
         }
+        $this->cinDbRowId = $cinRowId;
 
         // block registration unless enrollment is open.
         if (!enrollmentIsOpen(Settings::getInstance()->getEnrollment())) {
@@ -357,18 +360,10 @@ class Member
 
     public function setCin(int $cin): void
     {
-        if (!Authenticator::isLoggedIn()) {
-            throw new UnauthorizedException();
-        }
-        if (Cin::exists($cin)) {
-            Cin::updateLastUsedDate($this->getHash());
-            Cin::updateCin($cin, $this->getHash());
+        if (isset($this->cinDbRowId)) {
+            Cin::fromId($this->cinDbRowId)->updateCin($cin); // might throw on duplication error
         } else {
-            $this->cinDbRowId = Cin::create($cin, $this->getHash());
-            $db = new DB();
-            $db->prepare("UPDATE members SET cinId=? WHERE id=?");
-            $db->bindParam("ii", $this->cinDbRowId, $this->dbRowId);
-            $db->execute();
+            Cin::new($cin, $this->getHash()); // might throw on duplication error
         }
     }
 
@@ -422,7 +417,7 @@ class Member
             $this->setVolunteering((bool)filter_var($jsonObject["volunteering"], FILTER_VALIDATE_BOOLEAN));
         }
         if (array_key_exists("cin", $jsonObject)) {
-            $this->setCin(Cin::create($jsonObject["cin"], $this->getHash()));
+            Cin::fromMemberHash($this->getHash())->updateCin($jsonObject["cin"]);
         }
         return [
             "success" => true,
@@ -508,13 +503,14 @@ class Member
         return substr($name, strlen($name) - strpos(strrev($name), " "));
     }
 
-    private function getAge(): int
+    private function getAge(DateTime $birthDate): int
     {
         $now = new DateTime();
-        $interval = $now->diff($this->birthDate);
+        $interval = $now->diff($birthDate);
         return $interval->y;
     }
 
+    // maybe move to Cin.php
     private static function calculateHash(DateTime $birthDate, Gender $gender, PhoneNumber $phone): Hash
     {
         $phoneString = PhoneNumberUtil::getInstance()->format($phone, PhoneNumberFormat::E164);

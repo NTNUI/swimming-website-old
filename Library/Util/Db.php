@@ -2,8 +2,6 @@
 
 declare(strict_types=1);
 
-use function PHPSTORM_META\type;
-
 // TODO: fetch row as an associative array
 /**
  * Create a new connection to database.

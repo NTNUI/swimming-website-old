@@ -12,8 +12,8 @@ abstract class ModelException extends \Exception
     }
 }
 
-class cinCreateException extends ModelException{
+class cinInvalidException extends ModelException{
     /** @var string $message */
-    protected $message = "cannot create cin";
+    protected $message = "cin is not 8 digits";
 }
 

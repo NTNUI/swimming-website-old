@@ -11,7 +11,7 @@ use libphonenumber\PhoneNumberUtil;
 use Stripe\Exception\ApiErrorException as StripeApiErrorException;
 use Stripe\PaymentIntent;
 
-
+global $args;
 $response = new Response();
 try {
 	\Stripe\Stripe::setApiKey($_ENV["STRIPE_SECRET_KEY"]);
