@@ -10,3 +10,4 @@ storage/
 composer.pahr
 .DS_Store
 .env
+public
