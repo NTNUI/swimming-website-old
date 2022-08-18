@@ -11,7 +11,7 @@ require_once(__DIR__ . "/Log.php");
 use \libphonenumber\PhoneNumberUtil;
 use \libphonenumber\PhoneNumber;
 use \libphonenumber\PhoneNumberFormat;
-
+use Webmozart\Assert\Assert;
 
 /**
  * class Member
@@ -22,8 +22,6 @@ use \libphonenumber\PhoneNumberFormat;
  * - Member::fromId() fetches one member from database by row id
  * default constructor is private and should only be called internally to guarantee that
  * any instance of member correspond to a row in the database.
- * 
- * all modifiers are protected by login check using Authenticator class
  *
  */
 class Member
@@ -62,7 +60,6 @@ class Member
      * @throws InvalidArgumentException on input error
      * @throws Exception on unrecoverable error
      * 
-     * TODO: check if $id can be required by caller
      */
     private function __construct(
         private string $name,
@@ -232,7 +229,7 @@ class Member
         $db->bindParam("i", $dbRowId);
         $db->execute();
         $member = [];
-        
+
         $member["id"] = 0;
         $member["name"] = "";
         $member["gender"] = "";
@@ -268,6 +265,7 @@ class Member
             throw new MemberNotFoundException();
         }
         return new Member(
+            id: $member["id"],
             name: $member["name"],
             birthDate: new DateTime($member["birthDate"], new DateTimeZone(self::TIME_ZONE)),
             phone: PhoneNumberUtil::getInstance()->parse($member["phone"]),
@@ -281,7 +279,6 @@ class Member
             haveVolunteered: $member["haveVolunteered"],
             licenseForwarded: $member["licenseForwarded"],
             cinId: $member["cinId"],
-            id: $member["id"],
         );
     }
 
@@ -330,6 +327,27 @@ class Member
     #endregion
 
     #region getters
+
+    /**
+     * toArray
+     *
+     * @return array{
+     * id:int,
+     * name:string,
+     * gender:string,
+     * birthDate:int,
+     * phone:string,
+     * email:string,
+     * address:string,
+     * zip:int,
+     * license:?string,
+     * registrationDate:int,
+     * approvedDate:?int,
+     * haveVolunteered:bool,
+     * licenseForwarded:bool,
+     * cinId:?int
+     * }}
+     */
     public function toArray(): array
     {
         return self::getByIdAsArray($this->id);
@@ -404,6 +422,12 @@ class Member
 
     #region handlers
 
+    /**
+     * enrollmentApproveHandler
+     *
+     * @param integer $memberId
+     * @return array{success:true, error:false, message:string}
+     */
     public static function enrollmentApproveHandler(int $memberId): array
     {
         self::fromId($memberId)->approveEnrollment();
@@ -414,6 +438,12 @@ class Member
         ];
     }
 
+    /**
+     * licenseHandler
+     *
+     * @param integer $memberId
+     * @return array{success:true, error:false, message:string}
+     */
     public static function licenseHandler(int $memberId): array
     {
         self::fromId($memberId)->setLicenseForwarded();
@@ -438,6 +468,12 @@ class Member
         return (bool)$result;
     }
 
+    /**
+     * patchHandler
+     *
+     * @param array $jsonObject
+     * @return array{success:true,error:false,message:string}
+     */
     public function patchHandler(array $jsonObject): array
     {
         $allowedPatches = ["volunteering", "cin"];
@@ -458,19 +494,39 @@ class Member
             "message" => "member successfully patched",
         ];
     }
+
+    /**
+     * getAllAsArray
+     *
+     * @return array{int,array{
+     * id: int,
+     * name: string,
+     * gender: string,
+     * birthDate: int,
+     * phone: string,
+     * email: string,
+     * address: string,
+     * zip: int,
+     * license: ?string,
+     * registrationDate: int,
+     * approvedDate: ?int,
+     * haveVolunteered: bool,
+     * licenseForwarded: bool,
+     * cinId: ?int
+     * }}
+     */
     public static function getAllAsArray(): array
     {
         $sql = "SELECT * FROM members";
-        $members = self::fetchArray($sql);
-        foreach ($members as &$member) {
-            $member["licenseForwarded"] = (bool)$member["licenseForwarded"];
-        }
-        if (count($members) === 0) {
-            throw new MemberNotFoundException();
-        }
-        return $members;
+        return self::fetchArray($sql);
     }
 
+    /**
+     * enroll
+     *
+     * @param array $jsonRequest
+     * @return array{success:true,error:false,message:string}
+     */
     public static function enroll(array $jsonRequest): array
     {
         $missing_keys = [];
@@ -502,24 +558,56 @@ class Member
         ];
     }
 
+    /**
+     * getAllActiveAsArray
+     *
+     * @return array{int,array{
+     * id: int,
+     * name: string,
+     * gender: string,
+     * birthDate: int,
+     * phone: string,
+     * email: string,
+     * address: string,
+     * zip: int,
+     * license: ?string,
+     * registrationDate: int,
+     * approvedDate: ?int,
+     * haveVolunteered: bool,
+     * licenseForwarded: bool,
+     * cinId: ?int
+     * }}
+     */
     public static function getAllActiveAsArray(): array
     {
         $sql = "SELECT * FROM members WHERE approvedDate IS NOT NULL";
-        $members = self::fetchArray($sql);
-        if (count($members) < 1) {
-            throw new MemberNotFoundException();
-        }
-        return $members;
+        return self::fetchArray($sql);
     }
 
+    /**
+     * getAllInactiveAsArray
+     *
+     * @return array{int,array{
+     * id: int,
+     * name: string,
+     * gender: string,
+     * birthDate: int,
+     * phone: string,
+     * email: string,
+     * address: string,
+     * zip: int,
+     * license: ?string,
+     * registrationDate: int,
+     * approvedDate: ?int,
+     * haveVolunteered: bool,
+     * licenseForwarded: bool,
+     * cinId: ?int
+     * }}
+     */
     public static function getAllInactiveAsArray(): array
     {
         $sql = "SELECT * FROM members WHERE approvedDate IS NULL";
-        $members = self::fetchArray($sql);
-        if (count($members) < 1) {
-            throw new MemberNotFoundException();
-        }
-        return $members;
+        return self::fetchArray($sql);
     }
 
     #endregion
@@ -582,31 +670,42 @@ class Member
         $this->approvedDate = new DateTime();
     }
 
+    /**
+     * Wrapper for db select queries. Used to fetch data from db and forward directly to clients. Will convert all dates to unix timestamp.
+     *
+     * TODO: consider replacing cinId with cin
+     * @param string $sql query to execute
+     * @param ?string $bindTypes types of arguments
+     * @param mixed $var1
+     * @param ?array ...$vars
+     * @return array{int,array{id:int,name:string,gender:string,birthDate:int,phone:string,email:string,address:string,zip:int,license:?string,registrationDate:int,approvedDate:?int,haveVolunteered:bool,licenseForwarded:bool,cinId:?int}}
+     */
     private static function fetchArray(string $sql, ?string $bindTypes = NULL, mixed &$var1 = NULL, ?array &...$vars): array
     {
 
         $db = new DB();
         $db->prepare($sql);
         if (isset($bindTypes)) {
-            $db->bindParam($bindTypes, $var1, $args);
+            $db->bindParam($bindTypes, $var1, ...$vars);
         }
-        $db->execute();
         $members = [];
         $member = [];
-        $member["id"] = NULL;
-        $member["name"] = NULL;
-        $member["gender"] = NULL;
-        $member["birthDate"] = NULL;
-        $member["phone"] = NULL;
-        $member["email"] = NULL;
-        $member["address"] = NULL;
-        $member["zip"] = NULL;
+
+        $member["id"] = 0;
+        $member["name"] = "";
+        $member["gender"] = "";
+        $member["birthDate"] = "";
+        $member["phone"] = "";
+        $member["email"] = "";
+        $member["address"] = "";
+        $member["zip"] = 0;
         $member["license"] = NULL;
-        $member["registrationDate"] = NULL;
+        $member["registrationDate"] = "";
         $member["approvedDate"] = NULL;
-        $member["haveVolunteered"] = NULL;
-        $member["licenseForwarded"] = NULL;
+        $member["haveVolunteered"] = false;
+        $member["licenseForwarded"] = false;
         $member["cinId"] = NULL;
+
         $db->bindResult(
             $member["id"],
             $member["name"],
@@ -623,13 +722,25 @@ class Member
             $member["licenseForwarded"],
             $member["cinId"],
         );
+        $db->execute();
+        $dates = ["birthDate", "registrationDate", "approvedDate"];
+
         while ($db->fetch()) {
+            // convert all valid dates to unix timestamp
+            foreach ($dates as $date) {
+                if (isset($member[$date])) {
+                    $member[$date] = DateTime::createFromFormat(self::DATE_FORMAT, $member[$date], new DateTimeZone(self::TIME_ZONE))->getTimestamp();
+                }
+                Assert::nullOrInteger($member[$date]);
+            }
+            $member["licenseForwarded"] = (bool)$member["licenseForwarded"];
             array_push($members, $member);
+        }
+        if (count($members) === 0) {
+            throw new MemberNotFoundException();
         }
         return $members;
     }
-
-
 
     private static function isActive(PhoneNumber $phone): bool
     {
@@ -647,14 +758,16 @@ class Member
         return $approvedDate ?? false;
     }
 
+    /**
+     * return one member as array
+     *
+     * @param integer $memberId
+     * @return array{id:int,name:string,gender:string,birthDate:int,phone:string,email:string,address:string,zip:int,license:?string,registrationDate:int,approvedDate:?int,haveVolunteered:bool,licenseForwarded:bool,cinId:?int}
+     */
     private static function getByIdAsArray(int $memberId): array
     {
         $sql = "SELECT * FROM members WHERE id=?";
-        $members = self::fetchArray($sql, "i", $memberId);
-        if (count($members) < 1) {
-            throw new MemberNotFoundException();
-        }
-        return $members;
+        return self::fetchArray($sql, "i", $memberId)[1];
     }
 
     private function sendApprovalEmail(): void

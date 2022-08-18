@@ -6,6 +6,8 @@ require_once(__DIR__ . "/Db.php");
 require_once(__DIR__ . "/Authenticator.php");
 require_once(__DIR__ . "/Log.php");
 
+use Webmozart\Assert\Assert;
+
 
 /**
  * @property-read string $name
@@ -140,6 +142,12 @@ class User
 	#endregion
 
 	#region getters
+
+	/**
+	 * toArray
+	 *
+	 * @return array{id:int, name:string, username:string, passwordModified:int}
+	 */
 	public function toArray(): array
 	{
 		return [
@@ -225,6 +233,12 @@ class User
 		return password_verify($password, $passwordHash);
 	}
 
+	/**
+	 * postHandler
+	 *
+	 * @param array $jsonRequest
+	 * @return array{success:true,error:false,message:string}
+	 */
 	public static function postHandler(array $jsonRequest): array
 	{
 		self::new(
@@ -293,13 +307,18 @@ class User
 		} */
 	}
 
+	/**
+	 * getAllAsArray
+	 *
+	 * @return array{int,array{id:int,name:string,username:string,passwordModified:?int}}
+	 */
 	public static function getAllAsArray(): array
 	{
 		$db = new DB();
 		$db->prepare('SELECT id, name, username, passwordModified FROM users');
 		$db->execute();
 		$userId = 0;
-		$name = 0;
+		$name = "";
 		$username = "";
 		$passwordModified = NULL;
 		$db->bindResult($userId, $name, $username, $passwordModified);
@@ -307,10 +326,16 @@ class User
 		$user = [];
 		while ($db->fetch()) {
 			$user = NULL;
+
+			Assert::integer($userId);
+			Assert::string($name);
+			Assert::string($username);
+			Assert::nullOrString($passwordModified);
+
 			$user["id"] = $userId;
 			$user["name"] = $name;
 			$user["username"] = $username;
-			$user["passwordModified"] = $passwordModified->getTimestamp();
+			$user["passwordModified"] = empty($passwordModified) ? NULL : DateTime::createFromFormat(self::DATE_FORMAT, $passwordModified, new DateTimeZone(self::TIME_ZONE))->getTimestamp();
 			array_push($users, $user);
 		}
 		return $users;

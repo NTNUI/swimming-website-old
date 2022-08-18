@@ -40,6 +40,25 @@ class Authenticator
     #endregion
 
     #region write
+
+    /**
+     * logInHandler
+     *
+     * @param string $username
+     * @param string $password
+     * @throws InvalidCredentialsException
+     * @return array{
+     * success:true,
+     * error:false,
+     * message:string,
+     * username:string,
+     * name:string
+     * }|array{
+     * error:true,
+     * success:false,
+     * message:string
+     * }
+     */
     public static function logInHandler(string $username, string $password): array
     {
         if (Authenticator::isLoggedIn()) {
@@ -68,6 +87,16 @@ class Authenticator
         }
     }
 
+    /**
+     * logOutHandler
+     *
+     * @throws UnauthorizedException
+     * @return array{
+     * success: true,
+     * error: false,
+     * message: string
+     * }
+     */
     static public function logOutHandler(): array
     {
         if (!Authenticator::isLoggedIn()) {
@@ -80,7 +109,12 @@ class Authenticator
             "message" => "log out successful",
         ];
     }
-
+    /**
+     * Protect a function call from being run by unauthorized users
+     *
+     * @param callable $protectedFunction
+     * @return mixed
+     */
     static public function protect(callable $protectedFunction): mixed
     {
         if (!self::isLoggedIn()) {

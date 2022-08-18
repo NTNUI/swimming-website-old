@@ -222,6 +222,12 @@ class Product
         );
     }
 
+    /**
+     * postHandler
+     *
+     * @param array $jsonRequest
+     * @return array{success:true, error:false, message:string}
+     */
     static public function postHandler(array $jsonRequest): array
     {
         self::new(
@@ -473,6 +479,14 @@ class Product
         $this->priceMember = $priceMember;
     }
 
+    /**
+     * patchHandler
+     *
+     * @param array $jsonRequest
+     * @return array{
+     * success:true, error:false, message:string
+     * }
+     */
     public function patchHandler(array $jsonRequest): array
     {
         $allowedPatches = [
@@ -517,6 +531,11 @@ class Product
         ];
     }
 
+    /**
+     * deleteHandler
+     *
+     * @return array{success:true,error:false,message:string}
+     */
     public function deleteHandler(): array
     {
         $db = new DB();

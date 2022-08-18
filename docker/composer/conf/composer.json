@@ -12,7 +12,8 @@
         "giggsey/libphonenumber-for-php": "^8.12",
         "stripe/stripe-php": "^8.8",
         "vlucas/phpdotenv": "^5.4",
-        "lukasoppermann/http-status": "^3.2"
+        "lukasoppermann/http-status": "^3.2",
+        "webmozart/assert": "^1.11"
     },
     "license": "GPLv3",
     "authors": [
@@ -36,5 +37,8 @@
             "name": "Sigurd Holten Bøen",
             "email": "sigurd.boen@ntnui.no"
         }
-    ]
+    ],
+    "require-dev": {
+        "phpstan/phpstan-webmozart-assert": "^1.2"
+    }
 }

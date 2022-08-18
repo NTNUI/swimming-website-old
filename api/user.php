@@ -28,28 +28,28 @@ try {
 	$response->data = match ($_SERVER["REQUEST_METHOD"]) {
 		"GET" => match ($userId) {
 			// * GET /api/user
-			NULL => User::getAllAsArray(),
+			NULL => Authenticator::protect(fn () => User::getAllAsArray()),
 
 			// * GET /api/user/{userId}
-			(string)(int)$userId => User::fromId((int)$userId)->toArray(),
+			(string)(int)$userId => Authenticator::protect(fn () => User::fromId((int)$userId))->toArray(),
 
 			default => throw new EndpointDoesNotExist(),
 		},
 		"POST" => match ($userId) {
 			// * POST /api/user
-			NULL => User::postHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)),
+			NULL => Authenticator::protect(fn () => User::postHandler(Response::getJsonInput())),
 
 			default => throw new EndpointDoesNotExist(),
 		},
 		"PATCH" => match ($userId) {
 			// * PATCH /api/user/{userId}
-			(string)(int)$userId => User::fromId((int)$userId)->patchHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)),
+			(string)(int)$userId => Authenticator::protect(fn () => User::fromId((int)$userId)->patchHandler(Response::getJsonInput())),
 
 			default => throw new EndpointDoesNotExist(),
 		},
 			// "DELETE" => match ($userId) {
 			// // * DELETE /api/user/{userId}
-			// (string)(int)$userId => User::fromId((int)$userId)->deleteHandler(),
+			// (string)(int)$userId => Authenticator::protect(fn () => User::fromId((int)$userId)->deleteHandler()),
 			//
 			// 	default => throw new EndpointDoesNotExist(),
 			// },

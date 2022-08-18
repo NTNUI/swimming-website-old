@@ -24,6 +24,15 @@ class Response implements Httpstatuscodes
         }
         $this->data = NULL;
     }
+
+    /**
+     * get json input from POST request.
+     *
+     * @throws InvalidArgumentException if input is missing
+     * @throws JsonException if decoding fails
+     *
+     * @return array<mixed>
+     */
     public static function getJsonInput(): array
     {
         $content = file_get_contents("php://input");
