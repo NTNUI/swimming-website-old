@@ -1,7 +1,6 @@
 {
     "$schema": "./docker.schema.json",
     "baseUrl": "https://127.0.0.1",
-    "memberTable": "member",
     "emails": {
         "leader": "svomming-leder@ntnui.no",
         "developer": "svomming-teknisk@ntnui.no",

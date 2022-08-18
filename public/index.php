@@ -31,6 +31,7 @@ $dotenv->required(
 		"DB_USERNAME",
 		"DB_PASSWORD",
 		"DB_DATABASE",
+		"BASE_URL",
 	]
 )->notEmpty();
 

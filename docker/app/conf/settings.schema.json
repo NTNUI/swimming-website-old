@@ -5,49 +5,11 @@
 	"title": "Root",
 	"type": "object",
 	"required": [
-		"baseurl",
-		"memberTable",
-		"translations_dir",
 		"emails",
-		"SQL_server",
-		"enrollment",
-		"defaults",
-		"license_product_hash"
+		"enrollment"
 	],
 	"additionalProperties": false,
 	"properties": {
-		"baseurl": {
-			"$id": "#root/baseurl",
-			"title": "Baseurl",
-			"type": "string",
-			"default": "",
-			"examples": [
-				"https://127.0.0.1"
-			],
-			"pattern": "^https://"
-		},
-		"memberTable": {
-			"$id": "#root/memberTable",
-			"title": "Member table",
-			"description": "Name of the table containing member rows",
-			"type": "string",
-			"default": "",
-			"examples": [
-				"member"
-			],
-			"pattern": "^.*$"
-		},
-		"translations_dir": {
-			"$id": "#root/translations_dir",
-			"title": "Translations_dir",
-			"description": "Relative location from root of the project on where to locate translation files",
-			"type": "string",
-			"default": "",
-			"examples": [
-				"translations"
-			],
-			"pattern": "^.*$"
-		},
 		"emails": {
 			"$id": "#root/emails",
 			"title": "Emails",
@@ -147,9 +109,9 @@
 					],
 					"pattern": "^.*$"
 				},
-				"start_month": {
-					"$id": "#root/enrollment/start_month",
-					"title": "Start_month",
+				"startMonth": {
+					"$id": "#root/enrollment/startMonth",	
+					"title": "Start month",
 					"type": "string",
 					"default": "",
 					"examples": [
@@ -181,17 +143,17 @@
 						"december"
 					]
 				},
-				"start_day": {
-					"$id": "#root/enrollment/start_day",
-					"title": "Start_day",
+				"startDay": {
+					"$id": "#root/enrollment/startDay",
+					"title": "StartDay",
 					"type": "integer",
 					"default": 1,
 					"minimum": 1,
 					"maximum": 31
 				},
-				"end_month": {
-					"$id": "#root/enrollment/end_month",
-					"title": "End_month",
+				"endMonth": {
+					"$id": "#root/enrollment/endMonth",
+					"title": "End month",
 					"type": "string",
 					"default": "",
 					"examples": [
@@ -223,8 +185,8 @@
 						"december"
 					]
 				},
-				"end_day": {
-					"$id": "#root/enrollment/end_day",
+				"endDay": {
+					"$id": "#root/enrollment/endDay",
 					"title": "End day",
 					"type": "integer",
 					"default": 1,
@@ -232,52 +194,6 @@
 					"maximum": 31
 				}
 			}
-		},
-		"defaults": {
-			"$id": "#root/defaults",
-			"title": "Defaults",
-			"type": "object",
-			"required": [
-				"language",
-				"landing-page"
-			],
-			"properties": {
-				"language": {
-					"$id": "#root/defaults/language",
-					"title": "Language",
-					"type": "string",
-					"default": "",
-					"examples": [
-						"no",
-						"en"
-					],
-					"enum":[
-						"no",
-						"en"
-					],
-					"pattern": "^.*$"
-				},
-				"landing-page": {
-					"$id": "#root/defaults/landing-page",
-					"title": "Landing-page",
-					"type": "string",
-					"default": "",
-					"examples": [
-						"homepage"
-					],
-					"pattern": "^.*$"
-				}
-			}
-		},
-		"license_product_hash": {
-			"$id": "#root/license_product_hash",
-			"title": "Product hash of the NSF swimming license",
-			"description": "Product hash of the NSF swimming license for enrollment approval",
-			"type": "string",
-			"default": "",
-			"maxLength": 20,
-			"minLength": 20,
-			"pattern": "^.*$"
 		}
 	}
 }

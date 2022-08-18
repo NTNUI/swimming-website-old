@@ -28,12 +28,12 @@ class Settings
     private const COOKIE_LIFETIME = 14400; // 4 hours
     private static ?self $instance = NULL;
     const REQUIRED_EMAIL_ROLES = [
-            "analyst",
-            "bot",
-            "coach",
-            "developer",
-            "leader",
-        ];
+        "analyst",
+        "bot",
+        "coach",
+        "developer",
+        "leader",
+    ];
     /**
      * Create a new instance of Settings class. First call will run constructor
      * and require @param $config_path. Subsequent calls will not use @param
@@ -63,7 +63,6 @@ class Settings
 
         $decoded = json_decode($fileContent, true, flags: JSON_OBJECT_AS_ARRAY | JSON_THROW_ON_ERROR);
         $REQUIRED_KEYS = [
-            "baseUrl",
             "emails",
             "enrollment",
             "licenseProductHash",
@@ -73,11 +72,12 @@ class Settings
                 throw new \Exception("key $key does not exists in settings");
             }
         }
-        
-        if (0 !== strpos($decoded["baseUrl"], "https://")) {
-            throw new \Exception("decoded[baseUrl] does not start with 'https://'. This will break links. decoded[baseUrl] contains: " . $decoded["baseUrl"]);
+
+        $this->licenseProductHash = $_ENV["licenseProductHash"];
+        $this->baseUrl = $_ENV["BASE_URL"];
+        if (0 !== strpos($this->baseUrl, "https://")) {
+            throw new \Exception("environment variable BASE_URL does not start with 'https://'. This will break links");
         }
-        $this->baseUrl = $decoded["baseUrl"];
 
         $emailsArray = $decoded["emails"];
         foreach (self::REQUIRED_EMAIL_ROLES as $role) {
@@ -92,7 +92,6 @@ class Settings
         $this->emails = $emailsArray;
 
         $this->enrollmentSettings = $decoded["enrollment"];
-        $this->licenseProductHash = $decoded["licenseProductHash"];
     }
 
     public function initSession(): void
