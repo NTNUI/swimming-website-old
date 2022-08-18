@@ -1,16 +1,9 @@
-includes:
-	- phpstan-baseline.neon
 parameters:
 	level: 1
 	paths:
-		- index.php
+		- public/index.php
 		- Library
-		- Private
-	excludePaths:
-		- Private/Admin
-		- Library/Templates
-		- Library/Helpers
-		- Public
+		- api
 	exceptions:
 		#implicitThrows: false
 		check:
