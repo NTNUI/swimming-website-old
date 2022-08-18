@@ -115,13 +115,13 @@ CREATE TABLE IF NOT EXISTS `users` (
   `username` varchar(32) NOT NULL,
   `passwd` varchar(100) NOT NULL,
   `name` varchar(32) NOT NULL,
-  `lastPassword` date DEFAULT NULL,
+  `passwordModified` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)
 ) ENGINE=MyISAM DEFAULT CHARSET=latin1;
 
 -- login credentials on /admin
-INSERT INTO `users` (`username`, `passwd`, `name`, `lastPassword`)VALUES
+INSERT INTO `users` (`username`, `passwd`, `name`, `passwordModified`)VALUES
 ('admin', '$2y$10$6DvTLWHY38TLZCfcKdQs5utG1EX39QcAmeVdA3FY6JEm6SVeGWyym', 'Administrator', NOW());
 
 -- login credentials to database

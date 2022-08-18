@@ -39,7 +39,7 @@ class Settings
      * and require @param $config_path. Subsequent calls will not use @param
      * $config_path
      *
-     * @param string|null $config_path path to `settings.json`. Required on first call.
+     * @param string|null $configPath path to `settings.json`. Required on first call.
      * @return self the instance of Settings class 
      */
     public static function getInstance(?string $configPath = NULL): self

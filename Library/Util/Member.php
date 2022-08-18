@@ -51,7 +51,7 @@ class Member
      * @param string $address
      * @param int $zip
      * @param ?string $license
-     * @param ?DateTime $registrationDate
+     * @param DateTime $registrationDate
      * @param ?DateTime $approvedDate
      * @param bool $haveVolunteered
      * @param bool $licenseForwarded

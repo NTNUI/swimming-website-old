@@ -6,6 +6,12 @@ require_once(__DIR__ . "/Db.php");
 require_once(__DIR__ . "/Authenticator.php");
 require_once(__DIR__ . "/Log.php");
 
+
+/**
+ * @property-read string $name
+ * @property-read string $username
+ * @property-read ?DateTime $passwordModified
+ */
 class User
 {
 	const DATE_FORMAT = "Y-m-d"; // https://www.php.net/manual/en/datetime.format.php
@@ -19,13 +25,13 @@ class User
 		}
 		return $this->$name;
 	}
-
+	private ?DateTime $passwordModified;
 	#region constructors
 	private function __construct(
+		public readonly int $id,
 		private string $name,
 		private string $username,
-		private ?DateTime $passwordSetDate = NULL,
-		private ?int $id = NULL,
+		?string $passwordModified = NULL,
 	) {
 		// length limitations are there just in case
 		if (strlen($name) > 40) {
@@ -42,35 +48,13 @@ class User
 		if (strlen($username) < 5) {
 			throw new InvalidArgumentException("username too short");
 		}
-	}
-
-	public static function postHandler(array $jsonRequest): array
-	{
-		new self(
-			name: $jsonRequest["name"],
-			username: $jsonRequest["username"]
-		);
-		return [
-			"success" => true,
-			"error" => false,
-			"message" => "user created successfully",
-		];
-	}
-	// 
-	public function deleteHandler(): array
-	{
-		throw new NotImplementedException("delete handler not implemented yet");
-		// after db deletion this instance needs to be deleted. unset($this) does not work
-		$db = new DB();
-		$db->prepare('DELETE FROM users WHERE id=?');
-		$userId = $this->id;
-		$db->bindParam('i', $userId);
-		$db->execute();
-		return [
-			"success" => true,
-			"error" => false,
-			"message" => "user deleted successfully",
-		];
+		if (isset($passwordModified)) {
+			// user has changed password
+			$this->$passwordModified = DateTime::createFromFormat(self::DATE_FORMAT, $passwordModified, new DateTimeZone(self::TIME_ZONE));
+		} else {
+			// user has never changed the password
+			$this->$passwordModified = NULL;
+		}
 	}
 
 	/**
@@ -89,16 +73,21 @@ class User
 		string $email
 	): self {
 		if (self::usernameExists($username)) {
-			throw new CreateException("username taken");
+			throw new CreateException("username taken"); // todo: not camelCase
 		}
-		$user = new self($name, $username);
-
 
 		$db = new DB();
 		$db->prepare('INSERT INTO users VALUES name=?, username=?');
 		$db->bindParam('ss', $name, $username);
 		$db->execute();
-		$user->id = $db->insertedId();
+
+		$userId = $db->insertedId();
+		$user = new self(
+			name: $name,
+			username: $username,
+			id: $userId,
+			passwordModified: NULL // password has never been set
+		);
 
 		$randomPassword = substr(md5((string)mt_rand()), 0, 9);
 
@@ -115,28 +104,38 @@ class User
 	public static function fromId(int $userId): self
 	{
 		$db = new DB();
-		$db->prepare('SELECT name, username, lastPassword FROM users WHERE id=?');
+		$db->prepare('SELECT name, username, passwordModified FROM users WHERE id=?');
 		$db->bindParam('i', $userId);
 		$db->execute();
-		$db->bindResult($name, $username, $lastPassword);
+		$db->bindResult($name, $username, $passwordModified);
 		if (!$db->fetch()) {
 			throw new UserNotFoundException();
 		}
 
-		return new self($name, $username, $lastPassword, $userId);
+		return new self(
+			id: $userId,
+			name: $name,
+			username: $username,
+			passwordModified: empty($passwordModified) ? NULL : $passwordModified,
+		);
 	}
-	
+
 	public static function fromUsername(string $username): self
 	{
 		$db = new DB();
-		$db->prepare('SELECT id, name, lastPassword FROM users WHERE username=?');
+		$db->prepare('SELECT id, name, passwordModified FROM users WHERE username=?');
 		$db->bindParam('s', $username);
 		$db->execute();
-		$db->bindResult($userId, $name, $lastPassword);
+		$db->bindResult($userId, $name, $passwordModified);
 		if (!$db->fetch()) {
 			throw new UserNotFoundException();
 		}
-		return new self($name, $username, DateTime::createFromFormat(self::DATE_FORMAT,$lastPassword), $userId);
+		return new self(
+			id: $userId,
+			name: $name,
+			username: $username,
+			passwordModified: empty($passwordModified) ? NULL : $passwordModified,
+		);
 	}
 	#endregion
 
@@ -147,7 +146,7 @@ class User
 			"id" => $this->id,
 			"name" => $this->name,
 			"username" => $this->username,
-			"lastPasswordDate" => $this->passwordSetDate,
+			"passwordModified" => $this->passwordModified->getTimestamp(),
 		];
 	}
 	#endregion
@@ -222,8 +221,38 @@ class User
 		$db->execute();
 		$passwordHash = "";
 		$db->bindResult($passwordHash);
-		$db->fetch();		
-        return password_verify($password, $passwordHash);
+		$db->fetch();
+		return password_verify($password, $passwordHash);
+	}
+
+	public static function postHandler(array $jsonRequest): array
+	{
+		self::new(
+			name: $jsonRequest["name"],
+			username: $jsonRequest["username"],
+			email: $jsonRequest["email"],
+		);
+		return [
+			"success" => true,
+			"error" => false,
+			"message" => "user created successfully",
+		];
+	}
+
+	public function deleteHandler(): array
+	{
+		throw new NotImplementedException("delete handler not implemented yet");
+		// TODO: after db deletion this instance needs to be deleted. unset($this) does not work
+		$db = new DB();
+		$db->prepare('DELETE FROM users WHERE id=?');
+		$userId = $this->id;
+		$db->bindParam('i', $userId);
+		$db->execute();
+		return [
+			"success" => true,
+			"error" => false,
+			"message" => "user deleted successfully",
+		];
 	}
 
 	#endregion
@@ -268,22 +297,21 @@ class User
 	public static function getAllAsArray(): array
 	{
 		$db = new DB();
-		$db->prepare('SELECT id, name, username, lastPassword FROM users');
+		$db->prepare('SELECT id, name, username, passwordModified FROM users');
 		$db->execute();
 		$userId = 0;
 		$name = 0;
 		$username = "";
-		$lastPassword = NULL;
-		$db->bindResult($userId, $name, $username, $lastPassword);
+		$passwordModified = NULL;
+		$db->bindResult($userId, $name, $username, $passwordModified);
 		$users = [];
 		$user = [];
 		while ($db->fetch()) {
-			$user = [
-				"id" => $userId,
-				"name" => $name,
-				"username" => $username,
-				"lastPassword" => $lastPassword
-			];
+			$user = NULL;
+			$user["id"] = $userId;
+			$user["name"] = $name;
+			$user["username"] = $username;
+			$user["passwordModified"] = $passwordModified->getTimestamp();
 			array_push($users, $user);
 		}
 		return $users;
@@ -292,4 +320,3 @@ class User
 	#endregion
 
 }
-

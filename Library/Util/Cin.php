@@ -5,12 +5,16 @@ declare(strict_types=1);
 require_once(__DIR__ . "/Hash.php");
 require_once(__DIR__ . "/Db.php");
 
+/**
+ * @property-read int $cin
+ * @property-read Hash $memberHash
+ * @property-read DateTime $lastUsed
+ */
 class Cin
 {
     const DATE_FORMAT = "Y-m-d"; // https://www.php.net/manual/en/datetime.format.php
     const TIME_ZONE = "Europe/Oslo";
 
-    private int $id;
     private int $cin;
     private Hash $memberHash;
     private DateTime $lastUsed;
@@ -21,7 +25,7 @@ class Cin
     }
 
     private function __construct(
-        int $cinId,
+        public readonly int $id,
         int $cin,
         string $memberHash,
         string $lastUsed,
@@ -29,7 +33,6 @@ class Cin
         if ($cin > 99999999 || $cin < 10000000) {
             throw new cinInvalidException();
         }
-        $this->id = $cinId;
         $this->cin = $cin;
         $this->memberHash = new Hash($memberHash);
         $this->lastUsed = DateTime::createFromFormat(self::DATE_FORMAT, $lastUsed, new DateTimeZone(self::TIME_ZONE));
@@ -51,7 +54,12 @@ class Cin
         $db->execute();
         $db->bindResult($id, $cin, $hash, $lastUsedString);
         $db->fetch();
-        return new self($id, $cin, $hash, $lastUsedString);
+        return new self(
+            id: $id,
+            cin: $cin,
+            memberHash: $hash,
+            lastUsed: $lastUsedString
+        );
     }
 
     public static function fromId(int $cinId): self
@@ -65,7 +73,12 @@ class Cin
         $hash = "";
         $db->bindResult($_, $cin, $hash, $lastUsedString);
         $db->fetch();
-        return new self($cinId, $cin, $hash, $lastUsedString);
+        return new self(
+            id: $cinId,
+            cin: $cin,
+            memberHash: $hash,
+            lastUsed: $lastUsedString
+        );
     }
 
     public static function fromMemberHash(Hash $memberHash): self
@@ -83,7 +96,12 @@ class Cin
             // no rows were fetched.
             throw new CinNotFoundException();
         }
-        return new self($cinId, $cin, $hash, $lastUsedString);
+        return new self(
+            id: $cinId,
+            cin: $cin,
+            memberHash: $hash,
+            lastUsed: $lastUsedString
+        );
     }
 
     public function touch(): void

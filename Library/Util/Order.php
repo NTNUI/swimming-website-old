@@ -67,7 +67,7 @@ class Order
      * @param Product $product 
      * @param string $paymentMethodId from stripe
      * @param string $comment order comment
-     * @param OrderStatus $order_status defaults to OrderStatus::PLACED
+     * @param OrderStatus $orderStatus defaults to OrderStatus::PLACED
      * @return self
      */
     public static function new(
@@ -80,12 +80,11 @@ class Order
     ): self {
         if (!$product->enabled) throw new ProductNotEnabledException();
 
-        $now = new DateTime();
         if (!$product->isAvailable()) {
             throw new ProductNotAvailableException("this product cannot be purchased at this point");
         }
         if (empty($customer->name)) throw new MissingCustomerDetailsException("Missing customer name");
-        if (empty($customer->phone) && $product->require_phone) throw new MissingCustomerDetailsException("A phone number is required for this purchase");
+        if (empty($customer->phone) && $product->requirePhone) throw new MissingCustomerDetailsException("A phone number is required for this purchase");
         if (empty($customer->email)) throw new MissingCustomerDetailsException("email is required for all purchases");
         if (empty($comment) && $product->requireComment) throw new MissingOrderDetailsException("A comment is required for this purchase");
 
@@ -342,7 +341,7 @@ class Order
         }
         if (isset($productHash)) {
             foreach ($orders as $orderIndex => $order) {
-                if ($order["productId"] !== Product::fromProductHash($productHash)->dbRowId) {
+                if ($order["productId"] !== Product::fromProductHash($productHash)->id) {
                     unset($orders[$orderIndex]);
                 }
             }

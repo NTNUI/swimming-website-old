@@ -11,10 +11,6 @@ class DB
 	private mysqli $conn;
 	private mysqli_stmt $stmt;
 
-	/**
-	 * Connect to a database. Credentials are automatically retrieved from environment variables.
-	 * @param string $_ unused
-	 */
 	public function __construct()
 	{
 		mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
