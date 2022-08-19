@@ -65,7 +65,6 @@ class Settings
         $REQUIRED_KEYS = [
             "emails",
             "enrollment",
-            "licenseProductHash",
         ];
         foreach ($REQUIRED_KEYS as $key) {
             if (!array_key_exists($key, $decoded)) {
@@ -73,7 +72,7 @@ class Settings
             }
         }
 
-        $this->licenseProductHash = $_ENV["licenseProductHash"];
+        $this->licenseProductHash = $_ENV["LICENSE_PRODUCT_HASH"];
         $this->baseUrl = $_ENV["BASE_URL"];
         if (0 !== strpos($this->baseUrl, "https://")) {
             throw new \Exception("environment variable BASE_URL does not start with 'https://'. This will break links");

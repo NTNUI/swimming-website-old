@@ -15,11 +15,6 @@ require_once(__DIR__ . "/../Library/Util/Log.php");
 require_once(__DIR__ . "/../Library/Util/Request.php");
 require_once(__DIR__ . "/../Library/Util/Settings.php");
 
-// Load settings and environments
-$settings = Settings::getInstance(__DIR__ . "/../settings/settings.json");
-$settings->testSettings();
-$settings->initSession();
-
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/..");
 $dotenv->load();
 $dotenv->required(
@@ -32,9 +27,14 @@ $dotenv->required(
 		"DB_PASSWORD",
 		"DB_DATABASE",
 		"BASE_URL",
+		"LICENSE_PRODUCT_HASH",
 	]
 )->notEmpty();
 
+// Load settings and environments
+$settings = Settings::getInstance(__DIR__ . "/../settings/settings.json");
+$settings->testSettings();
+$settings->initSession();
 $args = array_filter(array_reverse(explode("/", $_SERVER["REQUEST_URI"])));
 
 $service = array_pop($args);

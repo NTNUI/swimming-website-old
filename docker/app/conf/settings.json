@@ -1,6 +1,5 @@
 {
     "$schema": "./docker.schema.json",
-    "baseUrl": "https://127.0.0.1",
     "emails": {
         "leader": "svomming-leder@ntnui.no",
         "developer": "svomming-teknisk@ntnui.no",
@@ -14,6 +13,5 @@
         "startDay": 5,
         "endMonth": "december",
         "endDay": 1
-    },
-    "licenseProductHash":"31e61c8253b54cdde3b9"
+    }
 }
