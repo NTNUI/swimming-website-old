@@ -37,53 +37,34 @@ $settings->testSettings();
 $settings->initSession();
 $args = array_filter(array_reverse(explode("/", $_SERVER["REQUEST_URI"])));
 
-$service = array_pop($args);
-$file = array_pop($args);
+$page = array_pop($args);
 
-if ($service !== NULL) {
-	if ($file === NULL) {
+if ($page === "api") {
+	$service = array_pop($args);
+	$validEndpoints = str_replace(".php", "", str_replace(__DIR__ . "/../api/", "", glob(__DIR__ . "/../api/*.php")));
+	// $service might contain get arguments like /api/service?foo=bar&hello=world
+
+	$questionMarkPos = strpos($service, "?");
+	if ($questionMarkPos !== false) {
+		$service = substr($service, 0, $questionMarkPos);
+	} // we don't need to parse get arguments since they are already available through $_GET
+
+	if (!in_array($service, $validEndpoints)) {
 		$response = new Response();
 		$response->code = Response::HTTP_NOT_FOUND;
 		$response->data = [
 			"error" => true,
 			"success" => false,
 			"message" => "please select a valid endpoint",
-			"valid endpoints" => [
-				str_replace(".php", "", str_replace("../api/", "", glob("../api/*.php")))
-			],
+			"currentEndpoint" => $service,
+			"validEndpoints" => $validEndpoints,
 		];
 		$response->sendJson();
 		return;
 	}
-
-
-	$questionMarkPosService = strpos($service, "?");
-	if ($questionMarkPosService !== false) {
-		$service = substr($service, 0, $questionMarkPosService);
-	}
-	$questionMarkPosFile = strpos($file, "?");
-	if ($questionMarkPosFile !== false) {
-		$file = substr($file, 0, $questionMarkPosFile);
-	}
-	if ($service === "api") {
-		if (!file_exists("../api/$file.php")) {
-			$response = new Response();
-			$response->code = Response::HTTP_NOT_FOUND;
-			$response->data = [
-				"error" => true,
-				"success" => false,
-				"message" => "endpoint not found",
-				"args" => $args,
-				"service" => $service,
-				"file" => "$file.php",
-			];
-			$response->sendJson();
-			return;
-		}
-		require_once(__DIR__ . "/../api/$file.php");
-		return;
-	}
+	require_once(__DIR__ . "/../api/$service.php");
+	return;
 }
-
-#echo file_get_contents("index.html");
+// echo "didn't work :/";
+echo file_get_contents("index.html");
 return;
