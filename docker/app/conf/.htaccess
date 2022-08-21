@@ -1,8 +1,8 @@
 # Block file listing in the web server
-Options All -Indexes
+Options All +Indexes
 
 # Allow listing of index.php
-DirectoryIndex public/index.php
+DirectoryIndex public/index.php public/*
 
 # Logging
 php_flag log_errors on
@@ -17,8 +17,10 @@ RewriteEngine On
 RewriteCond %{HTTPS} off
 RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
-# TODO: if requesting a file point it to a file inside public directory
+# Allow access to all files inside public. Note: index.php is inside public right now and should probaby be moved then. 
+RewriteRule ^public/ - [L]
+RewriteCond public/$0 -F
+RewriteRule .* public/$0 [L]
 
-
-# rewrite all requests to public/index.php
+# Rewrite all requests to public/index.php
 RewriteRule ^([^?]*)$ public/index.php [NC,L,QSA]
