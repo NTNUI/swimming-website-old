@@ -95,7 +95,7 @@ class Settings
 
     public function initSession(): void
     {
-        $err = session_save_path("../sessions");
+        $err = session_save_path(__DIR__ . "/../../../runtimeData/sessions");
         if ($err === false) {
             throw new \Exception("could not start session");
         }
@@ -133,12 +133,12 @@ class Settings
     public function testSettings(): void
     {
         // test access
-        foreach (["/tmp", __DIR__ . "/../../../sessions"] as $dir) {
+        foreach (["/tmp", __DIR__ . "/../../../runtimeData/sessions", __DIR__ . "/../../../runtimeData/img"] as $dir) {
             if (!is_writable($dir)) {
                 throw new \Exception("$dir is not writable");
             }
         }
-        foreach ([__DIR__ . "/../../../assets", __DIR__ . "/../../Library"] as $dir) {
+        foreach ([__DIR__ . "/../../assets", __DIR__ . "/../../Library"] as $dir) {
             if (!is_readable($dir)) {
                 throw new \Exception("$dir is not readable");
             }
