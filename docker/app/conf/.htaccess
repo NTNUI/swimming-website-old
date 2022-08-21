@@ -1,5 +1,5 @@
 # Block file listing in the web server
-Options All +Indexes
+Options All -Indexes
 
 # Allow listing of index.php
 DirectoryIndex public/index.php public/*
