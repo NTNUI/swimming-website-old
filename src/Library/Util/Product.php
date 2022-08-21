@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-require_once("Library/Util/Language.php");
+require_once(__DIR__ . "/Library/Util/Language.php");
 
 class Product
 {

@@ -133,12 +133,12 @@ class Settings
     public function testSettings(): void
     {
         // test access
-        foreach (["/tmp", "../sessions"] as $dir) {
+        foreach (["/tmp", __DIR__ . "/../../../sessions"] as $dir) {
             if (!is_writable($dir)) {
                 throw new \Exception("$dir is not writable");
             }
         }
-        foreach (["../assets", "../Library"] as $dir) {
+        foreach ([__DIR__ . "/../../../assets", __DIR__ . "/../../Library"] as $dir) {
             if (!is_readable($dir)) {
                 throw new \Exception("$dir is not readable");
             }

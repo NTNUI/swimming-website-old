@@ -9,11 +9,11 @@ ini_set("display_errors", "0");
 ini_set("max_execution_time", "5"); // seconds
 // Libraries
 require_once(__DIR__ . "/../vendor/autoload.php");
-require_once(__DIR__ . "/../Library/Util/Api.php");
-require_once(__DIR__ . "/../Library/Util/Db.php");
-require_once(__DIR__ . "/../Library/Util/Log.php");
-require_once(__DIR__ . "/../Library/Util/Request.php");
-require_once(__DIR__ . "/../Library/Util/Settings.php");
+require_once(__DIR__ . "/Library/Util/Api.php");
+require_once(__DIR__ . "/Library/Util/Db.php");
+require_once(__DIR__ . "/Library/Util/Log.php");
+require_once(__DIR__ . "/Library/Util/Request.php");
+require_once(__DIR__ . "/Library/Util/Settings.php");
 
 $dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/..");
 $dotenv->load();
@@ -32,7 +32,7 @@ $dotenv->required(
 )->notEmpty();
 
 // Load settings and environments
-$settings = Settings::getInstance(__DIR__ . "/../settings/settings.json");
+$settings = Settings::getInstance(__DIR__ . "/../settings.json");
 $settings->testSettings();
 $settings->initSession();
 $args = array_filter(array_reverse(explode("/", $_SERVER["REQUEST_URI"])));
@@ -41,7 +41,7 @@ $page = array_pop($args);
 
 if ($page === "api") {
 	$service = array_pop($args);
-	$validEndpoints = str_replace(".php", "", str_replace(__DIR__ . "/../api/", "", glob(__DIR__ . "/../api/*.php")));
+	$validEndpoints = str_replace(".php", "", str_replace(__DIR__ . "/api/", "", glob(__DIR__ . "/api/*.php")));
 	// $service might contain get arguments like /api/service?foo=bar&hello=world
 
 	$questionMarkPos = strpos($service, "?");
@@ -62,9 +62,10 @@ if ($page === "api") {
 		$response->sendJson();
 		return;
 	}
-	require_once(__DIR__ . "/../api/$service.php");
+	require_once(__DIR__ . "/api/$service.php");
 	return;
 }
 // echo "didn't work :/";
-echo file_get_contents("index.html");
+echo file_get_contents(__DIR__ . "/../public/index.html");
 return;
+
