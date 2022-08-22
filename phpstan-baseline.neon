@@ -1,6 +1,0 @@
-parameters:
-	ignoreErrors:
-		-
-			message: "#^Parameter \\#1 \\$statusCode of method Lukasoppermann\\\\Httpstatus\\\\Httpstatus\\:\\:getReasonPhrase\\(\\) expects string, int given\\.$#"
-			count: 1
-			path: src/Library/Util/Api.php

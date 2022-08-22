@@ -8,6 +8,7 @@ services:
             - ./docker/composer/conf/composer.json:/app/composer.json
             - ./docker/composer/conf/composer.lock:/app/composer.lock
             - ./docker/storage/vendor:/app/vendor
+            - ./src:/app/src
 
     app:
         build:

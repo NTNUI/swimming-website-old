@@ -3,8 +3,8 @@
     "description": "Web site for swimming group in NTNUI sports club in Trondheim, Norway",
     "type": "project",
     "config": {
-        "platform":{
-            "php":"8.1.2"
+        "platform": {
+            "php": "8.1.2"
         }
     },
     "require": {
@@ -38,7 +38,13 @@
             "email": "sigurd.boen@ntnui.no"
         }
     ],
+    "autoload": {
+        "psr-4": {
+            "NTNUI\\Swimming\\": "src/"
+        }
+    },
     "require-dev": {
-        "phpstan/phpstan-webmozart-assert": "^1.2"
+        "phpstan/phpstan-webmozart-assert": "^1.2",
+        "friendsofphp/php-cs-fixer": "^3.10"
     }
 }
