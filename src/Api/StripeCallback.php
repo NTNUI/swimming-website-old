@@ -6,7 +6,7 @@
 
 declare(strict_types=1);
 
-namespace NTNUI;
+namespace NTNUI\Swimming\Api;
 
 // Documentation: https://stripe.com/docs/webhooks
 use Stripe\Webhook;
@@ -33,7 +33,7 @@ try {
     if (empty($sigHeader)) {
         throw new \InvalidArgumentException("signature invalid");
     }
-    $event = \Stripe\Webhook::constructEvent(
+    $event = Webhook::constructEvent(
         $data,
         $sigHeader,
         $secret
@@ -42,11 +42,11 @@ try {
     switch ($event["type"]) {
         case "source.canceled":
         case "charge.failed":
-            Order::fromPaymentIntent(\Stripe\PaymentIntent::retrieve($event["data"]["object"]["payment_intent"]))->setOrderStatus(OrderStatus::FAILED);
+            Order::fromPaymentIntent(PaymentIntent::retrieve($event["data"]["object"]["payment_intent"]))->setOrderStatus(OrderStatus::FAILED);
             $response->code = Response::HTTP_OK;
             break;
         case "charge.succeeded":
-            Order::fromPaymentIntent(\Stripe\PaymentIntent::retrieve($event["data"]["object"]["payment_intent"]))->setOrderStatus(OrderStatus::FINALIZED);
+            Order::fromPaymentIntent(PaymentIntent::retrieve($event["data"]["object"]["payment_intent"]))->setOrderStatus(OrderStatus::FINALIZED);
             if ($event["data"]["object"]["productHash"] === Settings::getInstance()->getLicenseProductHash()) {
                 $phone = PhoneNumberUtil::getInstance()->parse($event["data"]["object"]["phone"]);
                 Member::fromPhone($phone)->approveEnrollment();

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NTNUI;
+namespace NTNUI\Swimming\Api;
 
 use Webmozart\Assert\Assert;
 use NTNUI\Swimming\Util\Product;

@@ -15,12 +15,12 @@ use Webmozart\Assert\Assert;
  */
 class User
 {
-	// these limits are not really necessary but you with php you never know. Better be safe than sorry.
+    // these limits are not really necessary but you with php you never know. Better be safe than sorry.
     public const MAX_CHARS_USERNAME = 20;
     public const MIN_CHARS_USERNAME = 5;
     public const MAX_CHARS_NAME = 20;
     public const MIN_CHARS_NAME = 6;
-	public const DATE_FORMAT = "Y-m-d"; // https://www.php.net/manual/en/datetime.format.php
+    public const DATE_FORMAT = "Y-m-d"; // https://www.php.net/manual/en/datetime.format.php
     public const TIME_ZONE = "Europe/Oslo";
 
     private ?\DateTime $passwordModified;
@@ -142,7 +142,7 @@ class User
 
     #region getters
 
-	// allow read access for all member variables but disallow setting them freely
+    // allow read access for all member variables but disallow setting them freely
     public function __get(string $name): string|\DateTime|int|NULL
     {
         Assert::propertyExists($this, $name);
@@ -195,7 +195,7 @@ class User
             throw new \InvalidArgumentException("username cannot be shorter than" . self::MIN_CHARS_USERNAME);
         }
         if (self::usernameExists($username)) {
-			throw UserException::failedToCreateUser("username already exists");
+            throw UserException::failedToCreateUser("username already exists");
         }
         $db = new DB();
         $db->prepare('UPDATE users SET username=? WHERE id=?');
@@ -212,7 +212,7 @@ class User
     public function patchHandler(array $jsonObject): array
     {
         if (!array_key_exists("name", $jsonObject) && !array_key_exists("username", $jsonObject)) {
-			throw ApiException::invalidRequest("nothing to patch");
+            throw ApiException::invalidRequest("nothing to patch");
         }
         if (array_key_exists("name", $jsonObject)) {
             $this->setName($jsonObject["name"]);
@@ -294,7 +294,7 @@ class User
 
     private static function sendRegistrationEmail(string $emailAddress, string $randomPassword): void
     {
-		Assert::email($emailAddress);
+        Assert::email($emailAddress);
         $emailTitle = "NTNUI Swimming: New user";
 
         $html = <<<HTML

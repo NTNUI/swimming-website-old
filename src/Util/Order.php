@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace NTNUI\Swimming\Util;
 
 use Stripe\PaymentIntent;
-use Webmozart\Assert\Assert;
 use libphonenumber\PhoneNumber;
 use libphonenumber\PhoneNumberUtil;
 use NTNUI\Swimming\Util\OrderStatus;

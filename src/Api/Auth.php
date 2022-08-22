@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NTNUI;
+namespace NTNUI\Swimming\Api;
 
 use NTNUI\Swimming\Util\Response;
 use NTNUI\Swimming\Util\Authenticator;

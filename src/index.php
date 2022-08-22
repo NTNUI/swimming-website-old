@@ -1,14 +1,18 @@
 <?php
 
-declare (strict_types = 1);
+declare(strict_types=1);
 
 require_once __DIR__ . "/../vendor/autoload.php";
+
+use Dotenv\Dotenv;
+use NTNUI\Swimming\Util\Response;
+use NTNUI\Swimming\Util\Settings;
 
 error_reporting(E_ALL);
 ini_set("display_errors", "0");
 ini_set("max_execution_time", "5"); // seconds
 
-$dotenv = Dotenv\Dotenv::createImmutable(__DIR__ . "/..");
+$dotenv = Dotenv::createImmutable(__DIR__ . "/..");
 $dotenv->load();
 $dotenv->required(
     [
@@ -25,7 +29,7 @@ $dotenv->required(
 )->notEmpty();
 
 // Load settings and environments
-$settings = \NTNUI\Swimming\Util\Settings::getInstance(__DIR__ . "/../settings.json");
+$settings = Settings::getInstance(__DIR__ . "/../settings.json");
 $settings->testSettings();
 $settings->initSession();
 $args = array_filter(array_reverse(explode("/", $_SERVER["REQUEST_URI"])));
@@ -49,8 +53,8 @@ if ($questionMarkPos !== false) {
 } // we don't need to parse get arguments since they are already available through $_GET
 
 if (!in_array($service, $validEndpoints)) {
-    $response = new \NTNUI\Swimming\Util\Response();
-    $response->code = \NTNUI\Swimming\Util\Response::HTTP_NOT_FOUND;
+    $response = new Response();
+    $response->code = Response::HTTP_NOT_FOUND;
     $response->data = [
         "error" => true,
         "success" => false,

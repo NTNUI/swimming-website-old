@@ -2,9 +2,8 @@
 
 declare(strict_types=1);
 
-namespace NTNUI;
+namespace NTNUI\Swimming\Api;
 
-use Stripe\Stripe;
 use Stripe\PaymentIntent;
 use NTNUI\Swimming\Util\Order;
 use NTNUI\Swimming\Util\Member;
