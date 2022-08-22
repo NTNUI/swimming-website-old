@@ -29,13 +29,13 @@ function enrollmentIsOpen(array $enrollmentSettings): bool
     $endDay = $enrollmentSettings["endDay"];
 
     $dateFormat = "j F"; // day month
-    $startDate = \DateTime::createFromFormat($dateFormat, $startDay . " " . $startMonth);
-    $endDate = \DateTime::createFromFormat($dateFormat, $endDay . " " . $endMonth);
+    $startDate = \DateTimeImmutable::createFromFormat($dateFormat, $startDay . " " . $startMonth);
+    $endDate = \DateTimeImmutable::createFromFormat($dateFormat, $endDay . " " . $endMonth);
 
     // TODO: read and test enrollment settings in settings class. Test function needs to be run only once to check if configuration is ok.
     Assert::notFalse($startDate);
     Assert::notFalse($endDate);
-    $now = new \DateTime("now");
+    $now = new \DateTimeImmutable("now");
     Assert::notFalse($now);
     if ($now > $startDate && $now < $endDate) {
         return true;

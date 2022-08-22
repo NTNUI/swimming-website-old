@@ -27,8 +27,8 @@ class Product
         private string $descriptionJson,
         private int $price,
         private ?int $priceMember,
-        private ?\DateTime $availableFrom,
-        private ?\DateTime $availableUntil,
+        private ?\DateTimeImmutable $availableFrom,
+        private ?\DateTimeImmutable $availableUntil,
         public readonly ?int $maxOrdersPerCustomer,
         public readonly bool $requireEmail,
         public readonly bool $requireComment,
@@ -48,8 +48,8 @@ class Product
         string $descriptionJson,
         int $price,
         ?int $priceMember,
-        ?\DateTime $availableFrom,
-        ?\DateTime $availableUntil,
+        ?\DateTimeImmutable $availableFrom,
+        ?\DateTimeImmutable $availableUntil,
         ?int $maxOrdersPerCustomer,
         bool $requireEmail,
         bool $requireComment,
@@ -201,11 +201,11 @@ class Product
         $db->execute();
         $db->fetch();
         if (!empty($availableFrom)) {
-            $availableFrom = \DateTime::createFromFormat(self::DATE_FORMAT, $availableFrom, new \DateTimeZone(self::TIME_ZONE));
+            $availableFrom = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $availableFrom, new \DateTimeZone(self::TIME_ZONE));
             Assert::notFalse($availableFrom);
         }
         if (!empty($availableUntil)) {
-            $availableUntil = \DateTime::createFromFormat(self::DATE_FORMAT, $availableUntil, new \DateTimeZone(self::TIME_ZONE));
+            $availableUntil = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $availableUntil, new \DateTimeZone(self::TIME_ZONE));
             Assert::notFalse($availableUntil);
         }
 
@@ -275,7 +275,7 @@ class Product
 
     /**
      * Get an associative array of the product.
-     *
+     * TODO: DateTimeImmutable to unix timestamp
      * @return array{
      *      id: int,
      *      productHash: string,
@@ -283,8 +283,8 @@ class Product
      *      descriptionJson: string,
      *      price: int,
      *      priceMember: ?int,
-     *      availableFrom: ?\DateTime,
-     *      availableUntil: ?\DateTime,
+     *      availableFrom: ?\DateTimeImmutable,
+     *      availableUntil: ?\DateTimeImmutable,
      *      maxOrdersPerCustomer: ?int,
      *      requireEmail: bool,
      *      requireComment: bool,
@@ -345,7 +345,7 @@ class Product
 
     public function isAvailable(): bool
     {
-        $now = new \DateTime('now', new \DateTimeZone(self::TIME_ZONE));
+        $now = new \DateTimeImmutable('now', new \DateTimeZone(self::TIME_ZONE));
         Assert::notFalse($now);
         // TODO: globally replace with sellStart and sellEnd or something similar
         $start = $this->availableFrom;
@@ -383,7 +383,7 @@ class Product
         $this->image = $imagePath;
     }
 
-    public function setAvailableFrom(?\DateTime $availableFrom): void
+    public function setAvailableFrom(?\DateTimeInterface $availableFrom): void
     {
         $db = new DB();
         $productId = $this->id;
@@ -433,7 +433,7 @@ class Product
         $this->inventoryCount = $inventoryCount;
     }
 
-    public function setAvailableUntil(?\DateTime $availableUntil): void
+    public function setAvailableUntil(?\DateTimeInterface $availableUntil): void
     {
         $db = new DB();
         $productId = $this->id;
@@ -609,7 +609,7 @@ class Product
     }
     /**
      * Get products as an associative array
-     *
+     * TODO: DateTimeImmutable to unix timestamp
      * @return array<
      * int, array{
      *      productHash: string,
@@ -617,8 +617,8 @@ class Product
      *      descriptionJson: string,
      *      price: int,
      *      priceMember: ?int,
-     *      availableFrom: ?\DateTime,
-     *      availableUntil: ?\DateTime,
+     *      availableFrom: ?\DateTimeImmutable,
+     *      availableUntil: ?\DateTimeImmutable,
      *      maxOrdersPerCustomer: ?int,
      *      requireEmail: bool,
      *      requireComment: bool,

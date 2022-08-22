@@ -28,6 +28,7 @@ services:
             - ./docker/app/conf/settings.json:/var/www/localhost/htdocs/settings.json:ro
             - ./docker/app/conf/ssl.conf:/etc/apache2/conf.d/ssl.conf:ro
             - ./docker/storage/app/img:/var/www/localhost/htdocs/runtimeData/img
+            - ./docker/storage/app/init/store/img/31e61c8253b54cdde3b9.jpg:/var/www/localhost/htdocs/runtimeData/img/31e61c8253b54cdde3b9.jpg
             - ./docker/storage/self_signed_certificate/server.crt:/etc/apache2/conf.d/server.crt
             - ./docker/storage/self_signed_certificate/server.key:/etc/apache2/conf.d/server.key
             - ./docker/storage/vendor:/var/www/localhost/htdocs/vendor:ro
@@ -54,9 +55,9 @@ services:
             - MYSQL_USER=${DB_USERNAME}
             - MYSQL_PASSWORD=${DB_PASSWORD}
         volumes:
-            - ./docker/storage/db/:/var/lib/mysql
-            - ./docker/db/init/:/docker-entrypoint-initdb.d:ro
             - ./docker/db/conf.d/:/etc/mysql/:ro
+            - ./docker/db/init/:/docker-entrypoint-initdb.d:ro
+            - ./docker/storage/db/:/var/lib/mysql
 
     # Database frontend
     phpmyadmin:
@@ -75,8 +76,8 @@ services:
         command: listen
         environment:
             - STRIPE_API_KEY=${STRIPE_SECRET_KEY}
-            - STRIPE_DEVICE_NAME=${USERNAME:-testing_host}
             - STRIPE_CLI_TELEMETRY_OPTOUT=true
+            - STRIPE_DEVICE_NAME=${USERNAME:-testing_host}
         depends_on:
             - app
     # Workaround so developers can delete ./docker/storage

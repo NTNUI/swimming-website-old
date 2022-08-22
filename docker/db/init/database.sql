@@ -8,6 +8,8 @@ SET time_zone = "+00:00";
 /*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
 /*!40101 SET NAMES utf8mb4 */;
 
+/* TODO: check out if charset can be utf-8 */
+
 CREATE DATABASE IF NOT EXISTS `swimming` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `swimming`;
 
@@ -71,6 +73,22 @@ CREATE TABLE IF NOT EXISTS `orders` (
   KEY `productId` (`productId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+CREATE TABLE IF NOT EXISTS `images` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `filename` text NOT NULL,
+  `refCount` int(11) NOT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `filename` (`filename`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+INSERT INTO `images`(
+  `filename`,
+  `refCount`
+)VALUES (
+  '31e61c8253b54cdde3b9.jpg',
+  1
+);
+
 CREATE TABLE IF NOT EXISTS `products` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `productHash` varchar(20) NOT NULL,
@@ -86,11 +104,12 @@ CREATE TABLE IF NOT EXISTS `products` (
   `requireComment` tinyint(1) NOT NULL DEFAULT '0',
   `requireActiveMembership` tinyint(1) NOT NULL DEFAULT '0',
   `amountAvailable` int(11) DEFAULT NULL,
-  `image` text,
+  `imageId` tinyint(11) NOT NULL,
   `visible` tinyint(1) NOT NULL DEFAULT '1',
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
-  UNIQUE KEY `productHash` (`productHash`)
+  UNIQUE KEY `productHash` (`productHash`),
+  UNIQUE KEY `imageId` (`imageId`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 INSERT INTO `products`(
@@ -98,7 +117,7 @@ INSERT INTO `products`(
   `name`,
   `description`,
   `price`,
-  `image`,
+  `imageId`,
   `visible`
 ) VALUES
 (
@@ -106,7 +125,7 @@ INSERT INTO `products`(
   '{\"no\":\"NSF Lisens\",\"en\":\"NSF License\"}',
   '{\"no\":\"Lisensen gir deg adgang til nasjonsale stevner og obligatorisk treningsforsikring. Lisensen har en gyldighet i ett kalender år fra januar til desember.\",\"en\":\"Norwegian Swimming license is required for practices and national competitions. License is valid max one year from January until December.\"}',
   76500,
-  '31e61c8253b54cdde3b9.jpg',
+  1,
   0
 );
 

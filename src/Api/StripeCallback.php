@@ -58,13 +58,20 @@ try {
             break;
     }
 } catch (\Throwable $ex) {
+    // TODO: import some logging solution
     $response->code = Response::HTTP_INTERNAL_SERVER_ERROR;
+    $response->data = [
+        "success" => false,
+        "error" => true,
+        "message" => "internal server error",
+    ];
     if (boolval(filter_var($_ENV["DEBUG"], FILTER_VALIDATE_BOOLEAN))) {
         $response->data["message"] = $ex->getMessage();
         $response->data["code"] = $ex->getCode();
         $response->data["file"] = $ex->getFile();
         $response->data["line"] = $ex->getLine();
         $response->data["args"] = $args;
+        $response->data["exception_class"] = get_class($ex);
         $response->data["backtrace"] = $ex->getTrace();
     }
 }

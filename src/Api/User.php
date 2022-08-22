@@ -4,11 +4,12 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Api;
 
+use NTNUI\Swimming\Util\Log;
+use NTNUI\Swimming\Util\User;
+use NTNUI\Swimming\Util\Response;
+use NTNUI\Swimming\Util\Authenticator;
 use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Exception\Api\AuthenticationException;
-use NTNUI\Swimming\Util\Authenticator;
-use NTNUI\Swimming\Util\Response;
-use NTNUI\Swimming\Util\User;
 
 /**
  * * GET /api/user
@@ -71,6 +72,7 @@ try {
         "message" => $ex->getMessage(),
     ];
 } catch (\Throwable $ex) {
+    // TODO: import some logging solution
     $response->code = Response::HTTP_INTERNAL_SERVER_ERROR;
     $response->data = [
         "success" => false,
@@ -83,6 +85,7 @@ try {
         $response->data["file"] = $ex->getFile();
         $response->data["line"] = $ex->getLine();
         $response->data["args"] = $args;
+        $response->data["exception_class"] = get_class($ex);
         $response->data["backtrace"] = $ex->getTrace();
     }
 }

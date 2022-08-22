@@ -43,36 +43,35 @@ class Member
      * Constructs a new Member instance. Validates input upon creation
      *
      * @param string $name
-     * @param \DateTime $birthDate
+     * @param \DateTimeImmutable $birthDate
      * @param PhoneNumber $phone
      * @param Gender $gender
      * @param string $email
      * @param string $address
      * @param int $zip
      * @param ?string $license
-     * @param \DateTime $registrationDate
-     * @param ?\DateTime $approvedDate
+     * @param \DateTimeImmutable $registrationDate
+     * @param ?\DateTimeImmutable $approvedDate
      * @param bool $haveVolunteered
      * @param bool $licenseForwarded
      * @param ?int $cinId database cin row id
      * @param ?int $id database member row id
      *
-     * @throws \MemberIsActiveException if a member already exists
-     * @throws \InvalidArgumentException on input error
+     * @throws \MemberException on registration error
      * @throws \Exception on unrecoverable error
      *
      */
     private function __construct(
         private string $name,
-        private \DateTime $birthDate,
+        private \DateTimeImmutable $birthDate,
         private PhoneNumber $phone,
         private Gender $gender,
         private string $email,
         private string $address,
         private int $zip,
         private ?string $license,
-        private \DateTime $registrationDate = new \DateTime('now', new \DateTimeZone(self::TIME_ZONE)),
-        private ?\DateTime $approvedDate = null,
+        private \DateTimeImmutable $registrationDate = new \DateTimeImmutable('now', new \DateTimeZone(self::TIME_ZONE)),
+        private ?\DateTimeImmutable $approvedDate = null,
         private bool $haveVolunteered = false,
         private bool $licenseForwarded = false,
         private ?int $cinId = null,
@@ -207,15 +206,15 @@ class Member
         return new Member(
             id: $member["id"],
             name: $member["name"],
-            birthDate: new \DateTime($member["birthDate"], new \DateTimeZone(self::TIME_ZONE)),
+            birthDate: new \DateTimeImmutable($member["birthDate"], new \DateTimeZone(self::TIME_ZONE)),
             phone: PhoneNumberUtil::getInstance()->parse($member["phone"]),
             gender: Gender::fromString($member["gender"]),
             email: $member["email"],
             address: $member["address"],
             zip: $member["zip"],
             license: $member["license"],
-            registrationDate: new \DateTime($member["registrationDate"], new \DateTimeZone(self::TIME_ZONE)),
-            approvedDate: new \DateTime($member["approvedDate"], new \DateTimeZone(self::TIME_ZONE)),
+            registrationDate: new \DateTimeImmutable($member["registrationDate"], new \DateTimeZone(self::TIME_ZONE)),
+            approvedDate: new \DateTimeImmutable($member["approvedDate"], new \DateTimeZone(self::TIME_ZONE)),
             haveVolunteered: $member["haveVolunteered"],
             licenseForwarded: $member["licenseForwarded"],
             cinId: $member["cinId"],
@@ -267,15 +266,15 @@ class Member
         return new Member(
             id: $member["id"],
             name: $member["name"],
-            birthDate: new \DateTime($member["birthDate"], new \DateTimeZone(self::TIME_ZONE)),
+            birthDate: new \DateTimeImmutable($member["birthDate"], new \DateTimeZone(self::TIME_ZONE)),
             phone: PhoneNumberUtil::getInstance()->parse($member["phone"]),
             gender: Gender::fromString($member["gender"]),
             email: $member["email"],
             address: $member["address"],
             zip: $member["zip"],
             license: $member["license"],
-            registrationDate: new \DateTime($member["registrationDate"], new \DateTimeZone(self::TIME_ZONE)),
-            approvedDate: new \DateTime($member["approvedDate"], new \DateTimeZone(self::TIME_ZONE)),
+            registrationDate: new \DateTimeImmutable($member["registrationDate"], new \DateTimeZone(self::TIME_ZONE)),
+            approvedDate: new \DateTimeImmutable($member["approvedDate"], new \DateTimeZone(self::TIME_ZONE)),
             haveVolunteered: $member["haveVolunteered"],
             licenseForwarded: $member["licenseForwarded"],
             cinId: $member["cinId"],
@@ -284,7 +283,7 @@ class Member
 
     public static function new(
         string $name,
-        \DateTime $birthDate,
+        \DateTimeImmutable $birthDate,
         PhoneNumber $phone,
         Gender $gender,
         string $email,
@@ -547,7 +546,7 @@ class Member
         // consider moving to Moment library which will throw appropriate exception.
         Member::new(
             name: $jsonRequest["name"],
-            birthDate: \DateTime::createFromFormat(self::DATE_FORMAT, $jsonRequest["birthDate"], new \DateTimeZone(self::TIME_ZONE)),
+            birthDate: \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $jsonRequest["birthDate"], new \DateTimeZone(self::TIME_ZONE)),
             phone: PhoneNumberUtil::getInstance()->parse($jsonRequest["phone"]),
             gender: Gender::fromString($jsonRequest["gender"]),
             email: $jsonRequest["email"],
@@ -628,15 +627,15 @@ class Member
         return substr($name, strlen($name) - strpos(strrev($name), " "));
     }
 
-    private function getAge(\DateTime $birthDate): int
+    private function getAge(\DateTimeImmutable $birthDate): int
     {
-        $now = new \DateTime();
+        $now = new \DateTimeImmutable();
         $interval = $now->diff($birthDate);
         return $interval->y;
     }
 
     // maybe move to Cin.php
-    private static function calculateHash(\DateTime $birthDate, Gender $gender, PhoneNumber $phone): Hash
+    private static function calculateHash(\DateTimeInterface $birthDate, Gender $gender, PhoneNumber $phone): Hash
     {
         $phoneString = PhoneNumberUtil::getInstance()->format($phone, PhoneNumberFormat::E164);
         return new Hash($birthDate["birthDate"]->format(self::DATE_FORMAT) . $phoneString . $gender->toString());

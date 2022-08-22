@@ -23,7 +23,7 @@ class User
     public const DATE_FORMAT = "Y-m-d"; // https://www.php.net/manual/en/datetime.format.php
     public const TIME_ZONE = "Europe/Oslo";
 
-    private ?\DateTime $passwordModified;
+    private ?\DateTimeImmutable $passwordModified;
 
     #region constructors
 
@@ -51,7 +51,7 @@ class User
 
         if (isset($passwordModified)) {
             // user has changed password
-            $this->passwordModified = \DateTime::createFromFormat(self::DATE_FORMAT, $passwordModified, new \DateTimeZone(self::TIME_ZONE));
+            $this->passwordModified = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $passwordModified, new \DateTimeZone(self::TIME_ZONE));
         } else {
             // user has never changed the password
             $this->$passwordModified = null;
@@ -138,12 +138,12 @@ class User
             passwordModified: empty($passwordModified) ? null : $passwordModified,
         );
     }
+
     #endregion
 
     #region getters
 
-    // allow read access for all member variables but disallow setting them freely
-    public function __get(string $name): string|\DateTime|int|NULL
+    public function __get(string $name): string|\DateTimeImmutable|int|NULL
     {
         Assert::propertyExists($this, $name);
         return $this->$name;
@@ -152,7 +152,7 @@ class User
     /**
      * toArray
      *
-     * @return array{id:int, name:string, username:string, passwordModified:int}
+     * @return array{id:int,name:string,username:string,passwordModified:int}
      */
     public function toArray(): array
     {
@@ -163,9 +163,11 @@ class User
             "passwordModified" => $this->passwordModified->getTimestamp(),
         ];
     }
+
     #endregion
 
     #region setters
+
     public function setName(string $name): void
     {
         if (strlen($name) > self::MAX_CHARS_NAME) {

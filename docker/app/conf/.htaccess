@@ -21,5 +21,7 @@ RewriteRule ^public/ - [L]
 RewriteCond public/$0 -F
 RewriteRule .* public/$0 [L]
 
+# TODO: somehow allow access to all images inside runtimeData/img
+
 # Rewrite all requests to src/index.php
 RewriteRule ^([^?]*)$ src/index.php [NC,L,QSA]

@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Util;
 
-use DateTime;
 use NTNUI\Swimming\Util\DB;
 use NTNUI\Swimming\Util\Hash;
 use NTNUI\Swimming\Exception\Api\CinException;
@@ -12,7 +11,7 @@ use NTNUI\Swimming\Exception\Api\CinException;
 /**
  * @property-read int $cin
  * @property-read Hash $memberHash
- * @property-read DateTime $lastUsed
+ * @property-read \DateTimeImmutable $lastUsed
  */
 class Cin
 {
@@ -21,9 +20,9 @@ class Cin
 
     private int $cin;
     private Hash $memberHash;
-    private \DateTime $lastUsed;
+    private \DateTimeImmutable $lastUsed;
 
-    public function __get(string $name): int|Hash|\DateTime
+    public function __get(string $name): int|Hash|\DateTimeImmutable
     {
         return $this->$name;
     }
@@ -39,7 +38,7 @@ class Cin
         }
         $this->cin = $cin;
         $this->memberHash = new Hash($memberHash);
-        $this->lastUsed = \DateTime::createFromFormat(self::DATE_FORMAT, $lastUsed, new \DateTimeZone(self::TIME_ZONE));
+        $this->lastUsed = \DateTimeImmutable::createFromFormat(self::DATE_FORMAT, $lastUsed, new \DateTimeZone(self::TIME_ZONE));
     }
 
     public static function new(int $cin, Hash $memberHash): self

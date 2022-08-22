@@ -27,7 +27,7 @@ try {
 
     $request = json_decode($file_content, true, flags: JSON_THROW_ON_ERROR);
 
-    $intent = new \Stripe\PaymentIntent();
+    $intent = new PaymentIntent();
 
     if (isset($request["payment_method_id"])) {
         if (!array_key_exists("order", $request)) {
@@ -95,11 +95,12 @@ try {
         "message" => $ex->getMessage(),
         "trace" => $ex->getTrace(),
     ];
-} catch (\LogicException | \Throwable $ex) {
+} catch (\Throwable $ex) {
+    // TODO: import some logging solution
     $response->code = Response::HTTP_INTERNAL_SERVER_ERROR;
     $response->data = [
-        "error" => true,
         "success" => false,
+        "error" => true,
         "message" => "internal server error",
     ];
     if (boolval(filter_var($_ENV["DEBUG"], FILTER_VALIDATE_BOOLEAN))) {
@@ -108,6 +109,7 @@ try {
         $response->data["file"] = $ex->getFile();
         $response->data["line"] = $ex->getLine();
         $response->data["args"] = $args;
+        $response->data["exception_class"] = get_class($ex);
         $response->data["backtrace"] = $ex->getTrace();
     }
 }

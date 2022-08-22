@@ -136,7 +136,7 @@ class Order
         $db->execute();
 
         $orderId = $db->insertedId();
-        \Stripe\PaymentIntent::update($intent["id"], ["metadata" => ["orderId" => $orderId]]);
+        PaymentIntent::update($intent["id"], ["metadata" => ["orderId" => $orderId]]);
 
         return new self(
             customer: $customer,

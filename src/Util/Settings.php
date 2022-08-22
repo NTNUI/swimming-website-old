@@ -43,7 +43,7 @@ class Settings
      * $config_path
      *
      * @param string|null $configPath path to `settings.json`. Required on first call.
-     * @return self the instance of Settings class
+     * @return self
      */
     public static function getInstance(?string $configPath = null): self
     {
@@ -90,7 +90,7 @@ class Settings
                 throw new \Exception("email " . $emailsArray[$role] . " is not valid for role $role");
             }
         }
-        /** @var array{leader: string, developer: string, analyst: string, coach: string, bot: string} $emailsArray */
+        /** @var array{leader:string,developer:string,analyst:string,coach:string,bot:string} $emailsArray */
         $this->emails = $emailsArray;
 
         $this->enrollmentSettings = $decoded["enrollment"];
@@ -123,6 +123,7 @@ class Settings
             throw new \Exception("could not start session");
         }
     }
+
     public function sessionDestroy(): void
     {
         if (!session_unset()) {
@@ -147,10 +148,12 @@ class Settings
             }
         }
     }
+
     public function getBaseurl(): string
     {
         return $this->baseUrl;
     }
+
     public function getEmailAddress(string $role): string
     {
         if (!in_array($role, self::REQUIRED_EMAIL_ROLES)) {
@@ -174,6 +177,7 @@ class Settings
     {
         return $this->enrollmentSettings;
     }
+
     public function getLicenseProductHash(): string
     {
         return $this->licenseProductHash;
