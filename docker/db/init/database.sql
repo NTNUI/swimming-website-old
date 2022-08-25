@@ -13,42 +13,6 @@ SET time_zone = "+00:00";
 CREATE DATABASE IF NOT EXISTS `swimming` DEFAULT CHARACTER SET latin1 COLLATE latin1_swedish_ci;
 USE `swimming`;
 
-/*
-"id",
-"name",
-"gender",
-"birthDate",
-"phone",
-"email",
-"address",
-"zip",
-"license",
-"registrationDate",
-"approvedDate",
-"haveVolunteered", 
-"licenseForwarded",
-"cinId",
-*/
-CREATE TABLE IF NOT EXISTS `members` (
-  `id` int(11) NOT NULL AUTO_INCREMENT,
-  `name` text NOT NULL,
-  `gender` text NOT NULL,
-  `birthDate` date DEFAULT NULL,
-  `phone` varchar(15) NOT NULL,
-  `email` text NOT NULL,
-  `address` text NOT NULL,
-  `zip` int(4) DEFAULT NULL,
-  `license` text DEFAULT NULL COMMENT 'lisenced under club',
-  `registrationDate` date DEFAULT NOW() NOT NULL COMMENT 'date when the form was filled out',
-  `approvedDate` date DEFAULT NULL COMMENT 'if date is set, then member is approved',
-  `haveVolunteered` tinyint(1) DEFAULT NULL COMMENT 'If true then this member has attended voulentary work',
-  `licenseForwarded` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'true if the license has been marked as forwarded to NSF',
-  `cinId` int(11) DEFAULT NULL, 
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `phone` (`phone`),
-  UNIQUE KEY `cinId` (`cinId`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
 CREATE TABLE IF NOT EXISTS `cin` (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Row identification',
   `memberHash` text NOT NULL COMMENT 'Hashed sum of stable personal data',
@@ -59,40 +23,39 @@ CREATE TABLE IF NOT EXISTS `cin` (
   UNIQUE KEY `cin` (`cin`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE IF NOT EXISTS `orders` (
+CREATE TABLE IF NOT EXISTS `members` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `productId` int(11) NOT NULL,
-  `name` text NOT NULL,
-  `email` text NOT NULL,
-  `phone` text,
-  `intentId` text ,
-  `orderStatus` enum('PLACED','FINALIZED','DELIVERED','FAILED','REFUNDED') DEFAULT NULL,
-  `comment` text default NULL,
-  `timestamp` date NOT NULL COMMENT 'Timestamp of last order status change' DEFAULT NOW(),
+  `name` varchar(255) NOT NULL,
+  `gender` text NOT NULL,
+  `birthDate` date DEFAULT NULL,
+  `phone` varchar(31) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `address` text NOT NULL,
+  `zip` int(4) DEFAULT NULL,
+  `license` text DEFAULT NULL COMMENT 'lisenced under club',
+  `registrationDate` date DEFAULT NOW() NOT NULL COMMENT 'date when the form was filled out',
+  `approvedDate` date DEFAULT NULL COMMENT 'if date is set, then member is approved',
+  `haveVolunteered` tinyint(1) DEFAULT NULL COMMENT 'If true then this member has attended voulentary work',
+  `licenseForwarded` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'true if the license has been marked as forwarded to NSF',
+  `cinId` int(11) DEFAULT NULL, 
   PRIMARY KEY (`id`),
-  KEY `productId` (`productId`)
+  UNIQUE KEY `phone` (`phone`),
+  UNIQUE KEY `email` (`email`),
+  FOREIGN KEY (`cinId`) REFERENCES cin(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 CREATE TABLE IF NOT EXISTS `images` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
-  `filename` text NOT NULL,
+  `filename` varchar(255) NOT NULL,
   `refCount` int(11) NOT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `filename` (`filename`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-INSERT INTO `images`(
-  `filename`,
-  `refCount`
-)VALUES (
-  '31e61c8253b54cdde3b9.jpg',
-  1
-);
-
 CREATE TABLE IF NOT EXISTS `products` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `productHash` varchar(20) NOT NULL,
-  `name` text NOT NULL,
+  `name` varchar(255) NOT NULL,
   `description` text,
   `price` int(11) NOT NULL,
   `priceMember` int(11) DEFAULT NULL,
@@ -104,13 +67,37 @@ CREATE TABLE IF NOT EXISTS `products` (
   `requireComment` tinyint(1) NOT NULL DEFAULT '0',
   `requireActiveMembership` tinyint(1) NOT NULL DEFAULT '0',
   `amountAvailable` int(11) DEFAULT NULL,
-  `imageId` tinyint(11) NOT NULL,
+  `imageId` int(11) NOT NULL,
   `visible` tinyint(1) NOT NULL DEFAULT '1',
   `enabled` tinyint(1) NOT NULL DEFAULT '1',
   PRIMARY KEY (`id`),
   UNIQUE KEY `productHash` (`productHash`),
-  UNIQUE KEY `imageId` (`imageId`)
+  FOREIGN KEY (`imageId`) REFERENCES images(`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+CREATE TABLE IF NOT EXISTS `orders` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `productId` int(11) NOT NULL,
+  `name` varchar(255) NOT NULL,
+  `email` varchar(255) NOT NULL,
+  `phone` varchar(31),
+  `intentId` text ,
+  `orderStatus` enum('PLACED','FINALIZED','DELIVERED','FAILED','REFUNDED') DEFAULT NULL,
+  `comment` text default NULL,
+  `timestamp` date NOT NULL COMMENT 'Timestamp of last order status change' DEFAULT NOW(),
+  PRIMARY KEY (`id`),
+  FOREIGN KEY (`productId`) REFERENCES products(`id`),
+  FOREIGN KEY (`phone`) REFERENCES members(`phone`),
+  FOREIGN KEY (`email`) REFERENCES members(`email`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+INSERT INTO `images`(
+  `filename`,
+  `refCount`
+)VALUES (
+  '31e61c8253b54cdde3b9.jpg',
+  1
+);
 
 INSERT INTO `products`(
   `productHash`,
@@ -133,7 +120,7 @@ CREATE TABLE IF NOT EXISTS `users` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `username` varchar(32) NOT NULL,
   `passwd` varchar(100) NOT NULL,
-  `name` varchar(32) NOT NULL,
+  `name` varchar(255) NOT NULL,
   `passwordModified` date DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`)

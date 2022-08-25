@@ -47,6 +47,8 @@ $service = array_pop($args);
 $validEndpoints = str_replace(".php", "", str_replace(__DIR__ . "/Api/", "", glob(__DIR__ . "/Api/*.php")));
 // $service might contain get arguments like /api/service?foo=bar&hello=world
 
+
+// what if $service does not exists? eg GET /api/
 $questionMarkPos = strpos($service, "?");
 if ($questionMarkPos !== false) {
     $service = substr($service, 0, $questionMarkPos);
