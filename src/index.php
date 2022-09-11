@@ -45,6 +45,7 @@ if ($page !== "api") {
 
 $service = array_pop($args);
 $validEndpoints = str_replace(".php", "", str_replace(__DIR__ . "/Api/", "", glob(__DIR__ . "/Api/*.php")));
+$validEndpoints = array_map(fn ($endpoint) => lcfirst($endpoint), $validEndpoints);
 // $service might contain get arguments like /api/service?foo=bar&hello=world
 
 
@@ -67,5 +68,6 @@ if (!in_array($service, $validEndpoints)) {
     $response->sendJson();
     return;
 }
-require_once __DIR__ . "/api/$service.php";
+$file = "/Api/" . ucfirst($service) . ".php";
+require_once __DIR__ . $file;
 return;
