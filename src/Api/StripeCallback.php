@@ -9,16 +9,16 @@ declare(strict_types=1);
 namespace NTNUI\Swimming\Api;
 
 // Documentation: https://stripe.com/docs/webhooks
-use Stripe\Webhook;
-use Stripe\PaymentIntent;
-use NTNUI\Swimming\Util\Order;
+use libphonenumber\PhoneNumberUtil;
+use NTNUI\Swimming\Enum\OrderStatus;
+use NTNUI\Swimming\Exception\Api\ApiException;
+use NTNUI\Swimming\Interface\Endpoint;
 use NTNUI\Swimming\Util\Member;
-use NTNUI\Swimming\Util\Endpoint;
+use NTNUI\Swimming\Util\Order;
 use NTNUI\Swimming\Util\Response;
 use NTNUI\Swimming\Util\Settings;
-use libphonenumber\PhoneNumberUtil;
-use NTNUI\Swimming\Util\OrderStatus;
-use NTNUI\Swimming\Exception\Api\ApiException;
+use Stripe\PaymentIntent;
+use Stripe\Webhook;
 
 class StripeCallback implements Endpoint
 {

@@ -4,15 +4,16 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Util;
 
-use Webmozart\Assert\Assert;
 use libphonenumber\PhoneNumber;
-use libphonenumber\PhoneNumberUtil;
 use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
+use NTNUI\Swimming\Enum\Gender;
 use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Exception\Api\CinException;
-use NTNUI\Swimming\Exception\Api\UserException;
-use NTNUI\Swimming\Exception\Api\MemberException;
 use NTNUI\Swimming\Exception\Api\EnrollmentException;
+use NTNUI\Swimming\Exception\Api\MemberException;
+use NTNUI\Swimming\Exception\Api\UserException;
+use Webmozart\Assert\Assert;
 
 /**
  * class Member

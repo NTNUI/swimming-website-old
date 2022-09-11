@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Util;
 
-use NTNUI\Swimming\Util\User;
-use NTNUI\Swimming\Util\Settings;
-use NTNUI\Swimming\Exception\Api\UserException;
 use NTNUI\Swimming\Exception\Api\AuthenticationException;
+use NTNUI\Swimming\Exception\Api\UserException;
+use NTNUI\Swimming\Util\Settings;
+use NTNUI\Swimming\Util\User;
 
 class Authenticator
 {

@@ -4,16 +4,16 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Api;
 
-use Stripe\PaymentIntent;
-use NTNUI\Swimming\Util\Order;
-use NTNUI\Swimming\Util\Member;
-use NTNUI\Swimming\Util\Product;
+use libphonenumber\PhoneNumberUtil;
+use NTNUI\Swimming\Enum\OrderStatus;
+use NTNUI\Swimming\Interface\Endpoint;
 use NTNUI\Swimming\Util\Customer;
-use NTNUI\Swimming\Util\Endpoint;
+use NTNUI\Swimming\Util\Member;
+use NTNUI\Swimming\Util\Order;
+use NTNUI\Swimming\Util\Product;
 use NTNUI\Swimming\Util\Response;
 use NTNUI\Swimming\Util\Settings;
-use libphonenumber\PhoneNumberUtil;
-use NTNUI\Swimming\Util\OrderStatus;
+use Stripe\PaymentIntent;
 
 
 class Charge implements Endpoint

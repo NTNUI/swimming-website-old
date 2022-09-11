@@ -4,13 +4,15 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Util;
 
-use Stripe\PaymentIntent;
 use libphonenumber\PhoneNumber;
-use libphonenumber\PhoneNumberUtil;
-use NTNUI\Swimming\Util\OrderStatus;
 use libphonenumber\PhoneNumberFormat;
+use libphonenumber\PhoneNumberUtil;
+use NTNUI\Swimming\Enum\Language;
+use NTNUI\Swimming\Enum\OrderStatus;
 use NTNUI\Swimming\Exception\Api\OrderException;
 use NTNUI\Swimming\Exception\Api\ProductException;
+use NTNUI\Swimming\Util\DB;
+use Stripe\PaymentIntent;
 
 class Order
 {

@@ -8,7 +8,7 @@ use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Exception\Api\AuthenticationException;
 use NTNUI\Swimming\Util;
 use NTNUI\Swimming\Util\Authenticator;
-use NTNUI\Swimming\Util\Endpoint;
+use NTNUI\Swimming\Interface\Endpoint;
 use NTNUI\Swimming\Util\Response;
 
 /**

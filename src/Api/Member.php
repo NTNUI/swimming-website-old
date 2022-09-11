@@ -21,7 +21,7 @@ namespace NTNUI\Swimming\Api;
 use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Util;
 use NTNUI\Swimming\Util\Authenticator as Auth;
-use NTNUI\Swimming\Util\Endpoint;
+use NTNUI\Swimming\Interface\Endpoint;
 use NTNUI\Swimming\Util\Response;
 
 class Member implements Endpoint

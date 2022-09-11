@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Util;
 
-use Maknz\Slack\Client;
 use Maknz\Slack\Attachment;
+use Maknz\Slack\Client;
 use NTNUI\Swimming\Api\Auth;
-use NTNUI\Swimming\Api\User;
 use NTNUI\Swimming\Api\Charge;
 use NTNUI\Swimming\Api\Member;
 use NTNUI\Swimming\Api\Product;
 use NTNUI\Swimming\Api\StripeCallback;
+use NTNUI\Swimming\Api\User;
 use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Exception\Api\AuthenticationException;
 

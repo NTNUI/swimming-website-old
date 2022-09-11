@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Util;
 
+use NTNUI\Swimming\Exception\Api\CinException;
 use NTNUI\Swimming\Util\DB;
 use NTNUI\Swimming\Util\Hash;
-use NTNUI\Swimming\Exception\Api\CinException;
 
 /**
  * @property-read int $cin

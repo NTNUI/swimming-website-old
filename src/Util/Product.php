@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Util;
 
+use NTNUI\Swimming\Enum\Language;
 use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Exception\Api\OrderException;
 use NTNUI\Swimming\Exception\Api\ProductException;
 use NTNUI\Swimming\Util\DB;
-use NTNUI\Swimming\Util\Language;
 use Webmozart\Assert\Assert;
 
 class Product

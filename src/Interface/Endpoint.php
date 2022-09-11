@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
-namespace NTNUI\Swimming\Util;
+namespace NTNUI\Swimming\Interface;
+
+use NTNUI\Swimming\Util\Response;
 
 interface Endpoint
 {
