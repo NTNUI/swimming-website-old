@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Api;
 
+use NTNUI\Swimming\App\Response;
+use NTNUI\Swimming\Db;
 use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Exception\Api\AuthenticationException;
 use NTNUI\Swimming\Interface\Endpoint;
-use NTNUI\Swimming\Util;
 use NTNUI\Swimming\Util\Authenticator;
-use NTNUI\Swimming\Util\Response;
 
 /**
  * * GET /api/product
@@ -43,28 +43,28 @@ class Product implements Endpoint
         $response->data = match ($requestMethod) {
             "GET" => match ($productHash) {
                 // * GET /api/product/
-                NULL => Util\Product::getAllAsArray(),
+                NULL => Db\Product::getAllAsArray(),
     
                 // * GET /api/product/{productHash}
-                (string)$productHash => Util\Product::fromProductHash($productHash)->toArray(),
+                (string)$productHash => Db\Product::fromProductHash($productHash)->toArray(),
     
                 default => throw ApiException::endpointDoesNotExist(),
             },
             "POST" => match ($productHash) {
                 // * POST /api/product
-                NULL => Util\Product::postHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)),
+                NULL => Db\Product::postHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)),
     
                 default => throw ApiException::endpointDoesNotExist(),
             },
             "PATCH" => match ($productHash) {
                 // * PATCH /api/product/{productHash}
-                (string)$productHash => Util\Product::fromProductHash($productHash)->patchHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)),
+                (string)$productHash => Db\Product::fromProductHash($productHash)->patchHandler(json_decode(file_get_contents("php://input"), true, flags: JSON_THROW_ON_ERROR)),
     
                 default => throw ApiException::endpointDoesNotExist(),
             },
             "DELETE" => match ($productHash) {
                 // * DELETE /api/product/{productHash}
-                (string)$productHash => Util\Product::fromProductHash($productHash)->deleteHandler(),
+                (string)$productHash => Db\Product::fromProductHash($productHash)->deleteHandler(),
     
                 default => throw ApiException::endpointDoesNotExist(),
             },

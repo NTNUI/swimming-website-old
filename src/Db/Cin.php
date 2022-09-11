@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace NTNUI\Swimming\Util;
+namespace NTNUI\Swimming\Db;
 
+use NTNUI\Swimming\Db\DB;
 use NTNUI\Swimming\Exception\Api\CinException;
-use NTNUI\Swimming\Util\DB;
 use NTNUI\Swimming\Util\Hash;
 
 /**

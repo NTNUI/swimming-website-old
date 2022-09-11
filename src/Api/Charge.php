@@ -5,14 +5,14 @@ declare(strict_types=1);
 namespace NTNUI\Swimming\Api;
 
 use libphonenumber\PhoneNumberUtil;
+use NTNUI\Swimming\App\Response;
+use NTNUI\Swimming\App\Settings;
+use NTNUI\Swimming\Db\Member;
+use NTNUI\Swimming\Db\Order;
+use NTNUI\Swimming\Db\Product;
 use NTNUI\Swimming\Enum\OrderStatus;
 use NTNUI\Swimming\Interface\Endpoint;
 use NTNUI\Swimming\Util\Customer;
-use NTNUI\Swimming\Util\Member;
-use NTNUI\Swimming\Util\Order;
-use NTNUI\Swimming\Util\Product;
-use NTNUI\Swimming\Util\Response;
-use NTNUI\Swimming\Util\Settings;
 use Stripe\PaymentIntent;
 
 

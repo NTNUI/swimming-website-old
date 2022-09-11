@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NTNUI\Swimming\Util;
+namespace NTNUI\Swimming\Db;
 
 // TODO: fetch row as an associative array
 /**

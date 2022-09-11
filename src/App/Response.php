@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NTNUI\Swimming\Util;
+namespace NTNUI\Swimming\App;
 
 use Lukasoppermann\Httpstatus\Httpstatus;
 use Lukasoppermann\Httpstatus\Httpstatuscodes;

@@ -2,16 +2,17 @@
 
 declare(strict_types=1);
 
-namespace NTNUI\Swimming\Util;
+namespace NTNUI\Swimming\Db;
 
 use libphonenumber\PhoneNumber;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
+use NTNUI\Swimming\Db\DB;
 use NTNUI\Swimming\Enum\Language;
 use NTNUI\Swimming\Enum\OrderStatus;
 use NTNUI\Swimming\Exception\Api\OrderException;
 use NTNUI\Swimming\Exception\Api\ProductException;
-use NTNUI\Swimming\Util\DB;
+use NTNUI\Swimming\Util\Customer;
 use Stripe\PaymentIntent;
 
 class Order

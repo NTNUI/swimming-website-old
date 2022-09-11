@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NTNUI\Swimming\Util;
+namespace NTNUI\Swimming\App;
 
 // TODO: convert into a config class
 class Settings

@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Api;
 
+use NTNUI\Swimming\App\Response;
+use NTNUI\Swimming\Db;
 use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Exception\Api\AuthenticationException;
-use NTNUI\Swimming\Util;
-use NTNUI\Swimming\Util\Authenticator;
 use NTNUI\Swimming\Interface\Endpoint;
-use NTNUI\Swimming\Util\Response;
+use NTNUI\Swimming\Util\Authenticator;
 
 /**
  * * GET /api/user
@@ -42,22 +42,22 @@ class User implements Endpoint
         $response->data = match ($requestMethod) {
             "GET" => match ($userId) {
                 // * GET /api/user
-                NULL => Authenticator::protect(fn () => Util\User::getAllAsArray()),
+                NULL => Authenticator::protect(fn () => Db\User::getAllAsArray()),
     
                 // * GET /api/user/{userId}
-                (string)(int)$userId => Authenticator::protect(fn () => Util\User::fromId((int)$userId))->toArray(),
+                (string)(int)$userId => Authenticator::protect(fn () => Db\User::fromId((int)$userId))->toArray(),
     
                 default => throw ApiException::endpointDoesNotExist(),
             },
             "POST" => match ($userId) {
                 // * POST /api/user
-                NULL => Authenticator::protect(fn () => Util\User::postHandler(Response::getJsonInput())),
+                NULL => Authenticator::protect(fn () => Db\User::postHandler(Response::getJsonInput())),
     
                 default => throw ApiException::endpointDoesNotExist(),
             },
             "PATCH" => match ($userId) {
                 // * PATCH /api/user/{userId}
-                (string)(int)$userId => Authenticator::protect(fn () => Util\User::fromId((int)$userId)->patchHandler(Response::getJsonInput())),
+                (string)(int)$userId => Authenticator::protect(fn () => Db\User::fromId((int)$userId)->patchHandler(Response::getJsonInput())),
     
                 default => throw ApiException::endpointDoesNotExist(),
             },

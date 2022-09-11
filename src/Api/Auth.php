@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Api;
 
+use NTNUI\Swimming\App\Response;
 use NTNUI\Swimming\Exception\Api\ApiException;
-use NTNUI\Swimming\Util\Authenticator;
 use NTNUI\Swimming\Interface\Endpoint;
-use NTNUI\Swimming\Util\Response;
+use NTNUI\Swimming\Util\Authenticator;
 
 /**
  * * GET /api/auth

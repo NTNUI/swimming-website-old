@@ -10,13 +10,13 @@ namespace NTNUI\Swimming\Api;
 
 // Documentation: https://stripe.com/docs/webhooks
 use libphonenumber\PhoneNumberUtil;
+use NTNUI\Swimming\App\Response;
+use NTNUI\Swimming\App\Settings;
+use NTNUI\Swimming\Db\Member;
+use NTNUI\Swimming\Db\Order;
 use NTNUI\Swimming\Enum\OrderStatus;
 use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Interface\Endpoint;
-use NTNUI\Swimming\Util\Member;
-use NTNUI\Swimming\Util\Order;
-use NTNUI\Swimming\Util\Response;
-use NTNUI\Swimming\Util\Settings;
 use Stripe\PaymentIntent;
 use Stripe\Webhook;
 
@@ -31,7 +31,7 @@ class StripeCallback implements Endpoint
         $secret = $_ENV["STRIPE_SIGNING_KEY"];
         $data = Response::getJsonInput();
 
-        $sigHeader = \NTNUI\Swimming\Util\argsURL("SERVER", "HTTP_STRIPE_SIGNATURE");
+        $sigHeader = \NTNUI\Swimming\App\argsURL("SERVER", "HTTP_STRIPE_SIGNATURE");
         if (empty($sigHeader)) {
             throw new \InvalidArgumentException("signature invalid");
         }

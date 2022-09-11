@@ -2,13 +2,14 @@
 
 declare(strict_types=1);
 
-namespace NTNUI\Swimming\Util;
+namespace NTNUI\Swimming\Db;
 
+use NTNUI\Swimming\App\Log;
+use NTNUI\Swimming\Db\DB;
 use NTNUI\Swimming\Enum\Language;
 use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Exception\Api\OrderException;
 use NTNUI\Swimming\Exception\Api\ProductException;
-use NTNUI\Swimming\Util\DB;
 use Webmozart\Assert\Assert;
 
 class Product

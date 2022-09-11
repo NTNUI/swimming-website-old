@@ -18,11 +18,11 @@ namespace NTNUI\Swimming\Api;
  * * PATCH /api/member/{memberId}/cin/{cin}
  */
 
+use NTNUI\Swimming\App\Response;
+use NTNUI\Swimming\Db;
 use NTNUI\Swimming\Exception\Api\ApiException;
-use NTNUI\Swimming\Util;
-use NTNUI\Swimming\Util\Authenticator as Auth;
 use NTNUI\Swimming\Interface\Endpoint;
-use NTNUI\Swimming\Util\Response;
+use NTNUI\Swimming\Util\Authenticator as Auth;
 
 class Member implements Endpoint
 {
@@ -41,38 +41,38 @@ class Member implements Endpoint
             "GET" => match ($memberId) {
                 // * GET /api/member/
                 NULL => Auth::protect(
-                    protectedFunction: fn () => Util\Member::getAllAsArray()
+                    protectedFunction: fn () => Db\Member::getAllAsArray()
                 ),
 
                 // * GET /api/member/{memberId}
                 (string)(int)$memberId => Auth::protect(
-                    protectedFunction: fn () => Util\Member::fromId((int)$memberId)
+                    protectedFunction: fn () => Db\Member::fromId((int)$memberId)
                 )->toArray(),
 
                 // * GET /api/member/pending
                 "pending" => Auth::protect(
-                    protectedFunction: fn () => Util\Member::getAllInactiveAsArray()
+                    protectedFunction: fn () => Db\Member::getAllInactiveAsArray()
                 ),
 
                 // * GET /api/member/active
                 "active" => Auth::protect(
-                    protectedFunction: fn () => Util\Member::getAllActiveAsArray()
+                    protectedFunction: fn () => Db\Member::getAllActiveAsArray()
                 ),
 
                 default => throw ApiException::endpointDoesNotExist(),
             },
             "POST" => match ($memberId) {
                 // * POST /api/member
-                NULL => Util\Member::enroll(Response::getJsonInput()),
+                NULL => Db\Member::enroll(Response::getJsonInput()),
 
                 // * POST /api/member/{memberId}/approve
                 (string)(int)$memberId . "/approve" => Auth::protect(
-                    protectedFunction: fn () => Util\Member::enrollmentApproveHandler((int)$memberId)
+                    protectedFunction: fn () => Db\Member::enrollmentApproveHandler((int)$memberId)
                 ),
 
                 // * POST /api/member/{memberId}/licenseForwarded
                 (string)(int)$memberId . "/licenseForwarded" => Auth::protect(
-                    protectedFunction: fn () => Util\Member::licenseHandler((int)$memberId)
+                    protectedFunction: fn () => Db\Member::licenseHandler((int)$memberId)
                 ),
 
                 default => throw ApiException::endpointDoesNotExist(),
@@ -80,12 +80,12 @@ class Member implements Endpoint
             "PATCH" => match ($memberId) {
                 // * PATCH /api/member/{memberId}/volunteering/{bool}
                 (string)(int)$memberId . "/volunteering/" => Auth::protect(
-                    protectedFunction: fn () => Util\Member::fromId((int)$memberId)->patchHandler(Response::getJsonInput())
+                    protectedFunction: fn () => Db\Member::fromId((int)$memberId)->patchHandler(Response::getJsonInput())
                 ),
 
                 // * PATCH /api/member/{memberId}/cin/{cin}
                 (string)(int)$memberId . "/cin/" => Auth::protect(
-                    protectedFunction: fn () => Util\Member::fromId((int)$memberId)->patchHandler(Response::getJsonInput())
+                    protectedFunction: fn () => Db\Member::fromId((int)$memberId)->patchHandler(Response::getJsonInput())
                 ),
 
                 default => throw ApiException::endpointDoesNotExist(),

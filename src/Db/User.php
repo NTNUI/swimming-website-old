@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace NTNUI\Swimming\Util;
+namespace NTNUI\Swimming\Db;
 
 use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Exception\Api\UserException;

@@ -6,8 +6,8 @@ require_once __DIR__ . "/../vendor/autoload.php";
 
 use Dotenv\Dotenv;
 use Maknz\Slack\Client;
-use NTNUI\Swimming\Util\Router;
-use NTNUI\Swimming\Util\Settings;
+use NTNUI\Swimming\App\Router;
+use NTNUI\Swimming\App\Settings;
 
 error_reporting(E_ALL);
 ini_set("display_errors", "0");

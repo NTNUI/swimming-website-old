@@ -2,17 +2,20 @@
 
 declare(strict_types=1);
 
-namespace NTNUI\Swimming\Util;
+namespace NTNUI\Swimming\Db;
 
 use libphonenumber\PhoneNumber;
 use libphonenumber\PhoneNumberFormat;
 use libphonenumber\PhoneNumberUtil;
+use NTNUI\Swimming\App\Settings;
+use NTNUI\Swimming\Db\Cin;
 use NTNUI\Swimming\Enum\Gender;
 use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Exception\Api\CinException;
 use NTNUI\Swimming\Exception\Api\EnrollmentException;
 use NTNUI\Swimming\Exception\Api\MemberException;
 use NTNUI\Swimming\Exception\Api\UserException;
+use NTNUI\Swimming\Util\Hash;
 use Webmozart\Assert\Assert;
 
 /**
@@ -146,7 +149,7 @@ class Member
         $this->cinId = $cinId;
 
         // block registration unless enrollment is open.
-        if (!enrollmentIsOpen(Settings::getInstance()->getEnrollment())) {
+        if (!\NTNUI\Swimming\Util\enrollmentIsOpen(Settings::getInstance()->getEnrollment())) {
             throw EnrollmentException::closed();
         }
 

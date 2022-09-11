@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Interface;
 
-use NTNUI\Swimming\Util\Response;
+use NTNUI\Swimming\App\Response;
 
 interface Endpoint
 {
