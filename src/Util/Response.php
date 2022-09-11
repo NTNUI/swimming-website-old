@@ -22,9 +22,14 @@ class Response implements Httpstatuscodes
         http_response_code($this->code);
         header($_SERVER["SERVER_PROTOCOL"] . " $this->code " . ((new Httpstatus())->getReasonPhrase($this->code)));
         if (!empty($this->data)) {
-            echo json_encode($this->data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+            echo json_encode($this->data, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES);
         }
         $this->data = null;
+    }
+
+    public function toJson(): string
+    {
+        return json_encode($this->data, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES | \JSON_OBJECT_AS_ARRAY | \JSON_THROW_ON_ERROR | \JSON_UNESCAPED_LINE_TERMINATORS);
     }
 
     /**

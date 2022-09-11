@@ -5,7 +5,8 @@ declare(strict_types=1);
 require_once __DIR__ . "/../vendor/autoload.php";
 
 use Dotenv\Dotenv;
-use NTNUI\Swimming\Util\Response;
+use Maknz\Slack\Client;
+use NTNUI\Swimming\Util\Router;
 use NTNUI\Swimming\Util\Settings;
 
 error_reporting(E_ALL);
@@ -25,49 +26,31 @@ $dotenv->required(
         "DB_DATABASE",
         "BASE_URL",
         "LICENSE_PRODUCT_HASH",
+        "SLACK_ENABLE",
+        "SLACK_WEBHOOK_URL",
+        "SLACK_CHANNEL_CRASH",
+        "SLACK_CHANNEL_STATUS",
+        "SLACK_USERNAME",
     ]
 )->notEmpty();
 
 // Load settings and environments
 $settings = Settings::getInstance(__DIR__ . "/../settings.json");
-$settings->testSettings();
+// uncomment following line to test configuration.
+// $settings->testSettings();
 $settings->initSession();
-$args = array_filter(array_reverse(explode("/", $_SERVER["REQUEST_URI"])));
 
-$page = array_pop($args);
+$router = new Router(
+    requestMethod: $_SERVER["REQUEST_METHOD"],
+    request: $_REQUEST,
+    pathIndexHtml: __DIR__ . "/../public/index.html",
+    slack: new Client([$_ENV["SLACK_WEBHOOK_URL"]], [
+        "username" => $_ENV["SLACK_USERNAME"],
+        "channel" => $_ENV["SLACK_CHANNEL_STATUS"],
+        "link_names" => true
+    ]),
+);
 
-if ($page !== "api") {
-    echo file_get_contents(__DIR__ . "/../public/index.html");
-    return;
-}
-
-// handle api request
-
-$service = array_pop($args);
-$validEndpoints = str_replace(".php", "", str_replace(__DIR__ . "/Api/", "", glob(__DIR__ . "/Api/*.php")));
-$validEndpoints = array_map(fn ($endpoint) => lcfirst($endpoint), $validEndpoints);
-// $service might contain get arguments like /api/service?foo=bar&hello=world
-
-
-// what if $service does not exists? eg GET /api/
-$questionMarkPos = strpos($service, "?");
-if ($questionMarkPos !== false) {
-    $service = substr($service, 0, $questionMarkPos);
-} // we don't need to parse get arguments since they are already available through $_GET
-
-if (!in_array($service, $validEndpoints)) {
-    $response = new Response();
-    $response->code = Response::HTTP_NOT_FOUND;
-    $response->data = [
-        "error" => true,
-        "success" => false,
-        "message" => "please select a valid endpoint",
-        "currentEndpoint" => $service,
-        "validEndpoints" => $validEndpoints,
-    ];
-    $response->sendJson();
-    return;
-}
-$file = "/Api/" . ucfirst($service) . ".php";
-require_once __DIR__ . $file;
+// Note: this function always returns index.html unless request uri is pointing to the API then it always returns a valid json object.
+$router->run($_SERVER["REQUEST_URI"])->sendJson();
 return;

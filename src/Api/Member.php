@@ -19,109 +19,80 @@ namespace NTNUI\Swimming\Api;
  */
 
 use NTNUI\Swimming\Exception\Api\ApiException;
-use NTNUI\Swimming\Exception\Api\AuthenticationException;
+use NTNUI\Swimming\Util;
 use NTNUI\Swimming\Util\Authenticator as Auth;
-use NTNUI\Swimming\Util\Member;
+use NTNUI\Swimming\Util\Endpoint;
 use NTNUI\Swimming\Util\Response;
 
-global $args;
-$response = new Response();
+class Member implements Endpoint
+{
+    public static function run(string $requestMethod, array $args, array $request): Response
+    {
+        $response = new Response();
 
-try {
-    $memberId = array_pop($args);
-    $action = array_pop($args);
-    $arg2 = array_pop($args);
+        $response->code = Response::HTTP_OK;
+        $response->data = [
+            "success" => true,
+            "error" => false,
+        ];
 
-    $response->data = match ($_SERVER["REQUEST_METHOD"]) {
-        "GET" => match ($memberId) {
-            // * GET /api/member/
-            NULL => Auth::protect(
-                protectedFunction: fn () => Member::getAllAsArray()
-            ),
+        $memberId = array_pop($args);
+        $response->data =  match ($requestMethod) {
+            "GET" => match ($memberId) {
+                // * GET /api/member/
+                NULL => Auth::protect(
+                    protectedFunction: fn () => Util\Member::getAllAsArray()
+                ),
 
-            // * GET /api/member/{memberId}
-            (string)(int)$memberId => Auth::protect(
-                protectedFunction: fn () => Member::fromId((int)$memberId)
-            )->toArray(),
+                // * GET /api/member/{memberId}
+                (string)(int)$memberId => Auth::protect(
+                    protectedFunction: fn () => Util\Member::fromId((int)$memberId)
+                )->toArray(),
 
-            // * GET /api/member/pending
-            "pending" => Auth::protect(
-                protectedFunction: fn () => Member::getAllInactiveAsArray()
-            ),
+                // * GET /api/member/pending
+                "pending" => Auth::protect(
+                    protectedFunction: fn () => Util\Member::getAllInactiveAsArray()
+                ),
 
-            // * GET /api/member/active
-            "active" => Auth::protect(
-                protectedFunction: fn () => Member::getAllActiveAsArray()
-            ),
+                // * GET /api/member/active
+                "active" => Auth::protect(
+                    protectedFunction: fn () => Util\Member::getAllActiveAsArray()
+                ),
 
-            default => throw ApiException::endpointDoesNotExist(),
-        },
-        "POST" => match ($memberId) {
-            // * POST /api/member
-            NULL => Member::enroll(Response::getJsonInput()),
+                default => throw ApiException::endpointDoesNotExist(),
+            },
+            "POST" => match ($memberId) {
+                // * POST /api/member
+                NULL => Util\Member::enroll(Response::getJsonInput()),
 
-            // * POST /api/member/{memberId}/approve
-            (string)(int)$memberId . "/approve" => Auth::protect(
-                protectedFunction: fn () => Member::enrollmentApproveHandler((int)$memberId)
-            ),
+                // * POST /api/member/{memberId}/approve
+                (string)(int)$memberId . "/approve" => Auth::protect(
+                    protectedFunction: fn () => Util\Member::enrollmentApproveHandler((int)$memberId)
+                ),
 
-            // * POST /api/member/{memberId}/licenseForwarded
-            (string)(int)$memberId . "/licenseForwarded" => Auth::protect(
-                protectedFunction: fn () => Member::licenseHandler((int)$memberId)
-            ),
+                // * POST /api/member/{memberId}/licenseForwarded
+                (string)(int)$memberId . "/licenseForwarded" => Auth::protect(
+                    protectedFunction: fn () => Util\Member::licenseHandler((int)$memberId)
+                ),
 
-            default => throw ApiException::endpointDoesNotExist(),
-        },
-        "PATCH" => match ($memberId) {
-            // * PATCH /api/member/{memberId}/volunteering/{bool}
-            (string)(int)$memberId . "/volunteering/" => Auth::protect(
-                protectedFunction: fn () => Member::fromId((int)$memberId)->patchHandler(Response::getJsonInput())
-            ),
+                default => throw ApiException::endpointDoesNotExist(),
+            },
+            "PATCH" => match ($memberId) {
+                // * PATCH /api/member/{memberId}/volunteering/{bool}
+                (string)(int)$memberId . "/volunteering/" => Auth::protect(
+                    protectedFunction: fn () => Util\Member::fromId((int)$memberId)->patchHandler(Response::getJsonInput())
+                ),
 
-            // * PATCH /api/member/{memberId}/cin/{cin}
-            (string)(int)$memberId . "/cin/" => Auth::protect(
-                protectedFunction: fn () => Member::fromId((int)$memberId)->patchHandler(Response::getJsonInput())
-            ),
+                // * PATCH /api/member/{memberId}/cin/{cin}
+                (string)(int)$memberId . "/cin/" => Auth::protect(
+                    protectedFunction: fn () => Util\Member::fromId((int)$memberId)->patchHandler(Response::getJsonInput())
+                ),
 
-            default => throw ApiException::endpointDoesNotExist(),
-        },
-        default => throw ApiException::methodNotAllowed(),
-    };
-
-    $response->code = empty($response->data) ? Response::HTTP_NOT_FOUND : Response::HTTP_OK;
-} catch (AuthenticationException | ApiException $ex) {
-    $response->code = $ex->getCode();
-    $response->data = [
-        "success" => false,
-        "error" => true,
-        "message" => $ex->getMessage(),
-    ];
-    if (boolval(filter_var($_ENV["DEBUG"], FILTER_VALIDATE_BOOLEAN))) {
-        $response->data["message"] = $ex->getMessage();
-        $response->data["code"] = $ex->getCode();
-        $response->data["file"] = $ex->getFile();
-        $response->data["line"] = $ex->getLine();
-        $response->data["args"] = $args;
-        $response->data["backtrace"] = $ex->getTrace();
-    }
-} catch (\Throwable $ex) {
-    // TODO: import some logging solution
-    $response->code = Response::HTTP_INTERNAL_SERVER_ERROR;
-    $response->data = [
-        "success" => false,
-        "error" => true,
-        "message" => "internal server error",
-    ];
-    if (boolval(filter_var($_ENV["DEBUG"], FILTER_VALIDATE_BOOLEAN))) {
-        $response->data["message"] = $ex->getMessage();
-        $response->data["code"] = $ex->getCode();
-        $response->data["file"] = $ex->getFile();
-        $response->data["line"] = $ex->getLine();
-        $response->data["args"] = $args;
-        $response->data["exception_class"] = get_class($ex);
-        $response->data["backtrace"] = $ex->getTrace();
+                default => throw ApiException::endpointDoesNotExist(),
+            },
+            default => throw ApiException::methodNotAllowed(),
+        };
+        $response->code = empty($response->data) ? Response::HTTP_NOT_FOUND : Response::HTTP_OK;
+        return $response;
     }
 }
-
-$response->sendJson();
-return;

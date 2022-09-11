@@ -13,67 +13,52 @@ use Stripe\Webhook;
 use Stripe\PaymentIntent;
 use NTNUI\Swimming\Util\Order;
 use NTNUI\Swimming\Util\Member;
+use NTNUI\Swimming\Util\Endpoint;
 use NTNUI\Swimming\Util\Response;
 use NTNUI\Swimming\Util\Settings;
 use libphonenumber\PhoneNumberUtil;
 use NTNUI\Swimming\Util\OrderStatus;
+use NTNUI\Swimming\Exception\Api\ApiException;
 
-$response = new Response();
-global $args;
-try {
-    if (\NTNUI\Swimming\Util\argsURL("SERVER", "REQUEST_METHOD") !== "POST") {
-        throw new \Exception("accepting only post methods");
-    }
-    $secret = $_ENV["STRIPE_SIGNING_KEY"];
-    $data = file_get_contents("php://input");
-    if ($data === false) {
-        throw new \Exception();
-    }
-    $sigHeader = \NTNUI\Swimming\Util\argsURL("SERVER", "HTTP_STRIPE_SIGNATURE");
-    if (empty($sigHeader)) {
-        throw new \InvalidArgumentException("signature invalid");
-    }
-    $event = Webhook::constructEvent(
-        $data,
-        $sigHeader,
-        $secret
-    );
+class StripeCallback implements Endpoint
+{
+    public static function run(string $requestMethod, array $args, array $request): Response
+    {
+        $response = new Response();
+        if ($requestMethod !== "POST") {
+            throw ApiException::methodNotAllowed("accepting only post methods");
+        }
+        $secret = $_ENV["STRIPE_SIGNING_KEY"];
+        $data = Response::getJsonInput();
 
-    switch ($event["type"]) {
-        case "source.canceled":
-        case "charge.failed":
-            Order::fromPaymentIntent(PaymentIntent::retrieve($event["data"]["object"]["payment_intent"]))->setOrderStatus(OrderStatus::FAILED);
-            $response->code = Response::HTTP_OK;
-            break;
-        case "charge.succeeded":
-            Order::fromPaymentIntent(PaymentIntent::retrieve($event["data"]["object"]["payment_intent"]))->setOrderStatus(OrderStatus::FINALIZED);
-            if ($event["data"]["object"]["productHash"] === Settings::getInstance()->getLicenseProductHash()) {
-                $phone = PhoneNumberUtil::getInstance()->parse($event["data"]["object"]["phone"]);
-                Member::fromPhone($phone)->approveEnrollment();
-            }
-            $response->code = Response::HTTP_OK;
-            break;
-        default:
-            $response->code = Response::HTTP_BAD_REQUEST;
-            break;
-    }
-} catch (\Throwable $ex) {
-    // TODO: import some logging solution
-    $response->code = Response::HTTP_INTERNAL_SERVER_ERROR;
-    $response->data = [
-        "success" => false,
-        "error" => true,
-        "message" => "internal server error",
-    ];
-    if (boolval(filter_var($_ENV["DEBUG"], FILTER_VALIDATE_BOOLEAN))) {
-        $response->data["message"] = $ex->getMessage();
-        $response->data["code"] = $ex->getCode();
-        $response->data["file"] = $ex->getFile();
-        $response->data["line"] = $ex->getLine();
-        $response->data["args"] = $args;
-        $response->data["exception_class"] = get_class($ex);
-        $response->data["backtrace"] = $ex->getTrace();
+        $sigHeader = \NTNUI\Swimming\Util\argsURL("SERVER", "HTTP_STRIPE_SIGNATURE");
+        if (empty($sigHeader)) {
+            throw new \InvalidArgumentException("signature invalid");
+        }
+        $event = Webhook::constructEvent(
+            $data,
+            $sigHeader,
+            $secret
+        );
+
+        switch ($event["type"]) {
+            case "source.canceled":
+            case "charge.failed":
+                Order::fromPaymentIntent(PaymentIntent::retrieve($event["data"]["object"]["payment_intent"]))->setOrderStatus(OrderStatus::FAILED);
+                $response->code = Response::HTTP_OK;
+                break;
+            case "charge.succeeded":
+                Order::fromPaymentIntent(PaymentIntent::retrieve($event["data"]["object"]["payment_intent"]))->setOrderStatus(OrderStatus::FINALIZED);
+                if ($event["data"]["object"]["productHash"] === Settings::getInstance()->getLicenseProductHash()) {
+                    $phone = PhoneNumberUtil::getInstance()->parse($event["data"]["object"]["phone"]);
+                    Member::fromPhone($phone)->approveEnrollment();
+                }
+                $response->code = Response::HTTP_OK;
+                break;
+            default:
+                $response->code = Response::HTTP_BAD_REQUEST;
+                break;
+        }
+        return $response;
     }
 }
-
-$response->sendJson();

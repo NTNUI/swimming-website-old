@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace NTNUI\Swimming\Util;
 
+use Exception;
 use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Exception\Api\UserException;
 use Webmozart\Assert\Assert;
