@@ -25,7 +25,9 @@ services:
             - ./.env:/var/www/localhost/htdocs/.env:ro
             - ./docker/app/conf/.htaccess:/var/www/localhost/htdocs/.htaccess:ro
             - ./docker/app/conf/httpd.conf:/etc/apache2/httpd.conf:ro
+            - ./docker/app/conf/.well-known:/var/www/localhost/htdocs/.well-known:ro
             - ./docker/app/conf/settings.json:/var/www/localhost/htdocs/settings.json:ro
+            - ./docker/app/conf/robots.txt:/var/www/localhost/htdocs/robots.txt:ro
             - ./docker/app/conf/ssl.conf:/etc/apache2/conf.d/ssl.conf:ro
             - ./docker/storage/app/img:/var/www/localhost/htdocs/runtimeData/img
             - ./docker/storage/app/init/store/img/31e61c8253b54cdde3b9.jpg:/var/www/localhost/htdocs/runtimeData/img/31e61c8253b54cdde3b9.jpg

@@ -1,0 +1,7 @@
+# nothing interesting there
+User-agent: Googlebot
+Disallow: /admin
+
+# Store has dynamic content
+User-agent: Googlebot
+Disallow: /store

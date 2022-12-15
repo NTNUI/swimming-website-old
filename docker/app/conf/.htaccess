@@ -1,27 +1,38 @@
-# Block file listing in the web server
+# Disable directory listing
 Options All -Indexes
 
-# Allow listing of src/index.php and all files in public directory
-DirectoryIndex src/index.php public/*
+RewriteEngine On
 
-# Logging
+ErrorDocument 403 /public/404.html
+ErrorDocument 404 /public/404.html
+
+# Redirect all HTTP requests to HTTPS
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# This stops recursive rewrite loops
+RewriteCond %{ENV:REDIRECT_STATUS} 200
+RewriteRule ^ - [L]
+
+# Allow access to all files inside /public if requested file exists
+RewriteCond %{DOCUMENT_ROOT}/public%{REQUEST_URI} -f
+RewriteRule ^(.*)$ /public/$1 [L]
+
+# Allow access to well-known files if they exists
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^.well-known/(.*)$ /.well-known/$1 [L]
+
+# Allow access to robots.txt if it exists
+RewriteCond %{REQUEST_FILENAME} -f
+RewriteRule ^robots.txt$ /robots.txt [L]
+
+# Enable logging
 php_flag log_errors on
 php_flag display_startup_errors off
 php_flag html_errors off
 php_flag ignore_repeated_errors on
 
-RewriteEngine On
+# FIXME: Since all requests are thrown in here as a fallback there needs to be some logic to handle 404.
 
-# Force ssl
-RewriteCond %{HTTPS} off
-RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-# Allow access to all files inside public.
-RewriteRule ^public/ - [L]
-RewriteCond public/$0 -F
-RewriteRule .* public/$0 [L]
-
-# TODO: somehow allow access to all images inside runtimeData/img
-
-# Rewrite all requests to src/index.php
-RewriteRule ^([^?]*)$ src/index.php [NC,L,QSA]
+# Route all other requests to index.php
+RewriteRule ^(.*)$ src/index.php [L]

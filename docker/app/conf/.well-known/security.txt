@@ -1,0 +1,13 @@
+# Security.txt
+
+Contact: mailto:svomming-teknisk@ntnui.no
+Contact: mailto:sprint@ntnui.no
+
+Expires: 2023-02-28T00:00:00.000Z
+
+Preferred-Language: en,no
+
+# Security policy:
+# We don't discourage hackers and pentesters but this is not our server so please don't fuck with it.
+# Clone the repository https://github.com/NTNUI/org.ntnu.svommer and build the docker image locally.
+# Please open a PR if you find anything <3.
