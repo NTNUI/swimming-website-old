@@ -21,16 +21,18 @@ use NTNUI\Swimming\Exception\Api\AuthenticationException;
 class Router
 {
 
-    public function __construct(public readonly string $requestMethod,
-    public readonly array $request,
-    private Client $slack,
-    public readonly string $pathIndexHtml,
-    )
-    {
+    public function __construct(
+        public readonly string $requestMethod,
+        public readonly array $request,
+        private Client $slack,
+        public readonly string $pathIndexHtml,
+        public readonly string $path404Html,
+    ) {
     }
 
     public static function getValidEndpoints(): array
     {
+        // remove .php extension
         $validEndpoints = str_replace(".php", "", str_replace(__DIR__ . "/../Api/", "", glob(__DIR__ . "/../Api/*.php")));
         $validEndpoints = array_map(fn ($endpoint) => lcfirst($endpoint), $validEndpoints);
         return $validEndpoints;
@@ -52,10 +54,11 @@ class Router
         $page = array_pop($args);
 
         if ($page !== "api") {
+            // TODO: check if file exists or something like that before returning a 404.
             echo file_get_contents($this->pathIndexHtml);
             exit;
         }
-        
+
         $service = array_pop($args);
 
         // what if $service does not exists? eg GET /api/
@@ -104,7 +107,7 @@ class Router
                 $file = str_replace($_SERVER["DOCUMENT_ROOT"] . "/", "", $ex->getFile());
                 $attachment = new Attachment(
                     [
-                        'text' => ':warning: Uncaught exception',
+                        'text' => ':error: Uncaught exception',
                         'color' => 'danger',
                         "fields" => [
                             [

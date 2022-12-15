@@ -44,13 +44,13 @@ $router = new Router(
     requestMethod: $_SERVER["REQUEST_METHOD"],
     request: $_REQUEST,
     pathIndexHtml: __DIR__ . "/../public/index.html",
+    path404Html: __DIR__ . "/../public/404.html",
     slack: new Client([$_ENV["SLACK_WEBHOOK_URL"]], [
         "username" => $_ENV["SLACK_USERNAME"],
         "channel" => $_ENV["SLACK_CHANNEL_STATUS"],
         "link_names" => true
     ]),
 );
-
 // Note: this function always returns index.html unless request uri is pointing to the API then it always returns a valid json object.
 $router->run($_SERVER["REQUEST_URI"])->sendJson();
 return;
