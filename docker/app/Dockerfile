@@ -13,6 +13,8 @@ RUN apk add \
     php81-embed \
     php81-session \
     php81-json \
+    php81-pdo \
+    php81-pdo_mysql \
     php81-mysqli \
     php81-iconv \
     php81-curl \

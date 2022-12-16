@@ -14,7 +14,9 @@
         "vlucas/phpdotenv": "^5.4",
         "lukasoppermann/http-status": "^3.2",
         "webmozart/assert": "^1.11",
-        "maknz/slack": "^1.7"
+        "maknz/slack": "^1.7",
+        "illuminate/database": "^9.44",
+        "nesbot/carbon": "^2.64"
     },
     "license": "GPLv3",
     "authors": [
@@ -46,6 +48,8 @@
     },
     "require-dev": {
         "phpstan/phpstan-webmozart-assert": "^1.2",
-        "friendsofphp/php-cs-fixer": "^3.10"
+        "friendsofphp/php-cs-fixer": "^3.10",
+        "nunomaduro/larastan": "^2.2",
+        "phpstan/phpstan": "^1.9"
     }
 }

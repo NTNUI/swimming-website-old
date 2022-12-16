@@ -1,13 +1,18 @@
 <?php
 
 declare(strict_types=1);
-
 require_once __DIR__ . "/../vendor/autoload.php";
 
+use Carbon\Carbon;
 use Dotenv\Dotenv;
 use Maknz\Slack\Client;
 use NTNUI\Swimming\App\Router;
 use NTNUI\Swimming\App\Settings;
+use Illuminate\Database\Capsule\Manager as Capsule;
+use NTNUI\Swimming\App\Models\Member;
+use NTNUI\Swimming\App\Models\Product;
+use NTNUI\Swimming\App\Models\User;
+use NTNUI\Swimming\Enum\Gender;
 
 error_reporting(E_ALL);
 ini_set("display_errors", "0");
@@ -39,6 +44,23 @@ $settings = Settings::getInstance(__DIR__ . "/../settings.json");
 // uncomment following line to test configuration.
 // $settings->testSettings();
 $settings->initSession();
+
+
+$db_params = [
+    "username" => $_ENV["DB_USERNAME"],
+    "password" => $_ENV["DB_PASSWORD"],
+    "database" => $_ENV["DB_DATABASE"],
+    "host" => $_ENV["DB_HOSTNAME"],
+    "driver" => "mysql",
+    "charset" => "utf8",
+    "collation" => "utf8_unicode_ci",
+    "prefix" => "",
+];
+$capsule = new Capsule();
+
+$capsule->addConnection($db_params);
+$capsule->setAsGlobal();
+$capsule->bootEloquent();
 
 $router = new Router(
     requestMethod: $_SERVER["REQUEST_METHOD"],
