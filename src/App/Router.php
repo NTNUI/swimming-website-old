@@ -66,7 +66,7 @@ class Router
         if ($questionMarkPos !== false) {
             $service = substr($service, 0, $questionMarkPos);
         } // we don't need to parse get arguments since they are already available through $_GET
-
+        $response = new Response();
         try {
             $response = match ($service) {
                 "auth" => Auth::run($this->requestMethod, $args, $this->request),
@@ -77,7 +77,9 @@ class Router
                 "stripeCallback" => StripeCallback::run($this->requestMethod, $args, $this->request),
                 default => throw ApiException::endpointDoesNotExist(),
             };
-            $response->code = empty($response->data) ? Response::HTTP_NOT_FOUND : Response::HTTP_OK;
+            if (empty($response->code)) {
+                $response->code = empty($response->data) ? Response::HTTP_NOT_FOUND : Response::HTTP_OK;
+            }
         } catch (AuthenticationException | ApiException $ex) {
             $response->code = $ex->getCode();
             $response->data = [

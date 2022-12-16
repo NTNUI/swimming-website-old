@@ -21,7 +21,7 @@ class Response implements Httpstatuscodes
         Assert::true(isset($this->code), "response code not set");
         http_response_code($this->code);
         header($_SERVER["SERVER_PROTOCOL"] . " $this->code " . ((new Httpstatus())->getReasonPhrase($this->code)));
-        if (!empty($this->data)) {
+        if (!empty($this->data) || $this->data === []) {
             echo json_encode($this->data, \JSON_PRETTY_PRINT | \JSON_UNESCAPED_SLASHES);
         }
         $this->data = null;
