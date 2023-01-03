@@ -61,7 +61,7 @@ class Member extends Model
 
         $member = self::new();
         $member->name = $enrollment_data["name"];
-        $member->birth_date = Carbon::createFromFormat("YYYY-MM-DD", $enrollment_data["birth_date"]);
+        $member->birth_date = Carbon::createFromFormat("Y-m-d", $enrollment_data["birth_date"]);
         $member->phone = $enrollment_data["phone"];
         $member->gender = $enrollment_data["gender"];
         $member->email = $enrollment_data["email"];

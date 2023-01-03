@@ -3,16 +3,11 @@
 declare(strict_types=1);
 require_once __DIR__ . "/../vendor/autoload.php";
 
-use Carbon\Carbon;
 use Dotenv\Dotenv;
 use Maknz\Slack\Client;
 use NTNUI\Swimming\App\Router;
 use NTNUI\Swimming\App\Settings;
 use Illuminate\Database\Capsule\Manager as Capsule;
-use NTNUI\Swimming\App\Models\Member;
-use NTNUI\Swimming\App\Models\Product;
-use NTNUI\Swimming\App\Models\User;
-use NTNUI\Swimming\Enum\Gender;
 
 error_reporting(E_ALL);
 ini_set("display_errors", "0");

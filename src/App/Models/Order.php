@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
  * @property int $product_id
  * @property string $name
  * @property string $email
- * @property string? $phone
+ * @property string|NULL $phone
  * @property string $intent_id
  * @property OrderStatus $order_status
  * @property string $comment

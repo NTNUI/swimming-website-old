@@ -23,10 +23,12 @@ enum Gender: string
     {
         return match (strtolower($gender)) {
             "male" => Gender::Male,
+            "m" => Gender::Male,
             "female" => Gender::Female,
+            "f" => Gender::Female,
             // "apache attack helicopter" => Gender::ApacheAttackHelicopter,
 
-            default => throw new \InvalidArgumentException("gender object can only be created from 'Male' or 'Female'. Got: " . $gender),
+            default => throw new \InvalidArgumentException("gender object can only be created from 'Male' , 'Female' 'm' or 'f'. Got: " . $gender),
             // default => throw new \InvalidArgumentException("gender object can only be created from 'Male', 'Female' or 'Apache Attack Helicopter'. Got: " . $gender),
         };
     }

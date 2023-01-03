@@ -47,28 +47,35 @@ class User implements Endpoint
                 NULL => UserModel::all()->toArray(),
 
                 // * GET /api/user/{userId}
-                (string)(int)$userId => UserModel::where("id", (int)$userId),
+                (string)(int)$userId => UserModel::where("id", (int)$userId)->get()->toArray(),
 
                 default => throw ApiException::endpointDoesNotExist(),
             },
             "POST" => match ($userId) {
                 // * POST /api/user
-                NULL => Authenticator::protect(fn () => Db\User::postHandler(Response::getJsonInput())),
+                NULL => (function () {
+                    UserModel::new_from_json(Response::getJsonInput());
+                    return [];
+                })(),
 
                 default => throw ApiException::endpointDoesNotExist(),
             },
             "PATCH" => match ($userId) {
                 // * PATCH /api/user/{userId}
-                (string)(int)$userId => Authenticator::protect(fn () => Db\User::fromId((int)$userId)->patchHandler(Response::getJsonInput())),
+                (string)(int)$userId => UserModel::where("id", (int)$userId)->update([
+                    "name" => Response::getJsonInput()["name"],
+                    "username" => Response::getJsonInput()["username"],
+                    "password_hash" => password_hash(Response::getJsonInput()["password"], \PASSWORD_DEFAULT),
+                ]) || [],
 
                 default => throw ApiException::endpointDoesNotExist(),
             },
-                // "DELETE" => match ($userId) {
-                // // * DELETE /api/user/{userId}
-                // (string)(int)$userId => Authenticator::protect(fn () => Util\User::fromId((int)$userId)->deleteHandler()),
-                //
-                // 	default => throw ApiException::endpointDoesNotExist(),
-                // },
+            "DELETE" => match ($userId) {
+                // * DELETE /api/user/{userId}
+                (string)(int)$userId => UserModel::where("id", (int)$userId)->delete() || [],
+
+                default => throw ApiException::endpointDoesNotExist(),
+            },
 
             default => throw ApiException::methodNotAllowed(),
         };

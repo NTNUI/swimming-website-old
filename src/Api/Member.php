@@ -19,10 +19,11 @@ namespace NTNUI\Swimming\Api;
  */
 
 use Carbon\Carbon;
+use NTNUI\Swimming\App\Log;
 use NTNUI\Swimming\App\Response;
-use NTNUI\Swimming\App\Models\Member as MemberModel;
-use NTNUI\Swimming\Exception\Api\ApiException;
 use NTNUI\Swimming\Interface\Endpoint;
+use NTNUI\Swimming\Exception\Api\ApiException;
+use NTNUI\Swimming\App\Models\Member as MemberModel;
 
 class Member implements Endpoint
 {
@@ -89,7 +90,9 @@ class Member implements Endpoint
                     // TODO: protect endpoint
                     // * PATCH /api/member/{memberId}/volunteering/{bool}
                     "volunteering" => (function ($memberId, $args) {
+                        Log::message("volunteering", __FILE__, __LINE__);
                         match (array_pop($args)) {
+                            // FIXME: I hate this
                             "true" => MemberModel::where("id", (int)$memberId)?->update(["have_volunteered" => true]),
                             "1" => MemberModel::where("id", (int)$memberId)?->update(["have_volunteered" => true]),
                             "TRUE" => MemberModel::where("id", (int)$memberId)?->update(["have_volunteered" => true]),

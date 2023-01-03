@@ -53,7 +53,7 @@ class Order
         if (!$product->isAvailable()) {
             throw ProductException::productNotAvailable("product is not available for purchase");
         }
-        if (empty($customer->name)) {
+        if (empty($customer->fullName)) {
             throw ProductException::missingCustomerDetails("name is missing");
         }
         if (empty($customer->phone) && $product->requirePhone) {
