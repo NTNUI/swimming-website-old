@@ -8,7 +8,7 @@ class TestUrlRewrite(unittest.TestCase):
 
     BASE = "https://127.0.0.1/"
 
-    def get_response_and_content(self, input_file, url):
+    def get_response_and_content(self, input_file: str, url: str) -> tuple[requests.Response, str]:
         file = open(input_file)
         content = file.read()
         file.close()
@@ -36,6 +36,7 @@ class TestUrlRewrite(unittest.TestCase):
             ("../docker/app/conf/.htaccess", ".htaccess"),
             ("../docker/app/conf/.well-known/.htaccess", ".well-known/.htaccess"),
             ("../.env", ".env"),
+            ("../.env.example", ".env.example"),
         ]
 
         for test_case in deny_list:
