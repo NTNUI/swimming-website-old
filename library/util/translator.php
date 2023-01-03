@@ -30,6 +30,7 @@ class Translator
 			if (!$logged) {
 				// some pages look up translation multiple times resulting in multiple log messages
 				log::message("Warning: Requesting a non existing page: $page", __FILE__, __LINE__);
+				$logged = true;
 			}
 			return;
 		}
