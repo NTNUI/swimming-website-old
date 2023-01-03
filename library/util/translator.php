@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 class Translator
@@ -25,7 +26,11 @@ class Translator
 		}
 
 		if (!file_exists($file)) {
-			log::message("Warning: Requesting a non existing page: $page", __FILE__, __LINE__);
+			static $logged = false;
+			if (!$logged) {
+				// some pages look up translation multiple times resulting in multiple log messages
+				log::message("Warning: Requesting a non existing page: $page", __FILE__, __LINE__);
+			}
 			return;
 		}
 
