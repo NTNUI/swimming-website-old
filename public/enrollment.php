@@ -133,7 +133,6 @@ if (!enrollment_is_active()) {
 		license_product.image = BASEURL + "/img/store/" + license_product.image;
 	});
 </script>
-<!-- <script defer type="text/javascript" src="https://www.google.com/recaptcha/api.js"></script> -->
 <script type='module' src='<?php print $settings["baseurl"];?>/js/enrollment.js'></script>
 <?php 
 // style_and_script(__FILE__);

@@ -1,11 +1,12 @@
 <?php
+
 declare(strict_types=1);
 
 require_once("library/util/store.php");
 require_once("library/util/api.php");
 
 define("DEBUG", false);
-function handle_error(Throwable $th, int $code = HTTP_INTERNAL_SERVER_ERROR) 
+function handle_error(Throwable $th, int $code = HTTP_INTERNAL_SERVER_ERROR)
 {
 	http_response_code($code);
 	if (DEBUG) {
@@ -44,7 +45,7 @@ try {
 	$response = "error";
 
 	// 3D secure charge
-	if (isset($data->{"payment_intent_id"})) {	
+	if (isset($data->{"payment_intent_id"})) {
 		$intent = $store->get_intent_by_id($data->payment_intent_id);
 		$intent->confirm();
 
@@ -63,15 +64,14 @@ try {
 				"message" => "Purchase succeeded.\nYou've been charged " . $intent["amount"] / 100 . " NOK"
 			];
 		} else {
-			log::message("Error: payment intent with id: ". $intent["id"] . "returned unexpected value.", __FILE__, __LINE__);
+			log::message("Error: payment intent with id: " . $intent["id"] . "returned unexpected value.", __FILE__, __LINE__);
 			throw new Exception("Unexpected payment intent status");
 		}
 
-	// non 3d secure charge
+		// non 3d secure charge
 	} elseif (isset($data->{"payment_method_id"})) {
 		// TODO: refactor create_order to accept order object
-		$response = $store->create_order($data->product_hash, $data->payment_method_id, $data->customer, $data->comment);
-
+		$response = $store->create_order($data->product_hash, $data->payment_method_id, $data->customer, $data->comment ?? NULL);
 	} else {
 		// todo: elseif customer and product attached: create a new paymentIntent, return client secret
 
@@ -92,13 +92,11 @@ try {
 	log::message($e->getError()->message . " Payment intent: " . $e->getError()->payment_intent->id, $e->getFile(), $e->getLine());
 	log::message($e->getTraceAsString(), $e->getFile(), $e->getLine());
 	handle_error($e, 400);
-	
 } catch (\StoreException $e) {
 	// Expected client errors like product not found and stuff like that
 	log::message($e->getMessage(), __FILE__, __LINE__);
 	log::message($e->getTraceAsString(), __FILE__, __LINE__);
 	handle_error($e, 400);
-
 } catch (Exception $e) {
 	// Unexpected errors on server
 	log::message($e->getMessage(), __FILE__, __LINE__);

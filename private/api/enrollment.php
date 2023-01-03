@@ -44,18 +44,6 @@ function get_age(DateTime $birthDate): int
     return $interval->y;
 }
 
-function valid_captcha(): bool
-{
-    global $settings;
-    $secret = $_ENV["GOOGLE_CAPTCHA_KEY"];
-    $token = $_POST['g-recaptcha-response'];
-    $url = "https://www.google.com/recaptcha/api/siteverify?secret=$secret&response=$token";
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    $verify = curl_exec($ch);
-    return json_decode($verify)->success;
-}
-
 header("Content-Type: application/json; charset=UTF-8");
 $input = [];
 
@@ -66,13 +54,6 @@ if ($_SERVER["REQUEST_METHOD"] !== "POST") {
     print(json_encode(["error" => true, "message" => "Method " . $_SERVER["REQUEST_METHOD"] . " is not accepted. This endpoint only accepts POST requests."]));
     return;
 }
-/*
-if(!valid_captcha()){
-    http_response_code(HTTP_INVALID_REQUEST);
-    print(json_encode(["error" => true, "message" => "captcha failed."]));
-    return;
-}
-*/
 
 // check for missing parameters
 foreach (["name", "isMale", "phone", "birthDate", "zip", "address", "email"] as $param) {
