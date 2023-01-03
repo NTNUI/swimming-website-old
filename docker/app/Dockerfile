@@ -29,10 +29,10 @@ COPY img ./img
 COPY translations ./translations
 
 RUN rm index.html && \
-    mkdir sessions
+    mkdir sessions log
 # 100:101 is apache user
-RUN chown -R 100:101 sessions translations img
-RUN chmod -R 775 sessions translations img
+RUN chown -R 100:101 sessions translations img log
+RUN chmod -R 775 sessions translations img log
 
 # Logs are stored here. Faster access to logs when "docker exec -it app /bin/ash"
 WORKDIR /var/log/apache2/

@@ -31,7 +31,8 @@ $dotenv->required(
 		'STRIPE_SIGNING_KEY',
 		"DB_HOSTNAME",
 		"DB_USERNAME",
-		"DB_PASSWORD"
+		"DB_PASSWORD",
+		"LOG_NOT_FOUND_PATH",
 	]
 )->notEmpty();
 
@@ -85,8 +86,9 @@ if (isValidURL($page)) {
 			return;
 	}
 }
-
-// Illegal request, page not found
+// Illegal request, page not found.
+$timestamp = date('Y-m-d H:i:s');
+error_log("[$timestamp] " . $_SERVER["REQUEST_URI"] . "\n", 3, $_ENV["LOG_NOT_FOUND_PATH"]);
 require_once("library/templates/header.php");
 require_once("library/templates/not_found.php");
 require_once("library/templates/footer.php");

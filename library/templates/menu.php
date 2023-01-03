@@ -5,11 +5,10 @@ declare(strict_types=1);
 global $t, $settings, $page;
 $t->load_translation('menu');
 
-function menu_entry($url, $name = '')
+function menu_entry($name)
 {
 	global $t;
-	if ($name == '') $name = $url;
-	$link = $t->get_url($url);
+	$link = $t->get_url($name);
 	$title = $t->get_translation($name, 'menu');
 	print("<li><a href=$link>$title</a></li>");
 }

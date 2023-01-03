@@ -11,10 +11,13 @@ class Translator
 
 	function __construct(string $page, string $lang = "no", string $dir = "translations")
 	{
-		$this->page = $page;
 		$this->language = $lang;
 		$this->directory = $dir;
-		$this->load_translation($page);
+		if (file_exists("public/$page.php")) {
+			// Ignore construction if page does not exist
+			$this->page = $page;
+			$this->load_translation($page);
+		}
 	}
 
 	public function load_translation($page)
@@ -26,20 +29,11 @@ class Translator
 		}
 
 		if (!file_exists($file)) {
-			static $logged = false;
-			if (!$logged) {
-				// some pages look up translation multiple times resulting in multiple log messages
-				log::message("Warning: Requesting a non existing page: $page", __FILE__, __LINE__);
-				$logged = true;
-			}
+			throw new Exception("translation does not exists: $file");
 			return;
 		}
 
-		$decoded = json_decode(file_get_contents($file));
-		if ($decoded === NULL) {
-			log::message("Warning: Could not decode json file: $file, for page: $page", __FILE__, __LINE__);
-			return;
-		}
+		$decoded = json_decode(file_get_contents($file), flags: JSON_THROW_ON_ERROR);
 		$this->translations[$page] = $decoded;
 	}
 
@@ -47,7 +41,6 @@ class Translator
 	{
 		$ret = "";
 
-		$language = $this->language;
 		if ($page == "") {
 			$page = $this->page;
 		}
@@ -59,13 +52,13 @@ class Translator
 
 		// if translations for this page is still not loaded return.
 		if (!isset($this->translations[$page])) {
-			// loading translation for a file that does not exist
-			return "";
+			throw new Exception("Requesting a non existing page: $page");
 		}
 
 		$translations_this_page = $this->translations[$page];
 
 		// try to get requested language
+		$language = $this->language;
 		if (property_exists($translations_this_page->$language, $key)) {
 			$ret = $translations_this_page->$language->$key;
 		}
@@ -78,8 +71,7 @@ class Translator
 		}
 
 		if ($ret == "") {
-			log::message("Warning: page: $page does not have translations for $key", __FILE__, __LINE__);
-			$ret = "";
+			throw new Exception("page: $page does not have translations for $key");
 		}
 
 		// Expand array keys

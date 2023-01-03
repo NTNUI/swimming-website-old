@@ -22,7 +22,7 @@ function load_settings($path){
 
 function test_settings(){
     // test access
-    foreach(["img/store", "/tmp", "sessions", "translations"] as $dir){
+    foreach(["img/store", "/tmp", "sessions", "translations", "log"] as $dir){
         if (!is_writable($dir)){
             log::die("$dir is not writable", __FILE__, __LINE__);
         }
