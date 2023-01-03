@@ -107,9 +107,14 @@ addLoadEvent(() => {
             }
             display_modal("Loading", "Attempting to empty your bank account", "", "", "wait");
             const chargeResponse = await store.charge(order);
-            await display_modal("Success", chargeResponse.message, "Accept", "", "success");
-            await display_modal("Welcome as a new member!", "Together we will make Norwegian swimming more fun.\nSprut nice 💦💦", "Accept", "", "success");
-            // window.location.href = BASEURL;
+            let message = chargeResponse.message;
+            message += "\n\n";
+            message += "Together we will make Norwegian swimming more fun.\nSprut nice 💦💦\n\n";
+            message += "Join us on Spond!\n";
+            message += "Spond is an app widely used in NTNUI to join practices, parties, meets and many other events.\n";
+            message += "Spond is also used as an official communication channel for the group.\n";
+            await display_modal("Welcome as a new member!", message, "Continue to Spond", "", "success");
+            window.open("https://group.spond.com/HJAVO", "_blank");
         } catch (error) {
             console.error(error);
             if (typeof (error) === "object") {
