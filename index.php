@@ -87,6 +87,7 @@ if (isValidURL($page)) {
 	}
 }
 // Illegal request, page not found.
+http_response_code(404);
 $timestamp = date('Y-m-d H:i:s');
 error_log("[$timestamp] " . $_SERVER["REQUEST_URI"] . "\n", 3, $_ENV["LOG_NOT_FOUND_PATH"]);
 require_once("library/templates/header.php");
