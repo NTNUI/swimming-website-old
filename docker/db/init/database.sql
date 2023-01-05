@@ -32,16 +32,6 @@ CREATE TABLE IF NOT EXISTS `member` (
   UNIQUE KEY `CIN` (`CIN`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-CREATE TABLE IF NOT EXISTS `member_CIN` (
-  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'Row identification',
-  `hash` text NOT NULL COMMENT 'Hashed sum of stable personal data',
-  `NSF_CIN` bigint(11) NOT NULL COMMENT 'Customer Identification number for norwegian swimming federation',
-  `last_used` date NOT NULL COMMENT 'Last time this row was an active member',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `hash` (`hash`),
-  UNIQUE KEY `NSF_CIN` (`NSF_CIN`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
 CREATE TABLE IF NOT EXISTS `member_statistics` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `year` int(11) NOT NULL,

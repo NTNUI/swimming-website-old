@@ -129,13 +129,6 @@ function patch_cin(int $member_id, int $cin): void
     }
     $db->reset();
 
-    // save CIN to users hash
-    $hash = hash("sha256", $birth_date . $phone . strval($gender ? 1 : 0));
-    $db->prepare("INSERT INTO member_CIN (hash, NSF_CIN, last_used) VALUES (?, ?, NOW())");
-    $db->bind_param("si", $hash, $cin);
-    $db->execute();
-    $db->reset();
-
     // save CIN to user
     $db->prepare("UPDATE member SET cin = ? WHERE id = ?");
     $db->bind_param("ii", $cin, $member_id);

@@ -220,25 +220,6 @@ if ($result) {
 }
 $db->reset();
 
-// check for excising CIN number
-$sql = "SELECT NSF_CIN FROM member_CIN WHERE hash=?";
-$db->prepare($sql);
-$input["CIN_hash"] = hash("sha256", $input["birthDate"] . $input["phone"] . $input["isMale"]);
-$db->bind_param("s", $input["CIN_hash"]);
-$db->execute();
-$CIN = 0;
-$db->stmt->bind_result($CIN);
-$db->fetch();
-$input["CIN"] = $CIN;
-if ($CIN && !$input["dryrun"]) {
-    // update last valid date for CIN number
-    $db->stmt->close();
-    $db->prepare("UPDATE member_CIN SET last_used=NOW() WHERE NSF_CIN=?");
-    $db->bind_param("i", $CIN);
-    $db->execute();
-}
-$db->reset();
-
 // don't perform destructive actions on dryrun
 if ($input["dryrun"]) {
     goto return_response;
@@ -262,14 +243,6 @@ $surname = get_surname($input["name"]);
 $birthDate = date("Y-m-d", strtotime($input["birthDate"]));
 $db->bind_param("sssssssis", $first_name, $surname, $gender, $birthDate, $input["phone"], $input["email"], $input["address"], $input["zip"], $input["licensee"]);
 $db->execute();
-
-// update CIN number if found
-if ($input["CIN"]) {
-    $sql = "UPDATE member SET CIN=? WHERE phone=?";
-    $db->prepare($sql);
-    $db->bind_param("is", $input["CIN"], $input["phone"]);
-    $db->execute();
-}
 
 // return success
 return_response:
