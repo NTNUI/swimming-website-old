@@ -99,7 +99,7 @@ addLoadEvent(() => {
         const store = new Store(STRIPE_PUBLISHABLE_KEY, SERVER_TIME_OFFSET, LANGUAGE);
         store.init(INVENTORY_URL);
         try {
-            window.open("https://medlem.ntnui.no/groups/swomming", "_blank");
+            window.open("https://medlem.ntnui.no/groups/svomming", "_blank");
             await display_modal("NTNUI membership", "Please create an account at NTNUI and join the swimming group", "Continue to license payment", "", "success");
             // display checkout for license payment
             const order = await store.checkout(license_product, customer);
