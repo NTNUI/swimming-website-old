@@ -116,6 +116,7 @@ addLoadEvent(() => {
             message += "Spond is an app widely used in NTNUI to join practices, parties, meets and many other events.\n";
             message += "Spond is also used as an official communication channel for the group.\n";
             await display_modal("Welcome as a new member!", message, "Continue to Spond", "", "success");
+            window.open("https://ntnui.slab.com/posts/welcome-to-ntnui-swimming-💦-44w4p9pv", "_blank");
             window.open("https://group.spond.com/HJAVO", "_blank");
         } catch (error) {
             console.error(error);
