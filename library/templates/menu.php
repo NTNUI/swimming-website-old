@@ -20,9 +20,15 @@ function menu_entry($name)
 	menu_entry('activities');
 	menu_entry('enrollment');
 	menu_entry('board');
-	menu_entry('FAQ');
-	menu_entry('store');
 	?>
+	<li id='lang_switch'>
+		<a href='https://ntnui.slab.com/posts/faq-bwb8nanz'>
+			FAQ
+		</a>
+	</li>
+<?php
+menu_entry("store");
+?>
 	<li id='lang_switch'>
 		<a href='<?php print($settings["baseurl"] . ($language != 'no' ? '/' : '/en/') . $page); ?>'>
 			<?php print $t->get_translation('switchLanguage', 'menu') ?>
