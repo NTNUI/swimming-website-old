@@ -98,26 +98,36 @@ addLoadEvent(() => {
         }
         const store = new Store(STRIPE_PUBLISHABLE_KEY, SERVER_TIME_OFFSET, LANGUAGE);
         store.init(INVENTORY_URL);
+        // Note: web browsers block pop ups if they are many of them.
+        // For now it seems like the limit is two
+        // it would be better to have an actual link users would click but
+        // I don't want to implement any more features in js anymore; maybe ever.
         try {
+            // the registration process.
+            // ask users to join NTNUI swimming in ntnui membership system
+            await display_modal("NTNUI membership", "Please create an account at NTNUI and join the swimming group", "Continue to NTNUI membership", "", "success");
             window.open("https://medlem.ntnui.no/groups/svomming", "_blank");
-            await display_modal("NTNUI membership", "Please create an account at NTNUI and join the swimming group", "Continue to license payment", "", "success");
+
             // display checkout for license payment
             const order = await store.checkout(license_product, customer);
             if (order === "abort") {
-                // If user aborts the checkout customer object is not available
                 return;
             }
+
+            // try to charge the client
             display_modal("Loading", "Attempting to empty your bank account", "", "", "wait");
             const chargeResponse = await store.charge(order);
+
+            // success message
             let message = chargeResponse.message;
             message += "\n\n";
             message += "Together we will make Norwegian swimming more fun.\nSprut nice 💦💦\n\n";
-            message += "Join us on Spond!\n";
-            message += "Spond is an app widely used in NTNUI to join practices, parties, meets and many other events.\n";
-            message += "Spond is also used as an official communication channel for the group.\n";
-            await display_modal("Welcome as a new member!", message, "Continue to Spond", "", "success");
-            window.open("https://ntnui.slab.com/posts/welcome-to-ntnui-swimming-💦-44w4p9pv", "_blank");
-            window.open("https://group.spond.com/HJAVO", "_blank");
+            message += "Check out information for members!\n";
+            message += "Information in this link will always be up to date and this is the only link you'll need";
+            await display_modal("Welcome as a new member!", message, "Continue to membership information", "", "success");
+
+            // redirect to membership information
+            window.location.href = SLAB_NEW_MEMBERS_URL;
         } catch (error) {
             console.error(error);
             if (typeof (error) === "object") {
