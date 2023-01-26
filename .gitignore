@@ -1,4 +1,5 @@
 vendor
+.secrets
 translations/*
 settings/settings.json
 img/
