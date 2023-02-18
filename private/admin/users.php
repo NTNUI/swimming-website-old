@@ -95,7 +95,7 @@ function create_user(string $name, string $username, string $email)
 	}
 
 	// create user with random password
-	$random_password = substr(md5(mt_rand()), 0, 7);
+	$random_password = substr(md5(strval(mt_rand())), 0, 7);
 	Authenticator::create_user($name, $username, $random_password);
 
 	// Send mail
