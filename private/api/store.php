@@ -118,7 +118,7 @@ function handle_patch(Store &$store, string $input, Response &$response)
 				];
 				break;
 			}
-			if (!Store::order_id_exists($input_json->{"params"}->{"order_id"})) {
+			if (!Store::order_id_exists(intval($input_json->{"params"}->{"order_id"}))) {
 				$response->code = HTTP_NOT_FOUND;
 				$response->data = [
 					"error" => true,
