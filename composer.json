@@ -1,1 +1,47 @@
-docker/composer/conf/composer.json
+{
+    "name": "ntnui/swimming-webpage",
+    "description": "Web site for swimming group in NTNUI sports club in Trondheim, Norway",
+    "type": "project",
+    "config": {
+        "platform":{
+            "php":"8.1.2"
+        },
+        "allow-plugins": {
+            "phpstan/extension-installer": true
+        }
+    },
+    "require": {
+        "php": ">=8.0.0",
+        "giggsey/libphonenumber-for-php": "^8.12",
+        "stripe/stripe-php": "^10.6",
+        "vlucas/phpdotenv": "^5.4"
+    },
+    "license": "GPLv3",
+    "authors": [
+        {
+            "name": "Olav Bech Bråten",
+            "email": "olav.braaten@ntnui.no"
+        },
+        {
+            "name": "Pavel Skipenes",
+            "email": "pavel.skipenes@ntnui.no"
+        },
+        {
+            "name": "Martin Gundersen",
+            "email": "martin.gundersen@ntnui.no"
+        },
+        {
+            "name": "Karel Everaert",
+            "email": "karel.everaert@ntnui.no"
+        },
+        {
+            "name": "Sigurd Holten Bøen",
+            "email": "sigurd.boen@ntnui.no"
+        }
+    ],
+    "require-dev": {
+        "phpstan/phpstan": "^1.9",
+        "phpstan/extension-installer": "^1.2",
+        "phpstan/phpstan-deprecation-rules": "^1.1"
+    }
+}
