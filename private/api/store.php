@@ -139,7 +139,7 @@ function handle_patch(Store &$store, string $input, Response &$response)
 			}
 			$order_id = $input_json->{"params"}->{"order_id"};
 			$order_status = $input_json->{"params"}->{"order_status"};
-			$store->set_order_status($order_id, $order_status);
+			$store->set_order_status(intval($order_id), $order_status);
 			$response->code = HTTP_OK;
 			$response->data = [
 				"error" => false,
