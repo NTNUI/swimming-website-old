@@ -19,7 +19,6 @@ services:
             - 443:443
         depends_on:
             - ${DB_HOSTNAME}
-            - self_signed_certificate
         volumes:
             - ./private:/var/www/localhost/htdocs/private:ro
             - ./public:/var/www/localhost/htdocs/public:ro
@@ -34,17 +33,7 @@ services:
             - ./docker/app/conf/settings.json:/var/www/localhost/htdocs/settings/settings.json:ro
             - ./docker/app/conf/httpd.conf:/etc/apache2/httpd.conf:ro
             - ./docker/storage/vendor:/var/www/localhost/htdocs/vendor:ro
-            - ./docker/storage/self_signed_certificate/server.key:/etc/apache2/conf.d/server.key
-            - ./docker/storage/self_signed_certificate/server.crt:/etc/apache2/conf.d/server.crt
-
-    self_signed_certificate:
-        build:
-            context: ./
-            dockerfile: ./docker/self_signed_certificate/Dockerfile
-        container_name: self_signed_certificate
-        volumes:
-            - ./docker/self_signed_certificate/conf:/app
-            - ./docker/storage/self_signed_certificate:/out
+            - ./docker/app/conf/ssl.conf:/etc/apache2/conf.d/ssl.conf:ro
     # Database
     db:
         image: mariadb

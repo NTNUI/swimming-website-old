@@ -22,8 +22,13 @@ RUN apk add \
     perl \
     bat
 
+
 # Copy over configs and application data
 WORKDIR /var/www/localhost/htdocs
+
+# Generate self signed sertificate
+RUN openssl req -new -newkey rsa:2048 -nodes -keyout /etc/ssl/apache2/server.key -out /etc/ssl/apache2/server.csr -subj "/CN=localhost"
+RUN openssl x509 -req -days 365 -in /etc/ssl/apache2/server.csr -signkey /etc/ssl/apache2/server.key -out /etc/ssl/apache2/server.crt -extfile <(echo "basicConstraints = CA:FALSE")
 
 COPY img ./img
 COPY translations ./translations
