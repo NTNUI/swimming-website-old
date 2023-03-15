@@ -22,7 +22,7 @@ require_once("library/templates/modal.php");
 <div class="box">
     <h3>Options</h3>
     <label for="amount">Amount</label>
-    <input id="amount" value="750" type="number"></input>
+    <input id="amount" value="600" type="number"></input>
 
     <label for="account_number">Receiver account</label>
     <input id="account_number" value="78740670025"></input>
