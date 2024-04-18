@@ -1,3 +1,7 @@
+# Archival notice
+
+We don't exaclty know when this project started, the earliest sign is a database entry from january 2007. The project is now archived because NTNUI Swimming went over to a new, and more sentralized solution as of January 2024.
+
 # NTNUI Swimming web page
 ![image](https://user-images.githubusercontent.com/38912521/137648694-a6dc977e-5652-4da1-a54d-afaf97e26732.png)
 
